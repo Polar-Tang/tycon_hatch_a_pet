@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@quenty/binder": "^14.27.0",
+    "@quenty/maid": "^3.5.1",
+    "@quenty/pathfindingutils": "^10.12.6",
+    "@quenty/servicebag": "^11.13.4",
+    "@quenty/soundplayer": "^7.27.0",
+    "@quenty/sounds": "^10.15.0"
+  }
+}
