@@ -86,6 +86,7 @@ end
 
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
+	print("playerData ", playerData)
 	if not playerData then
 		playerData = {
 			inventory = {},
@@ -93,7 +94,7 @@ Players.PlayerAdded:Connect(function(player)
 			pets = {},
 		}
 	end
-	PlayerInventoryHandler:InitPlayer(player, playerData.inventory, playerData.cash)
+	PlayerInventoryHandler:InitPlayer(player, playerData)
 	local Amount = ReplicatedStorage.RemoteEvents.Amount
 	Amount:FireClient(player, {
 		amount = playerData.cash,
@@ -111,7 +112,7 @@ Players.PlayerRemoving:Connect(function(player)
 	local playerInventory = PlayerInventoryHandler:GetHandler(player)
 	print("playerInventory ", playerInventory)
 	local newData = {}
-	newData.inventory = playerInventory.intentory
+
 	newData.cash = playerInventory.cash
 
 	--newData.inventory = {}

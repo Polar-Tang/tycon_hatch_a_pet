@@ -42,6 +42,19 @@ function MovementController:ChangeVelocity(v: number)
 	self.velocity = v
 end
 
+local function clampToBounds(position, boundsPart)
+	local relative = boundsPart.CFrame:PointToObjectSpace(position)
+	local halfSize = boundsPart.Size * 0.5
+
+	relative = Vector3.new(
+		math.clamp(relative.X, -halfSize.X, halfSize.X),
+		relative.Y,
+		math.clamp(relative.Z, -halfSize.Z, halfSize.Z)
+	)
+
+	return boundsPart.CFrame:PointToWorldSpace(relative)
+end
+
 function MovementController:MoveTo(targetPosition)
 	if not self._root then
 		return
@@ -56,7 +69,8 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	-- self:_computePath(targetPosition)
+	targetPosition = clampToBounds(targetPosition, workspace.FenceBounds)
+
 	self:PlainMove(targetPosition)
 end
 

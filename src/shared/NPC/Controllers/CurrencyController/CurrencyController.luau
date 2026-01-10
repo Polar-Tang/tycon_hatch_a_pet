@@ -1,5 +1,7 @@
 local RS = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local packages = RS.Nevermore.Quenty
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
 -- TEST IF this doesn't break
 local Amount: RemoteEvent = RS.RemoteEvents.Amount
@@ -45,6 +47,8 @@ function CurrencyController:GenerateCurrency()
 	})
 	self._AnimationHandler:LoadAnimation(true, "dizzy")
 	print("self._player ", self._player)
+	local player_inventory = PlayerInventory:GetHandler(self._player)
+	player_inventory:IncreaseMoney(2)
 end
 
 function CurrencyController:StopAnim()

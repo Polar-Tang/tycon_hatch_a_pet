@@ -9,7 +9,10 @@ type PlayerData = {
 	items: item,
 }
 
-function PlayerInventory.new(cash: number, inventory: { itemType }): PlayerData
+function PlayerInventory.new(data): PlayerData
+	local cash = data.cash
+	local inventory = data.inventory
+
 	if not cash or not inventory then
 		warn("Player inventory intiliaziated as zero")
 	end
@@ -77,8 +80,8 @@ PlayerInventoryHandler.__index = PlayerInventoryHandler
 
 PlayerInventoryHandler._players = {}
 
-function PlayerInventoryHandler:InitPlayer(player, inventory, cash)
-	local handler = PlayerInventory.new(inventory, cash)
+function PlayerInventoryHandler:InitPlayer(player, data)
+	local handler = PlayerInventory.new(data)
 	self._players[player.UserId] = handler
 end
 
