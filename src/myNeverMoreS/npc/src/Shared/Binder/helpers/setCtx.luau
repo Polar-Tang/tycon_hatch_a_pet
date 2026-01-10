@@ -10,7 +10,7 @@ local CurrencyController = require(Controllers.CurrencyController.CurrencyContro
 local animData = require(ReplicatedStorage.Animations.animationsData)
 local petStats = require(ServerScriptService.Pets.petData)
 
-return function(parent: Model, serviceBag: any)
+return function(parent: Model, serviceBag: any, player)
 	local current_pet_stats = petStats[parent.Name]
 
 	local petData = {} -- ctx for the controllers
@@ -36,7 +36,7 @@ return function(parent: Model, serviceBag: any)
 		patrol_duration = current_pet_stats.patrol_duration,
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
-		CurrencyController = CurrencyController.new(petData, serviceBag),
+		CurrencyController = CurrencyController.new(petData, serviceBag, player),
 		SoundController = SoundController.new(petData, serviceBag),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),

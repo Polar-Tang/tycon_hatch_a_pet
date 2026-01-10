@@ -31,10 +31,11 @@ function StateMachineBinder.new(char: Model, serviceBag)
 end
 
 -- this method is called on nearby players
-function StateMachineBinder:Init()
+function StateMachineBinder:Init(player)
 	-- the state machine is like the npc's brain
 
-	local state = StateMachine.new("Idle", StateMachine:LoadDirectory(StatesFolder), setCTX(self.char, self.serviceBag))
+	local state =
+		StateMachine.new("Idle", StateMachine:LoadDirectory(StatesFolder), setCTX(self.char, self.serviceBag, player))
 	self.state = state
 	self._initialized = true
 	return self

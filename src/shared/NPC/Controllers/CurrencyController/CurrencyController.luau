@@ -7,7 +7,7 @@ local Amount: RemoteEvent = RS.RemoteEvents.Amount
 local CurrencyController = setmetatable({}, BaseObject)
 CurrencyController.__index = CurrencyController
 
-function CurrencyController.new(data, serviceBag: any)
+function CurrencyController.new(data, serviceBag: any, player)
 	local self = setmetatable(BaseObject.new() :: any, CurrencyController)
 	local character = data.pet
 
@@ -19,6 +19,8 @@ function CurrencyController.new(data, serviceBag: any)
 
 	self._currentPlayer = nil
 	self._humanoidTracker = nil
+
+	self._player = player
 
 	return self
 end
@@ -42,7 +44,7 @@ function CurrencyController:GenerateCurrency()
 		amount = 2,
 	})
 	self._AnimationHandler:LoadAnimation(true, "dizzy")
-	print("create the floating number that are at capture pet")
+	print("self._player ", self._player)
 end
 
 function CurrencyController:StopAnim()

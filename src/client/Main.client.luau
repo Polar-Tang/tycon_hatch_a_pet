@@ -7,10 +7,14 @@ local FadingText = require(script.Parent.utils.FadingText)
 
 local currentAmount = 0 -- this data should come from the server
 Amount.OnClientEvent:Connect(function(data)
-	local model: Model = data.model
-	local rootPart = model.PrimaryPart
+	print("data ", data)
 	local newAmount = data.amount
 	currentAmount += newAmount
 	increaseMoney(currentAmount)
-	FadingText(rootPart, newAmount, Color3.fromRGB(0, 128, 0), UDim2.new(6, 0, 1, 0))
+
+	local model: Model = data.model
+	if model then
+		local rootPart = model.PrimaryPart
+		FadingText(rootPart, newAmount, Color3.fromRGB(57, 228, 5), UDim2.new(12, 0, 2, 0))
+	end
 end)

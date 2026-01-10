@@ -1,4 +1,5 @@
 --||Services||--
+local DataStoreService = game:GetService("DataStoreService")
 local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -56,8 +57,12 @@ local MachineBinder = BinderProviderStarted:Get("NPC")
 
 -- Register all the animations registered with the models name
 MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
-	print("added")
-	machine_binder:Init()
+	local player = Players:GetPlayers()[1]
+	if not player then
+		player = Players.PlayerAdded:Wait()
+	end
+
+	machine_binder:Init(player)
 end)
 ----- ------------------------ START SERVICEBAG -----------------------------
 
@@ -67,12 +72,52 @@ _G.ServiceBag = serviceBag
 _G.BinderProvider = AllBinders
 
 ------------------Once initilized-------------------------------
-----Do binder stuff-------------------------------
+local Inventory = ServerScriptService.Player.Inventory
+local PlayerInventoryHandler = require(Inventory.PlayerInventory)
+local ds = DataStoreService:GetDataStore("rise_a_pet_test")
 
-Players.PlayerAdded:Connect(function(player) end)
+local function onDescendantAdded(descendant)
+	-- Set collision group for any part descendant
+
+	if descendant:IsA("BasePart") then
+		descendant.CollisionGroup = "Players" -- TODO: list this in the collision group
+	end
+end
+
+Players.PlayerAdded:Connect(function(player)
+	local playerData = ds:GetAsync("data_" .. player.UserId)
+	if not playerData then
+		playerData = {
+			inventory = {},
+			cash = 0,
+			pets = {},
+		}
+	end
+	PlayerInventoryHandler:InitPlayer(player, playerData.inventory, playerData.cash)
+	local Amount = ReplicatedStorage.RemoteEvents.Amount
+	Amount:FireClient(player, {
+		amount = playerData.cash,
+	})
+	local character = player.Character or player.CharacterAdded:Wait()
+	for _, descendant in character:GetDescendants() do
+		onDescendantAdded(descendant)
+	end
+
+	character.DescendantAdded:Connect(onDescendantAdded)
+end)
+
 --||PlayerRemoving||--
 Players.PlayerRemoving:Connect(function(player)
-	-- PlayerAnimationHandler:RemovePlayer({ player = player })
+	local playerInventory = PlayerInventoryHandler:GetHandler(player)
+	print("playerInventory ", playerInventory)
+	local newData = {}
+	newData.inventory = playerInventory.intentory
+	newData.cash = playerInventory.cash
+
+	--newData.inventory = {}
+	PlayerInventoryHandler:RemovePlayer(player)
+
+	ds:SetAsync("data_" .. player.UserId, newData)
 end)
 
 print("Main loaded")
