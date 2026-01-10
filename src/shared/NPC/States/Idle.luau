@@ -7,13 +7,15 @@ local Idle = State.new("Idle")
 
 Idle.Transitions = {
 	require(script.Parent.Parent.Transitions.StartPatrol),
-	-- require(ReplicatedSorage.NPC.Transitions.StartEating),
+	require(ReplicatedSorage.NPC.Transitions.StartEating),
 }
 
-function Idle:OnEnter(data) end
+function Idle:OnEnter(data)
+	data.lastIdleTime = data.timer
+end
 
 function Idle:OnHeartbeat(data, deltatime)
 	data.timer += deltatime
-	print("idle", data.timer)
 end
+
 return Idle

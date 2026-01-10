@@ -17,10 +17,10 @@ module["Kitsune"] = {
 }
 
 module["Comodork"] = {
-	["eat_interval"] = 3,
-	["eat_duration"] = 2,
+	["eat_interval"] = 5,
+	["eat_duration"] = 1,
 	["range"] = 3,
-	["patrol_interval"] = 6,
+	["patrol_interval"] = 8,
 	["patrol_duration"] = 3,
 }
 

@@ -15,10 +15,13 @@ Eat.Transitions = {
 
 function Eat:OnEnter(data)
 	data.MovementController:Stop()
-	print("play eating animation")
-	print("generate currency")
+	data.eatingStartTime = data.timer
+	data.CurrencyController:GenerateCurrency()
 end
 
+function Eat:OnLeave(data)
+	data.lastEatTime = data.timer -- Reset the patrol timer
+end
 function Eat:OnHeartbeat(data, deltaTime)
 	data.timer += deltaTime
 end

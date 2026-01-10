@@ -35,17 +35,11 @@ local AllBinders = BinderProvider.new("Binders", function(self, serviceBag)
 		self:Add(Binder.new(tag, contructor), serviceBag)
 	end
 end)
-
------ ------------------------ START SERVICEBAG -----------------------------
+----- ------------------------ INIT SERVICEBAG -----------------------------
 serviceBag:GetService(AllBinders)
 serviceBag:Init()
-serviceBag:Start()
-_G.FistBag = nil
-_G.ServiceBag = serviceBag
-_G.BinderProvider = AllBinders
 
-------------------Once initilized-------------------------------
-local BinderProviderStarted = serviceBag:GetService(_G.BinderProvider)
+local BinderProviderStarted = serviceBag:GetService(AllBinders)
 print("BinderProviderStarted ", BinderProviderStarted)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
@@ -58,12 +52,22 @@ end)
 
 local MachineBinder = BinderProviderStarted:Get("NPC")
 
+-- when it doesn't work _initialized and _started are true
+
 -- Register all the animations registered with the models name
 MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
 	print("added")
 	machine_binder:Init()
 end)
-------------------Do binder stuff-------------------------------
+----- ------------------------ START SERVICEBAG -----------------------------
+
+serviceBag:Start()
+_G.FistBag = nil
+_G.ServiceBag = serviceBag
+_G.BinderProvider = AllBinders
+
+------------------Once initilized-------------------------------
+----Do binder stuff-------------------------------
 
 Players.PlayerAdded:Connect(function(player) end)
 --||PlayerRemoving||--

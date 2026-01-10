@@ -5,14 +5,9 @@ local Transition = RobloxStateMachine.Transition
 
 local FinnishEating = Transition.new("Idle")
 
--- Tracks the patrol time
-function FinnishEating:OnEnter(data)
-	self.timer = 0
-end
-
 function FinnishEating:OnDataChanged(data)
-	self.timer += data.timer
-	if self.timer > data.eat_duration then
+	local timeEating = data.timer - data.eatingStartTime
+	if timeEating >= data.eat_duration then
 		return true
 	end
 	return false

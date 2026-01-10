@@ -3,16 +3,19 @@ local RobloxStateMachine = require(ReplicatedStorage.StateMachine)
 
 local Transition = RobloxStateMachine.Transition
 
-local StartEat = Transition.new("Eat")
+local StartEating = Transition.new("Eat")
 
-function StartEat:OnEnter(data) end
-function StartEat:OnDataChanged(data)
-	local timeMachine = data.timer
+function StartEating:OnEnter(data)
+	-- Track when we last entered Idle (or whichever state this transitions from)
+end
 
-	if math.round(timeMachine) ~= 0 and math.round(timeMachine) % data.eat_interval == 0 then
+function StartEating:OnDataChanged(data)
+	local timeInIdle = data.timer - data.lastIdleTime
+
+	if timeInIdle >= data.eat_interval then
 		return true
 	end
 	return false
 end
 
-return StartEat
+return StartEating

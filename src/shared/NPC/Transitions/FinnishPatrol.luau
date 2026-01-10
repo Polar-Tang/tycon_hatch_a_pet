@@ -3,20 +3,15 @@ local RobloxStateMachine = require(ReplicatedStorage.StateMachine)
 
 local Transition = RobloxStateMachine.Transition
 
-local FinnishPatrol = Transition.new("Idle")
+local FinishPatrol = Transition.new("Idle")
 
--- Tracks the patrol time
-function FinnishPatrol:OnEnter(data)
-	self.timer = 0
-end
+function FinishPatrol:OnDataChanged(data)
+	local timePatrolling = data.timer - data.patrolStartTime
 
-function FinnishPatrol:OnDataChanged(data)
-	self.timer += data.timer
-	if self.timer > data.patrol_duration then
-		data.MovementController:Stop()
+	if timePatrolling >= data.patrol_duration then
 		return true
 	end
 	return false
 end
 
-return FinnishPatrol
+return FinishPatrol

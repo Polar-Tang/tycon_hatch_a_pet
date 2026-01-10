@@ -136,7 +136,15 @@ function AnimationHandler:_ensurePreload(animaName)
 	self:_initDescriptior(animaName)
 
 	if not self.animator then
-		self.animator = self.Char:WaitForChild("Humanoid").Animator
+		local animatiorContainer
+		local humanoid = self.Char:FindFirstChild("Humanoid")
+		if not humanoid then
+			animatiorContainer = self.Char:FindFirstChild("AnimationController")
+		elseif humanoid then
+			animatiorContainer = humanoid
+		end
+		assert(animatiorContainer, "no ANimationCOntroller or humanoid in ", self.Char)
+		self.animator = animatiorContainer.Animator
 		self:_Check()
 	end
 

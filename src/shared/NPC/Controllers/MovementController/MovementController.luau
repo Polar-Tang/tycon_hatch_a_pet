@@ -139,23 +139,36 @@ function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
+	-- look at targetPosition
+	local rotateTime = 0.5
+	do
+		local lookTHatSHit = CFrame.lookAt(self._root.Position, targetPosition)
+		local tween = TweenService:Create(
+			self._root,
+			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+			{ CFrame = lookTHatSHit }
+		)
+		tween:Play()
+	end
 
-	self._AnimationHandler:LoadAnimation(true, "walk")
+	local move = function()
+		self.isMoving = true
 
-	self.isMoving = true
+		local distance = (targetPosition - self._root.Position).Magnitude
+		local timeToReach = distance / self.velocity
 
-	local distance = (targetPosition - self._root.Position).Magnitude
-	local timeToReach = distance / self.velocity
-
-	self._currentTween = TweenService:Create(
-		self._root,
-		TweenInfo.new(timeToReach, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-		{ CFrame = CFrame.new(targetPosition) }
-	)
-	self._currentTween:Play()
-	task.delay(timeToReach, function()
-		self._AnimationHandler:LoadAnimation(false, "walk")
-	end)
+		self._AnimationHandler:LoadAnimation(true, "walk")
+		self._currentTween = TweenService:Create(
+			self._root,
+			TweenInfo.new(timeToReach, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+			{ Position = targetPosition }
+		)
+		self._currentTween:Play()
+		task.delay(timeToReach, function()
+			self._AnimationHandler:LoadAnimation(false, "walk")
+		end)
+	end
+	task.delay(rotateTime, move)
 end
 
 function MovementController:Destroy()

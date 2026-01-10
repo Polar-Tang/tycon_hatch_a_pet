@@ -6,6 +6,7 @@ local Controllers = RS.NPC.Controllers
 local TargetingController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
+local CurrencyController = require(Controllers.CurrencyController.CurrencyController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
 local petStats = require(ServerScriptService.Pets.petData)
 
@@ -20,14 +21,22 @@ return function(parent: Model, serviceBag: any)
 
 	return {
 		pet = parent,
+		-- timers
 		timer = 0,
+		lastIdleTime = 0,
 		lastTriggerTime = 0,
-
+		lastEatTime = 0,
+		lastPatrolTime = 0,
+		-------------------
+		patrolStartTime = 0,
+		eatingStartTime = 0,
+		---- Saves the last time an state where trigger, the we can know to trigger the state based in that substracction
 		patrol_interval = current_pet_stats.patrol_interval,
 		eat_interval = current_pet_stats.eat_interval,
 		patrol_duration = current_pet_stats.patrol_duration,
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
+		CurrencyController = CurrencyController.new(petData, serviceBag),
 		SoundController = SoundController.new(petData, serviceBag),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),
