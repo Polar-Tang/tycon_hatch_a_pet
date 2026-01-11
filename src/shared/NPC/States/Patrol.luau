@@ -8,7 +8,6 @@ local Patrol = State.new("Patrol")
 
 Patrol.Transitions = {
 	require(script.Parent.Parent.Transitions.FinnishPatrol),
-	require(ReplicatedSorage.NPC.Transitions.StartEating),
 }
 
 function Patrol:OnEnter(data)
@@ -16,7 +15,9 @@ function Patrol:OnEnter(data)
 
 	data.patrolStartTime = data.timer
 	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(10)
-	data.MovementController:MoveTo(goal)
+	data.MovementController:MoveTo(goal):Then(function(timeToReach)
+		data.patrol_duration = timeToReach
+	end)
 end
 
 function Patrol:OnLeave(data)

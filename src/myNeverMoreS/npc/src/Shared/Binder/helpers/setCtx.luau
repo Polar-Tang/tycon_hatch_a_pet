@@ -20,6 +20,8 @@ return function(parent: Model, serviceBag: any, player)
 	petData.range = current_pet_stats.range
 	petData.pet = parent
 	petData.base = current_pet_stats.base
+	petData.velocity = current_pet_stats.velocity
+
 	return {
 		pet = parent,
 		-- timers

@@ -12,6 +12,7 @@ Idle.Transitions = {
 
 function Idle:OnInit(data)
 	-- data.PetAnimatorController:Init()
+	-- data.PetAnimatorController:PlayIdle()
 end
 
 function Idle:OnEnter(data)

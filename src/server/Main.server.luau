@@ -50,6 +50,7 @@ AnimBinder:GetClassAddedSignal():Connect(function(binder)
 	--print("animationsData ", animationsData, binder.Char)
 	binder:registryAnims(animationsData[binder.Char.Name])
 	binder:PreloadAnims({ "eat", "walk", "idle" })
+	binder:LoadAnimation(true, "idle")
 end)
 
 local MachineBinder = BinderProviderStarted:Get("NPC")

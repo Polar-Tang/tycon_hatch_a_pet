@@ -29,9 +29,8 @@ function PetAnimatorController:getAnimHandler()
 	self._AnimationHandler = AnimationBinder:Get(self.Model)
 end
 
-function PetAnimatorController:Init()
-	self:getAnimHandler()
-	self._animHandler:PreloadAnims({ "eat", "walk", "idle" })
+function PetAnimatorController:PlayIdle()
+	self._animHandler:LoadAnimation(true, "idle")
 end
 
 return PetAnimatorController

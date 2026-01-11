@@ -7,7 +7,7 @@ module["Panda"] = {
 }
 
 module["Elephant"] = {
-	["eat"] = "rbxassetid://90294699295417",
+	["eat"] = "rbxassetid://81987345696259",
 	["walk"] = "rbxassetid://127039081466221",
 	["idle"] = "rbxassetid://79910278625725",
 }

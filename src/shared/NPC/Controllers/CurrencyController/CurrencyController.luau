@@ -1,6 +1,5 @@
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local packages = RS.Nevermore.Quenty
 local Observable = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Observable)

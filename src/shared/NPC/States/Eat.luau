@@ -9,7 +9,6 @@ local Eat = State.new("Eat")
 -- Transitions
 
 Eat.Transitions = {
-	require(ReplicatedSorage.NPC.Transitions.StartPatrol),
 	require(ReplicatedSorage.NPC.Transitions.FinnishEating),
 }
 
