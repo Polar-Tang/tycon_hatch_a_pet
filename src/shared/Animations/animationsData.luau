@@ -1,30 +1,32 @@
 local module = {}
 
-module["Lynx"] = {
-	["dizzy"] = "rbxassetid://84313186099985",
-	["walk"] = "rbxassetid://90680272212841",
-	["hit"] = "rbxassetid://117550593106180",
+module["Panda"] = {
+	["eat"] = "rbxassetid://80946202686101",
+	["walk"] = "rbxassetid://131602430583471",
+	["idle"] = "rbxassetid://99212102782041",
 }
 
-module["Kitsune"] = {
-	["walk"] = "rbxassetid://130621789811770",
-	["hit"] = "rbxassetid://138621860413807",
-	["dizzy"] = "rbxassetid://88642067871376",
-	["surprised"] = "rbxassetid://86499807514628",
+module["Elephant"] = {
+	["eat"] = "rbxassetid://90294699295417",
+	["walk"] = "rbxassetid://127039081466221",
+	["idle"] = "rbxassetid://79910278625725",
+}
+--
+module["Fox"] = {
+	["eat"] = "rbxassetid://126455693054162",
+	["walk"] = "rbxassetid://119023631448919",
+	["idle"] = "rbxassetid://133266992083508",
 }
 
-module["Comodork"] = {
-	["walk"] = "rbxassetid://103867351329878",
-	["hit"] = "rbxassetid://138621860413807",
-	["dizzy"] = "rbxassetid://76845392321876",
+module["Hippo"] = {
+	["eat"] = "rbxassetid://140544883893155",
+	["walk"] = "rbxassetid://132847805554305",
+	["idle"] = "rbxassetid://126630772020803",
 }
-
-module["Zothz"] = {
-	["walk"] = "rbxassetid://116345952514772",
-	["hit"] = "rbxassetid://109741211326544",
-	["surprised"] = "rbxassetid://134815504994009",
-	["fly"] = "rbxassetid://136370274977138",
-	["dizzy"] = "rbxassetid://90635759829310",
+--
+module["Rhino"] = {
+	["eat"] = "rbxassetid://90306362650239",
+	["walk"] = "rbxassetid://109389774238135",
+	["idle"] = "rbxassetid://86820327844180",
 }
-
 return module

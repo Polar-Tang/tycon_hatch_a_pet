@@ -1,5 +1,5 @@
 return function(rootPart: BasePart, text: string, textColor: Color3?, size: UDim2?)
-	print("text ", text)
+	--print("text ", text)
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "CustomHumanoidBar"
 	billboard.Adornee = rootPart

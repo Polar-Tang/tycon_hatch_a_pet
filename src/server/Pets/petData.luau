@@ -1,35 +1,48 @@
 local module = {}
 
-module["Lynx"] = {
-	["eat_interval"] = 4,
-	["eat_duration"] = 2,
-	["range"] = 5,
+module["Fox"] = {
+	["eat_interval"] = 2,
+	["eat_duration"] = 3,
+	["range"] = 9,
 	["patrol_interval"] = 7,
 	["patrol_duration"] = 3,
+	["base"] = 2,
 }
 
-module["Kitsune"] = {
+module["Panda"] = {
 	["eat_interval"] = 4,
-	["eat_duration"] = 2,
-	["range"] = 4,
+	["eat_duration"] = 3,
+	["range"] = 9,
 	["patrol_interval"] = 3,
 	["patrol_duration"] = 3,
+	["base"] = 4,
 }
 
-module["Comodork"] = {
-	["eat_interval"] = 5,
-	["eat_duration"] = 1,
-	["range"] = 3,
+module["Elephant"] = {
+	["eat_interval"] = 6,
+	["eat_duration"] = 3,
+	["range"] = 9,
 	["patrol_interval"] = 8,
 	["patrol_duration"] = 3,
+	["base"] = 6,
 }
 
-module["Zothz"] = {
-	["eat_interval"] = 5,
-	["eat_duration"] = 2,
-	["range"] = 10,
-	["patrol_interval"] = 5,
+module["Hippo"] = {
+	["eat_interval"] = 6,
+	["eat_duration"] = 5,
+	["range"] = 9,
+	["patrol_interval"] = 8,
 	["patrol_duration"] = 3,
+	["base"] = 6,
 }
 
+module["Rhino"] = {
+	["eat_interval"] = 6,
+	["eat_duration"] = 5,
+	["range"] = 9,
+	["patrol_interval"] = 8,
+	["patrol_duration"] = 3,
+	["base"] = 6,
+}
+--
 return module

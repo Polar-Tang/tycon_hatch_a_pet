@@ -8,6 +8,7 @@ local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
 local CurrencyController = require(Controllers.CurrencyController.CurrencyController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
+local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
 local petStats = require(ServerScriptService.Pets.petData)
 
 return function(parent: Model, serviceBag: any, player)
@@ -18,7 +19,7 @@ return function(parent: Model, serviceBag: any, player)
 	petData.animations = animData[parent.Name]
 	petData.range = current_pet_stats.range
 	petData.pet = parent
-
+	petData.base = current_pet_stats.base
 	return {
 		pet = parent,
 		-- timers
@@ -40,5 +41,6 @@ return function(parent: Model, serviceBag: any, player)
 		SoundController = SoundController.new(petData, serviceBag),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),
+		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
 	}
 end

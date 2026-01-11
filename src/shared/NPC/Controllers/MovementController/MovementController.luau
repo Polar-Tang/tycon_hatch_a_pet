@@ -156,7 +156,7 @@ function MovementController:PlainMove(targetPosition)
 	-- look at targetPosition
 	local rotateTime = 0.5
 	do
-		local lookTHatSHit = CFrame.lookAt(self._root.Position, targetPosition)
+		local lookTHatSHit = CFrame.lookAt(self._root.Position, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
 		local tween = TweenService:Create(
 			self._root,
 			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),

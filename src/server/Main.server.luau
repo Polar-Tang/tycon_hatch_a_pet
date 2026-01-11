@@ -41,14 +41,15 @@ serviceBag:GetService(AllBinders)
 serviceBag:Init()
 
 local BinderProviderStarted = serviceBag:GetService(AllBinders)
-print("BinderProviderStarted ", BinderProviderStarted)
+--print("BinderProviderStarted ", BinderProviderStarted)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
 
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
-	print("animationsData ", animationsData, binder.Char)
+	--print("animationsData ", animationsData, binder.Char)
 	binder:registryAnims(animationsData[binder.Char.Name])
+	binder:PreloadAnims({ "eat", "walk", "idle" })
 end)
 
 local MachineBinder = BinderProviderStarted:Get("NPC")
@@ -86,7 +87,7 @@ end
 
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
-	print("playerData ", playerData)
+	--print("playerData ", playerData)
 	if not playerData then
 		playerData = {
 			inventory = {},
@@ -110,7 +111,7 @@ end)
 --||PlayerRemoving||--
 Players.PlayerRemoving:Connect(function(player)
 	local playerInventory = PlayerInventoryHandler:GetHandler(player)
-	print("playerInventory ", playerInventory)
+	--print("playerInventory ", playerInventory)
 	local newData = {}
 
 	newData.cash = playerInventory.cash
@@ -121,4 +122,4 @@ Players.PlayerRemoving:Connect(function(player)
 	ds:SetAsync("data_" .. player.UserId, newData)
 end)
 
-print("Main loaded")
+--print("Main loaded")

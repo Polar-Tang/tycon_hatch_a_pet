@@ -10,6 +10,10 @@ Idle.Transitions = {
 	require(ReplicatedSorage.NPC.Transitions.StartEating),
 }
 
+function Idle:OnInit(data)
+	-- data.PetAnimatorController:Init()
+end
+
 function Idle:OnEnter(data)
 	data.lastIdleTime = data.timer
 end

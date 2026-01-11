@@ -153,6 +153,7 @@ function AnimationHandler:_ensurePreload(animaName)
 		local animaTionTrack: AnimationTrack =
 			self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
 		animaTionTrack:Play(0)
+		animaTionTrack:Stop()
 		self.animationDescriptors[animaName].AnimationTrack = animaTionTrack
 	end
 
@@ -161,7 +162,8 @@ end
 
 -- Just a helper to getting the animation tracker by its animation name
 function AnimationHandler:_getDescriptor(animaName): AnimationDescriptor
-	assert(self.animations[animaName], "animation name does not exists")
+	assert(animaName, "Animation name is nil")
+	assert(self.animations[animaName], animaName .. " animation name does not exists")
 	return self.animationDescriptors[animaName]
 end
 
@@ -169,6 +171,11 @@ function AnimationHandler:AddAnimations(newAnims)
 	for k, v in pairs(newAnims) do
 		self.animations[k] = v
 	end
+end
+
+function AnimationHandler:Restart()
+	self._maid:DoCleaning()
+	self:ClearAllTheAnims()
 end
 
 function AnimationHandler:Destroy()
@@ -220,19 +227,22 @@ type connArgs = {
 	callback: (Track: AnimationTrack, params: any) -> (),
 	animationName: string,
 	animationEventName: string,
+	override: boolean?,
 }
+
+-- TODO:  for a future project, chage this name to OnAnimationEvent
 function AnimationHandler:OnSignal(info: connArgs)
 	local animName = info.animationName
 	local animationEventName = info.animationEventName
+	local override = info.override
 	local descriptor: AnimationDescriptor = self.animationDescriptors[animName]
-	if descriptor.Maid and descriptor.Maid[animationEventName] then
-		return
-	end
 
 	local animationTracker = descriptor.AnimationTrack
 	local signal: RBXScriptSignal
-	if descriptor.Maid[animationEventName] then
+	if descriptor.Maid[animationEventName] and not override then
 		return
+	elseif descriptor.Maid[animationEventName] and override then
+		descriptor.Maid[animationEventName]:Disconnect()
 	end
 
 	if animationEventName == "EndedCon" then
@@ -245,6 +255,12 @@ function AnimationHandler:OnSignal(info: connArgs)
 		info.callback(animationTracker, param)
 	end)
 	descriptor.Maid:__newindex(animationEventName, conn)
+end
+
+function AnimationHandler:PreloadAnims(animsName: { string })
+	for _, name in ipairs(animsName) do
+		self:_ensurePreload(name)
+	end
 end
 
 function AnimationHandler:_ClearAnimation(animName)
