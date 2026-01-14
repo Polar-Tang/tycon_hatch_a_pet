@@ -43,47 +43,6 @@ function CurrencyController:GenerateCurrency()
 		self:getAnimHandler()
 	end
 	-- BUG: if there are invited players this will be an issue because it also updates the amount of money thing
-	--[[
-	-- Source: Money --printer
-local --printerObservable = Observable.new(function(sub)
-    local conn = RunService.Heartbeat:Connect(function(dt)
-        local amount = --printer.Rate * dt
-        sub:Fire(amount)  -- ← Data enters the chain HERE
-    end)
-    return conn  -- Cleanup when unsubscribed
-end)
-
--- Transformer 1: Accumulate (Rx.scan creates this)
-local accumulatedObservable = Observable.new(function(sub)
-    local total = 0
-    return --printerObservable:Subscribe(
-        function(amount)  -- ← Receives sub:Fire(amount) from --printer
-            total = total + amount
-            sub:Fire(total)  -- ← Passes accumulated total forward
-        end
-    )
-end)
-
--- Transformer 2: Throttle (Rx.throttle creates this)
-local throttledObservable = Observable.new(function(sub)
-    local lastFireTime = 0
-    return accumulatedObservable:Subscribe(
-        function(total)  -- ← Receives sub:Fire(total) from accumulator
-            if os.clock() - lastFireTime >= 1 then
-                lastFireTime = os.clock()
-                sub:Fire(total)  -- ← Only fires once per second
-            end
-        end
-    )
-end)
-
--- Your subscription
-throttledObservable:Subscribe(function(money)
-    -- ← Receives sub:Fire(money) from throttle
-    player.Money.Value = money
-    updateUI(money)
-end)
-	]]
 
 	self._AnimationHandler:LoadAnimation(true, "eat")
 	self._AnimationHandler:OnSignal({
@@ -96,11 +55,6 @@ end)
 end
 
 function CurrencyController:_generateCurrency()
-	Amount:FireAllClients({
-		model = self._character,
-		amount = self.base,
-	})
-
 	local player_inventory = PlayerInventory:GetHandler(self._player)
 	player_inventory:IncreaseMoney(self.base)
 end

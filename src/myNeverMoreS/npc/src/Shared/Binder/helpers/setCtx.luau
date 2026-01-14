@@ -21,6 +21,7 @@ return function(parent: Model, serviceBag: any, player)
 	petData.pet = parent
 	petData.base = current_pet_stats.base
 	petData.velocity = current_pet_stats.velocity
+	petData.speed = current_pet_stats.speed
 
 	return {
 		pet = parent,

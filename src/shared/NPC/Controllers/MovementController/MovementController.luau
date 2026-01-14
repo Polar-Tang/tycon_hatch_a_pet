@@ -18,11 +18,12 @@ function MovementController.new(data, serviceBag: any)
 	local self = setmetatable({}, MovementController)
 	local model = data.pet
 	self.Model = model
+
 	self.velocity = data.velocity
-	assert("model.PrimaryPart ", model.PrimaryPart)
 	self._root = model.PrimaryPart
 	self._serviceBag = serviceBag
 	self.anims = data.animations
+	self.speed = data.speed
 
 	self._maid = Maid.new()
 	self._pathMaid = Maid.new()
@@ -63,7 +64,6 @@ function MovementController:MoveTo(targetPosition)
 	end
 	self._lastTarget = targetPosition
 	targetPosition = clampToBounds(targetPosition, workspace.FenceBounds)
-	print("wtf?")
 	return self:PlainMove(targetPosition)
 end
 
@@ -109,7 +109,9 @@ function MovementController:PlainMove(targetPosition)
 			local distance = (targetPosition - self._root.Position).Magnitude
 			local timeToReach = distance / self.velocity
 
-			self._AnimationHandler:LoadAnimation(true, "walk")
+			local animationController: AnimationTrack = self._AnimationHandler:LoadAnimation(true, "walk")
+			animationController:AdjustSpeed(self.speed)
+
 			self._currentTween = TweenService:Create(
 				self._root,
 				TweenInfo.new(timeToReach, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),

@@ -12,6 +12,7 @@ function TargetingController.new(data, serviceBag: any)
 
 	self._character = character
 	self._root = character.PrimaryPart
+	self.startPos = character.PrimaryPart.Position
 
 	self._range = data.range
 	self._serviceBag = serviceBag
@@ -23,7 +24,7 @@ function TargetingController.new(data, serviceBag: any)
 end
 
 function TargetingController:getRandomNearbyPosition(radius: number?): Vector3
-	local origin = self._root.Position
+	local origin = self.startPos
 	local angle = math.rad(math.random(0, 360))
 	local range = radius or self._range
 	local distance = math.random() * range
