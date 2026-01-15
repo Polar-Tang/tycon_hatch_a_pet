@@ -7,7 +7,6 @@ local FadingText = require(script.Parent.utils.FadingText)
 
 local currentAmount = 0 -- this data should come from the server
 Amount.OnClientEvent:Connect(function(data)
-	print("data ", data)
 	local newAmount = data.amount
 	currentAmount += newAmount
 	increaseMoney(currentAmount)

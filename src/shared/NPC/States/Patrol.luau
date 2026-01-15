@@ -14,10 +14,15 @@ function Patrol:OnEnter(data)
 	data.CurrencyController:StopAnim()
 
 	data.patrolStartTime = data.timer
-	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(10)
-	data.MovementController:MoveTo(goal):Then(function(timeToReach)
-		data.patrol_duration = timeToReach
-	end)
+	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(50)
+	data.MovementController
+		:MoveTo(goal)
+		:Then(function(timeToReach)
+			data.patrol_duration = timeToReach
+		end)
+		:Catch(function(err)
+			print("Rejected:", err)
+		end)
 end
 
 function Patrol:OnLeave(data)

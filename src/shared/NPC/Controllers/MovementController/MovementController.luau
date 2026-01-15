@@ -45,17 +45,48 @@ function MovementController:ChangeVelocity(v: number)
 	self.velocity = v
 end
 
-local function clampToBounds(position, boundsPart)
-	local relative = boundsPart.CFrame:PointToObjectSpace(position)
-	local halfSize = boundsPart.Size * 0.5
+function MovementController:_clampToBounds(position)
+	local fenceCF = workspace.FenceBounds.CFrame
+	local fenceSize = workspace.FenceBounds.Size
 
-	relative = Vector3.new(
-		math.clamp(relative.X, -halfSize.X, halfSize.X),
-		relative.Y,
-		math.clamp(relative.Z, -halfSize.Z, halfSize.Z)
-	)
+	local offset = position - fenceCF.Position
 
-	return boundsPart.CFrame:PointToWorldSpace(relative)
+	local right = fenceCF.RightVector
+	local up = fenceCF.UpVector
+	local look = fenceCF.LookVector
+
+	local x = offset:Dot(right)
+	local y = offset:Dot(up)
+	local z = offset:Dot(look)
+
+	local half = fenceSize * 0.5
+
+	x = math.clamp(x, -half.X, half.X)
+	z = math.clamp(z, -half.Z, half.Z)
+	local bouncedPosition = fenceCF.Position + right * x + up * y + look * z
+
+	-- GETTING THE POSITION, REALLY HOPE TO VOID VECTOR HAPPEN HERE
+	local possibleInf = (bouncedPosition - self._root.Position).Magnitude / self.velocity
+	if possibleInf ~= possibleInf or bouncedPosition.Y < 20 or self._root.Position.Y < 20 then
+		print(self.Model.Name, "self._root.Position ", self._root.Position)
+		print(
+			self.Model.Name,
+			"all the types ",
+			typeof(self._root.Position.X),
+			typeof(self._root.Position.Y),
+			typeof(self._root.Position.Z)
+		)
+
+		print(self.Model.Name, "self._root.Position ", bouncedPosition)
+		print(
+			self.Model.Name,
+			"all the types ",
+			typeof(bouncedPosition.X),
+			typeof(bouncedPosition.Y),
+			typeof(bouncedPosition.Z)
+		)
+	end
+	return bouncedPosition
 end
 
 function MovementController:MoveTo(targetPosition)
@@ -63,7 +94,10 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	targetPosition = clampToBounds(targetPosition, workspace.FenceBounds)
+	targetPosition = self:_clampToBounds(targetPosition)
+	if targetPosition.Y < 20 then
+		targetPosition = workspace.FenceBounds.CFrame.Position
+	end
 	return self:PlainMove(targetPosition)
 end
 
@@ -85,11 +119,47 @@ function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
+	--[[
+		print(self.Model.Name, "targetPosition.Y ", targetPosition)
+		print(
+			self.Model.Name,
+			"targetPosition ",
+			typeof(targetPosition.X),
+			typeof(targetPosition.Y),
+			typeof(targetPosition.Z)
+		)
+	
+		print(self.Model.Name, "type of ", typeof(targetPosition.Y))
+	]]
 
 	return Promise.new(function(resolve, reject)
 		-- Cancel any existing movement
 		if self._currentTween then
 			self._currentTween:Cancel()
+		end
+
+		-- BEFORE SPINNING
+		local possibleInf = (targetPosition - self._root.Position).Magnitude / self.velocity
+		if possibleInf ~= possibleInf or targetPosition.Y < 20 or self._root.Position.Y < 20 then
+			reject("root position corruption")
+
+			print(self.Model.Name, "self._root.Position ", self._root.Position)
+			print(
+				self.Model.Name,
+				"all the types ",
+				typeof(self._root.Position.X),
+				typeof(self._root.Position.Y),
+				typeof(self._root.Position.Z)
+			)
+
+			print(self.Model.Name, "self._root.Position ", targetPosition)
+			print(
+				self.Model.Name,
+				"all the types ",
+				typeof(targetPosition.X),
+				typeof(targetPosition.Y),
+				typeof(targetPosition.Z)
+			)
 		end
 
 		-- Rotation phase
@@ -106,9 +176,37 @@ function MovementController:PlainMove(targetPosition)
 		task.delay(rotateTime, function()
 			self.isMoving = true
 
+			-- AFTER SPINING, BEFORE MOVE AND CALCULATE VELOCIITY
+			local possibleInf = (targetPosition - self._root.Position).Magnitude / self.velocity
+			if possibleInf ~= possibleInf or targetPosition.Y < 20 or self._root.Position.Y < 20 then
+				reject("root position corruption")
+				print(self.Model.Name, "self._root.Position ", self._root.Position)
+				print(
+					self.Model.Name,
+					"all the types ",
+					typeof(self._root.Position.X),
+					typeof(self._root.Position.Y),
+					typeof(self._root.Position.Z)
+				)
+
+				print(self.Model.Name, "self._root.Position ", targetPosition)
+				print(
+					self.Model.Name,
+					"all the types ",
+					typeof(targetPosition.X),
+					typeof(targetPosition.Y),
+					typeof(targetPosition.Z)
+				)
+			end
+			--[[
+			6  self._root.Position DELAY 0, -3.4028234663852886e+38, 0  -  Server - MovementController:139
+ 			all the types DELAY number number number  -  Server - MovementController:140
+  			self._root.Position DELAY  10.600006103515625, 22.39059829711914, 102.79998779296875  -  Server - MovementController:146
+  			all the types DELAY number number number  -  Server - MovementController:147
+			]]
+
 			local distance = (targetPosition - self._root.Position).Magnitude
 			local timeToReach = distance / self.velocity
-
 			local animationController: AnimationTrack = self._AnimationHandler:LoadAnimation(true, "walk")
 			animationController:AdjustSpeed(self.speed)
 

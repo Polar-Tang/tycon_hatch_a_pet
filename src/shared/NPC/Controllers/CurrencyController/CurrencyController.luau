@@ -57,6 +57,9 @@ end
 function CurrencyController:_generateCurrency()
 	local player_inventory = PlayerInventory:GetHandler(self._player)
 	player_inventory:IncreaseMoney(self.base)
+	Amount:FireClient(self._player, {
+		amount = self.base,
+	})
 end
 
 function CurrencyController:StopAnim()
