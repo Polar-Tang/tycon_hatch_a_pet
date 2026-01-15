@@ -11,6 +11,19 @@ local animData = require(ReplicatedStorage.Animations.animationsData)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
 local petStats = require(ServerScriptService.Pets.petData)
 
+local function onDescendantAdded(descendant)
+	-- Set collision group for any part descendant
+
+	if descendant:IsA("BasePart") then
+		descendant.CanCollide = true
+		descendant.CollisionGroup = "Npcs"
+
+		if descendant.Name == "Rootpart" then
+			descendant.Anchored = true
+		end
+	end
+end
+
 return function(parent: Model, serviceBag: any, player)
 	local current_pet_stats = petStats[parent.Name]
 
@@ -22,6 +35,15 @@ return function(parent: Model, serviceBag: any, player)
 	petData.base = current_pet_stats.base
 	petData.velocity = current_pet_stats.velocity
 	petData.speed = current_pet_stats.speed
+
+	for _, descendant in parent:GetDescendants() do
+		if descendant:IsA("Model") then
+			for _, descendant in parent:GetDescendants() do
+				onDescendantAdded(descendant)
+			end
+		end
+		onDescendantAdded(descendant)
+	end
 
 	return {
 		pet = parent,

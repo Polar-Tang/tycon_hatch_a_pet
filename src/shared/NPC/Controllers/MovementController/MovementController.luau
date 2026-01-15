@@ -1,18 +1,22 @@
 -- MovementController.lua
 -- TODO: Implement a method for completly stop moving the character
-local ReplicatedSorage = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PathfindingService = game:GetService("PathfindingService")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
-local PathfindingUtils = require(ReplicatedStorage.Nevermore.Quenty.pathfindingutils.Shared.PathfindingUtils)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
-
-local STOP_DISTANCE = 6
 
 local MovementController = {}
 MovementController.__index = MovementController
+
+local function isValidPosition(pos)
+	return pos == pos -- Check for NaN (NaN ~= NaN)
+		and pos.Y > -1000 -- Not in the void
+		and pos.Y < 10000 -- Not absurdly high
+		and math.abs(pos.X) < 100000 -- Not extreme values
+		and math.abs(pos.Z) < 100000
+end
 
 function MovementController.new(data, serviceBag: any)
 	local self = setmetatable({}, MovementController)
@@ -45,56 +49,11 @@ function MovementController:ChangeVelocity(v: number)
 	self.velocity = v
 end
 
-function MovementController:_clampToBounds(position)
-	local fenceCF = workspace.FenceBounds.CFrame
-	local fenceSize = workspace.FenceBounds.Size
-
-	local offset = position - fenceCF.Position
-
-	local right = fenceCF.RightVector
-	local up = fenceCF.UpVector
-	local look = fenceCF.LookVector
-
-	local x = offset:Dot(right)
-	local y = offset:Dot(up)
-	local z = offset:Dot(look)
-
-	local half = fenceSize * 0.5
-
-	x = math.clamp(x, -half.X, half.X)
-	z = math.clamp(z, -half.Z, half.Z)
-	local bouncedPosition = fenceCF.Position + right * x + up * y + look * z
-
-	-- GETTING THE POSITION, REALLY HOPE TO VOID VECTOR HAPPEN HERE
-	local possibleInf = (bouncedPosition - self._root.Position).Magnitude / self.velocity
-	if possibleInf ~= possibleInf or bouncedPosition.Y < 20 or self._root.Position.Y < 20 then
-		print(self.Model.Name, "self._root.Position ", self._root.Position)
-		print(
-			self.Model.Name,
-			"all the types ",
-			typeof(self._root.Position.X),
-			typeof(self._root.Position.Y),
-			typeof(self._root.Position.Z)
-		)
-
-		print(self.Model.Name, "self._root.Position ", bouncedPosition)
-		print(
-			self.Model.Name,
-			"all the types ",
-			typeof(bouncedPosition.X),
-			typeof(bouncedPosition.Y),
-			typeof(bouncedPosition.Z)
-		)
-	end
-	return bouncedPosition
-end
-
 function MovementController:MoveTo(targetPosition)
 	if (self._lastTarget and ((self._lastTarget - targetPosition).Magnitude > 0)) or self.isMoving then
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	targetPosition = self:_clampToBounds(targetPosition)
 	if targetPosition.Y < 20 then
 		targetPosition = workspace.FenceBounds.CFrame.Position
 	end
@@ -114,117 +73,84 @@ function MovementController:Stop()
 	end
 	-- Fire an event to report the last position to the server
 end
-
 function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
-	--[[
-		print(self.Model.Name, "targetPosition.Y ", targetPosition)
-		print(
-			self.Model.Name,
-			"targetPosition ",
-			typeof(targetPosition.X),
-			typeof(targetPosition.Y),
-			typeof(targetPosition.Z)
-		)
-	
-		print(self.Model.Name, "type of ", typeof(targetPosition.Y))
-	]]
 
-	return Promise.new(function(resolve, reject)
-		-- Cancel any existing movement
-		if self._currentTween then
-			self._currentTween:Cancel()
+	-- Cancel previous movement
+	if self._currentMovePromise then
+		self._currentMovePromise:Destroy()
+	end
+	local startPos = self._root.Position
+	local delta = targetPosition - startPos
+	local dir = delta.Unit
+	local distance = delta.Magnitude
+	local timeToReach = distance / self.velocity
+
+	self._currentMovePromise = Promise.new(function(resolve, reject)
+		-- CLEAN
+		self._maid:DoCleaning()
+
+		-- Do some checks because we fear to NaN values
+		do
+			if not isValidPosition(startPos) then
+				reject("Root position corrupted (void vector)")
+				return
+			end
+
+			if not isValidPosition(targetPosition) then
+				reject("Target position invalid")
+				return
+			end
+
+			if timeToReach ~= timeToReach then -- Check for NaN
+				reject("TimeToReach is NaN (infinite distance)")
+				return
+			end
 		end
 
-		-- BEFORE SPINNING
-		local possibleInf = (targetPosition - self._root.Position).Magnitude / self.velocity
-		if possibleInf ~= possibleInf or targetPosition.Y < 20 or self._root.Position.Y < 20 then
-			reject("root position corruption")
-
-			print(self.Model.Name, "self._root.Position ", self._root.Position)
-			print(
-				self.Model.Name,
-				"all the types ",
-				typeof(self._root.Position.X),
-				typeof(self._root.Position.Y),
-				typeof(self._root.Position.Z)
-			)
-
-			print(self.Model.Name, "self._root.Position ", targetPosition)
-			print(
-				self.Model.Name,
-				"all the types ",
-				typeof(targetPosition.X),
-				typeof(targetPosition.Y),
-				typeof(targetPosition.Z)
-			)
-		end
-
-		-- Rotation phase
+		-- ✅ Create cancellable delay using thread
 		local rotateTime = 0.5
-		local lookThatShit = CFrame.lookAt(self._root.Position, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
+
+		local lookThatShit = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
 		local rotateTween = TweenService:Create(
 			self._root,
 			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
 			{ CFrame = lookThatShit }
 		)
-		rotateTween:Play()
-
-		-- Wait for rotation to complete, then move
-		task.delay(rotateTime, function()
+		-- TODO: add this task to maid
+		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
+		local rotationCOmplete = rotateTween.Completed:Once(function(playbackState)
 			self.isMoving = true
 
-			-- AFTER SPINING, BEFORE MOVE AND CALCULATE VELOCIITY
-			local possibleInf = (targetPosition - self._root.Position).Magnitude / self.velocity
-			if possibleInf ~= possibleInf or targetPosition.Y < 20 or self._root.Position.Y < 20 then
-				reject("root position corruption")
-				print(self.Model.Name, "self._root.Position ", self._root.Position)
-				print(
-					self.Model.Name,
-					"all the types ",
-					typeof(self._root.Position.X),
-					typeof(self._root.Position.Y),
-					typeof(self._root.Position.Z)
-				)
+			-- Walking anim
+			local animationTrask = self._AnimationHandler:LoadAnimation(true, "walk")
+			animationTrask:AdjustSpeed(self.speed)
+			local elapsed = 0
 
-				print(self.Model.Name, "self._root.Position ", targetPosition)
-				print(
-					self.Model.Name,
-					"all the types ",
-					typeof(targetPosition.X),
-					typeof(targetPosition.Y),
-					typeof(targetPosition.Z)
-				)
-			end
-			--[[
-			6  self._root.Position DELAY 0, -3.4028234663852886e+38, 0  -  Server - MovementController:139
- 			all the types DELAY number number number  -  Server - MovementController:140
-  			self._root.Position DELAY  10.600006103515625, 22.39059829711914, 102.79998779296875  -  Server - MovementController:146
-  			all the types DELAY number number number  -  Server - MovementController:147
-			]]
+			self._moveConn = RunService.Heartbeat:Connect(function(dt)
+				elapsed += dt
 
-			local distance = (targetPosition - self._root.Position).Magnitude
-			local timeToReach = distance / self.velocity
-			local animationController: AnimationTrack = self._AnimationHandler:LoadAnimation(true, "walk")
-			animationController:AdjustSpeed(self.speed)
+				if elapsed >= timeToReach then
+					self._moveConn:Disconnect()
+					self._moveConn = nil
+					resolve(timeToReach)
+					self._AnimationHandler:LoadAnimation(false, "walk")
+					self.isMoving = false
+					return
+				end
 
-			self._currentTween = TweenService:Create(
-				self._root,
-				TweenInfo.new(timeToReach, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-				{ Position = targetPosition }
-			)
-			self._currentTween:Play()
-
-			task.delay(timeToReach, function()
-				self._AnimationHandler:LoadAnimation(false, "walk")
-				self.isMoving = false
-				-- ✅ Resolve with timeToReach
-				resolve(timeToReach)
+				local newPos = startPos + dir * self.velocity * elapsed
+				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
 			end)
+			self._maid:GiveTask(self._moveConn)
 		end)
+		self._maid:GiveTask(rotationCOmplete)
+		rotateTween:Play()
 	end)
+
+	return timeToReach
 end
 
 function MovementController:GetMoveDuration()
@@ -233,6 +159,19 @@ end
 function MovementController:Destroy()
 	self:Stop()
 	self._maid:DoCleaning()
+	if self._currentMovePromise then
+		self._currentMovePromise:Destroy()
+	end
+
+	if self._currentTween then
+		self._currentTween:Cancel()
+	end
+
+	if self._AnimationHandler then
+		self._AnimationHandler:LoadAnimation(false, "walk")
+	end
+
+	self.isMoving = false
 end
 
 return MovementController

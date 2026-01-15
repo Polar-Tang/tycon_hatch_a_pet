@@ -82,7 +82,7 @@ local function onDescendantAdded(descendant)
 	-- Set collision group for any part descendant
 
 	if descendant:IsA("BasePart") then
-		descendant.CollisionGroup = "Players" -- TODO: list this in the collision group
+		descendant.CollisionGroup = "Players"
 	end
 end
 

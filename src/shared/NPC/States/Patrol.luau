@@ -15,14 +15,7 @@ function Patrol:OnEnter(data)
 
 	data.patrolStartTime = data.timer
 	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(50)
-	data.MovementController
-		:MoveTo(goal)
-		:Then(function(timeToReach)
-			data.patrol_duration = timeToReach
-		end)
-		:Catch(function(err)
-			print("Rejected:", err)
-		end)
+	data.patrol_duration = data.MovementController:MoveTo(goal)
 end
 
 function Patrol:OnLeave(data)
