@@ -43,6 +43,8 @@ serviceBag:Init()
 local BinderProviderStarted = serviceBag:GetService(AllBinders)
 --print("BinderProviderStarted ", BinderProviderStarted)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
+local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
+local petData = require(ServerScriptService.Pets.petData)
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
 
 -- Register all the animations registered with the models name
@@ -96,16 +98,33 @@ Players.PlayerAdded:Connect(function(player)
 			pets = {},
 		}
 	end
-	PlayerInventoryHandler:InitPlayer(player, playerData)
-	local Amount = ReplicatedStorage.RemoteEvents.Amount
-	Amount:FireClient(player, {
-		amount = playerData.cash,
-	})
+	
 	local character = player.Character or player.CharacterAdded:Wait()
 	for _, descendant in character:GetDescendants() do
 		onDescendantAdded(descendant)
 	end
 
+	local totalMoney = playerData.cash or 0
+	do
+		for petName, petStats in pairs(petData) do
+			local money, eats = OfflineRewards.CalculateOfflineEarnings(petStats, playerData.offlineTime)
+			if not money then
+				break
+			end
+			print(petName, " ate " ,eats, " times and earned ", money , " coins")
+			totalMoney += money
+		end
+	end
+	local dataInit = {
+		cash = totalMoney
+	}
+	print()
+	PlayerInventoryHandler:InitPlayer(player, dataInit)
+
+	local Amount = ReplicatedStorage.RemoteEvents.Amount
+	Amount:FireClient(player, {
+		amount = totalMoney,
+	})
 	character.DescendantAdded:Connect(onDescendantAdded)
 end)
 
@@ -115,11 +134,12 @@ Players.PlayerRemoving:Connect(function(player)
 	--print("playerInventory ", playerInventory)
 	local newData = {}
 
-	newData.cash = playerInventory.cash
+	-- newData.cash = playerInventory.cash
+	newData.cash = 0
 
+	newData.offlineTime = os.time()
 	--newData.inventory = {}
 	PlayerInventoryHandler:RemovePlayer(player)
-
 	ds:SetAsync("data_" .. player.UserId, newData)
 end)
 

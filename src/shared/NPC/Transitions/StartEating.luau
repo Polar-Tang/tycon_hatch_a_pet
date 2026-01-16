@@ -10,12 +10,8 @@ function StartEating:OnEnter(data)
 end
 
 function StartEating:OnDataChanged(data)
-	local timeInIdle = data.timer - data.lastIdleTime
-
-	if timeInIdle >= data.eat_interval then
-		return true
-	end
-	return false
+	local timeSinceLastEat = data.timer - data.lastEatTime
+	return timeSinceLastEat >= data.eat_interval
 end
 
 return StartEating

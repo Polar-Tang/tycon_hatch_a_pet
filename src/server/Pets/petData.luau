@@ -14,12 +14,12 @@ module["Fox"] = {
 module["Panda"] = {
 	["eat_interval"] = 5,
 	["eat_duration"] = 4,
+	["patrol_interval"] = 6,
+	["patrol_duration"] = 3,
 	["range"] = 30,
 	["velocity"] = 8,
 	["speed"] = 1.25,
-	["patrol_interval"] = 6,
-	["patrol_duration"] = 3,
-	["base"] = 4,
+	["base"] = 4, -- money generation
 }
 
 module["Elephant"] = {
