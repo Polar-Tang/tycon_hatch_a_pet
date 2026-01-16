@@ -15,7 +15,7 @@ function Patrol:OnEnter(data)
 
 	data.patrolStartTime = data.timer
 	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(50)
-	data.patrol_duration = data.MovementController:MoveTo(goal)
+	data.patrol_duration = data.MovementController:MoveTo(goal) +1
 end
 
 function Patrol:OnLeave(data)

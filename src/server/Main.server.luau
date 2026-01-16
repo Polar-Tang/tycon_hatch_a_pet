@@ -1,79 +1,11 @@
 --||Services||--
 local DataStoreService = game:GetService("DataStoreService")
-local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
---||Nevermore Shit||--
------------------------------ getting servicebag and loader -----------------------------
-
-local NeverMorePackages = RS.Nevermore
-local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
-local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
-
-local ServiceBag = Nevermore("ServiceBag")
-local serviceBag = ServiceBag.new()
-
------------------------------ init process -----------------------------
-_G.FistBag = serviceBag
-
----------- COLDOWNS ----------
----------- BINDERS ----------
-local Binder = Nevermore("Binder")
-local AnimationHandler = Nevermore("AnimationHandler")
-local StateMachine = Nevermore("StateMachine")
-
-local Binders = {
-	["AnimationHandler"] = AnimationHandler,
-	["NPC"] = StateMachine,
-}
----------- USE BINDER PORVIDER ----------
-local BinderProvider = Nevermore("BinderProvider")
-
-local AllBinders = BinderProvider.new("Binders", function(self, serviceBag)
-	for tag, contructor in pairs(Binders) do
-		self:Add(Binder.new(tag, contructor), serviceBag)
-	end
-end)
------ ------------------------ INIT SERVICEBAG -----------------------------
-serviceBag:GetService(AllBinders)
-serviceBag:Init()
-
-local BinderProviderStarted = serviceBag:GetService(AllBinders)
---print("BinderProviderStarted ", BinderProviderStarted)
-local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local petData = require(ServerScriptService.Pets.petData)
-local animationsData = require(ReplicatedStorage.Animations.animationsData)
-
--- Register all the animations registered with the models name
-AnimBinder:GetClassAddedSignal():Connect(function(binder)
-	--print("animationsData ", animationsData, binder.Char)
-	binder:registryAnims(animationsData[binder.Char.Name])
-	binder:PreloadAnims({ "eat", "walk", "idle" })
-	binder:LoadAnimation(true, "idle")
-end)
-
-local MachineBinder = BinderProviderStarted:Get("NPC")
-
--- when it doesn't work _initialized and _started are true
-
--- Register all the animations registered with the models name
-MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
-	local player = Players:GetPlayers()[1]
-	if not player then
-		player = Players.PlayerAdded:Wait()
-	end
-
-	machine_binder:Init(player)
-end)
------ ------------------------ START SERVICEBAG -----------------------------
-
-serviceBag:Start()
-_G.FistBag = nil
-_G.ServiceBag = serviceBag
-_G.BinderProvider = AllBinders
 
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
@@ -105,9 +37,11 @@ Players.PlayerAdded:Connect(function(player)
 	end
 
 	local totalMoney = playerData.cash or 0
-	do
+	if playerData.lastConnection then
+		local offlineTime = os.time() - playerData.lastConnection 
+		print("Player has been offline for ", offlineTime, " seconds")
 		for petName, petStats in pairs(petData) do
-			local money, eats = OfflineRewards.CalculateOfflineEarnings(petStats, playerData.offlineTime)
+			local money, eats = OfflineRewards:CalculateOfflineEarnings(petStats, offlineTime)
 			if not money then
 				break
 			end
@@ -115,10 +49,11 @@ Players.PlayerAdded:Connect(function(player)
 			totalMoney += money
 		end
 	end
+
 	local dataInit = {
 		cash = totalMoney
 	}
-	print()
+	
 	PlayerInventoryHandler:InitPlayer(player, dataInit)
 
 	local Amount = ReplicatedStorage.RemoteEvents.Amount
@@ -134,10 +69,10 @@ Players.PlayerRemoving:Connect(function(player)
 	--print("playerInventory ", playerInventory)
 	local newData = {}
 
-	-- newData.cash = playerInventory.cash
-	newData.cash = 0
+	newData.cash = playerInventory.cash
+	-- newData.cash = 0
 
-	newData.offlineTime = os.time()
+	newData.lastConnection = os.time()
 	--newData.inventory = {}
 	PlayerInventoryHandler:RemovePlayer(player)
 	ds:SetAsync("data_" .. player.UserId, newData)

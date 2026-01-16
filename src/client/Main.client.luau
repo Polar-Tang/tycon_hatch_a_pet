@@ -11,9 +11,4 @@ Amount.OnClientEvent:Connect(function(data)
 	currentAmount += newAmount
 	increaseMoney(currentAmount)
 
-	local model: Model = data.model
-	if model then
-		local rootPart = model.PrimaryPart
-		FadingText(rootPart, newAmount, Color3.fromRGB(57, 228, 5), UDim2.new(12, 0, 2, 0))
-	end
 end)

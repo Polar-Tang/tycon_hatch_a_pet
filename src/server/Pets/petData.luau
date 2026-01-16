@@ -1,5 +1,10 @@
 local module = {}
 
+--[[
+The eat interval is always less than the patrol interval
+The eat interval + eat duration >= eat_interval
+]]
+
 module["Fox"] = {
 	["eat_interval"] = 2,
 	["eat_duration"] = 3,

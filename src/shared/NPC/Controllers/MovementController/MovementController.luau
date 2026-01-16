@@ -88,6 +88,7 @@ function MovementController:PlainMove(targetPosition)
 	local distance = delta.Magnitude
 	local timeToReach = distance / self.velocity
 
+	print("self._maid ", self._maid)
 	self._currentMovePromise = Promise.new(function(resolve, reject)
 		-- CLEAN
 		self._maid:DoCleaning()
@@ -149,7 +150,6 @@ function MovementController:PlainMove(targetPosition)
 		self._maid:GiveTask(rotationCOmplete)
 		rotateTween:Play()
 	end)
-
 	return timeToReach
 end
 
