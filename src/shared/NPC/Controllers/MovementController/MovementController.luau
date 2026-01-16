@@ -24,7 +24,8 @@ function MovementController.new(data, serviceBag: any)
 	self.Model = model
 
 	self.velocity = data.velocity
-	self._root = model.PrimaryPart
+	print("model ", model)
+	self._root = data.root
 	self._serviceBag = serviceBag
 	self.anims = data.animations
 	self.speed = data.speed

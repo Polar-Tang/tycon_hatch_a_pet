@@ -9,10 +9,9 @@ TargetingController.__index = TargetingController
 function TargetingController.new(data, serviceBag: any)
 	local self = setmetatable(BaseObject.new() :: any, TargetingController)
 	local character = data.pet
-
 	self._character = character
-	self._root = character.PrimaryPart
-	self.startPos = character.PrimaryPart.Position
+	self._root = data.root
+	self.startPos = self._root.Position
 
 	self._range = data.range
 	self._serviceBag = serviceBag

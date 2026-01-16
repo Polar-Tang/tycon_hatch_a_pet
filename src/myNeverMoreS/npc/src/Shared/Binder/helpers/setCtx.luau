@@ -1,7 +1,6 @@
 -- Utility setting the npc context
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local Controllers = RS.NPC.Controllers
 local TargetingController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
@@ -9,7 +8,7 @@ local MovementController = require(Controllers.MovementController.MovementContro
 local CurrencyController = require(Controllers.CurrencyController.CurrencyController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
-local petStats = require(ServerScriptService.Pets.petData)
+local petStats = require(script.Parent.petData)
 
 local function onDescendantAdded(descendant)
 	-- Set collision group for any part descendant
@@ -25,6 +24,8 @@ local function onDescendantAdded(descendant)
 end
 
 return function(parent: Model, serviceBag: any, player)
+	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
+	
 	local current_pet_stats = petStats[parent.Name]
 
 	local petData = {} -- ctx for the controllers
@@ -35,6 +36,7 @@ return function(parent: Model, serviceBag: any, player)
 	petData.base = current_pet_stats.base
 	petData.velocity = current_pet_stats.velocity
 	petData.speed = current_pet_stats.speed
+	petData.root = root 
 
 	for _, descendant in parent:GetDescendants() do
 		if descendant:IsA("Model") then
