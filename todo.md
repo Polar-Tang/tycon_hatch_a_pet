@@ -1,0 +1,1 @@
+[] The offline player should not gain the same money as the online player
