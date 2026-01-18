@@ -25,7 +25,6 @@ end
 
 return function(parent: Model, serviceBag: any, player)
 	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
-	
 	local current_pet_stats = petStats[parent.Name]
 
 	local petData = {} -- ctx for the controllers

@@ -56,7 +56,6 @@ local MachineBinder = BinderProviderStarted:Get("NPC")
 -- Register all the animations registered with the models name
 MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
 	local player = Players.LocalPlayer
-
 	machine_binder:Init(player)
 end)
 ----- ------------------------ START SERVICEBAG -----------------------------

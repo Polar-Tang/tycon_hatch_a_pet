@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StateMachine = require(ReplicatedStorage.StateMachine)
 local setCTX = require(script.Parent.helpers.setCtx)
 local StatesFolder = ReplicatedStorage.NPC.States
-
 local StateMachineBinder = {}
 StateMachineBinder.ServiceName = "StateMachine"
 StateMachineBinder.__index = StateMachineBinder
@@ -26,7 +25,6 @@ function StateMachineBinder.new(char: Model, serviceBag)
 	self._initialized = false
 	self._players = {}
 	self.serviceBag = serviceBag
-	print()
 	return self
 end
 
