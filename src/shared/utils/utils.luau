@@ -1,9 +1,10 @@
 local utils = {}
 utils.ScaleToLvl = function(npc: Model, LVL: number)
-	local currentSize = npc:GetExtentsSize().Magnitude
+	local baseScale = 1
+	local growthPerLevel = 0.02 -- 10%
 
-	local newScale = currentSize * ((0.1 / 19) * (LVL - 1) + 0.2)
-	npc:ScaleTo(newScale)
+	local scale = baseScale + growthPerLevel * (LVL - 1)
+	npc:ScaleTo(scale)
 end
 
 return utils

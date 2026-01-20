@@ -50,7 +50,7 @@ function CurrencyController:LevelUp()
 end
 
 function CurrencyController:_levelUp()
-	PetLevel:FireServer(self.model)
+	PetLevel:FireServer(self._character)
 end
 
 function CurrencyController:StopAnim()

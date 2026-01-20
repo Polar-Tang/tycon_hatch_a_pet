@@ -64,3 +64,16 @@ serviceBag:Start()
 _G.FistBag = nil
 _G.ServiceBag = serviceBag
 _G.BinderProvider = AllBinders
+
+local PetNew = ReplicatedStorage.RemoteEvents.PetNew
+
+PetNew.OnClientEvent:Connect(function(data)
+	if data.allPets then
+		-- TODO [Collectionable Pets task]: pets should be tagged and placed in a slot here, with data from the server
+		_G["pets_registry"] = data.allPets
+	elseif data.newPet then
+		table.insert(_G["pets_registry"], data.newPet)
+	else
+		warn("Unkown attribute")
+	end
+end)

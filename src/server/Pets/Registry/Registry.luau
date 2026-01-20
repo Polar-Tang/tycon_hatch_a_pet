@@ -22,9 +22,11 @@ local function shallowCopy(t)
 	return out
 end
 
-function BestiaryList.new(player, bestiaryProg)
+function BestiaryList.new(bestiaryProg)
 	local self = setmetatable({}, BestiaryList)
 	self.pets = bestiaryProg or {}
+
+
 	return self
 end
 
@@ -33,6 +35,7 @@ function BestiaryList:listController(petId: string, controller)
 end
 
 function BestiaryList:listNewPet(petId: string, data)
+	
 	self.pets[petId] = data
 	return self.pets
 end
@@ -147,7 +150,7 @@ type PlayerData = {
 }
 
 function BestiaryListHandler:InitPlayer(player, lastList)
-	local handler = BestiaryList.new(player, lastList)
+	local handler = BestiaryList.new(lastList)
 	self._players[player.UserId] = handler
 end
 

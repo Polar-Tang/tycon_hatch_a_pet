@@ -234,6 +234,8 @@
   },
   "active": "8030286d6b9449b0",
   "lastOpenFiles": [
+    "src/server/Player/Currency/CurrencyController.luau",
+    "src/server/Player/Currency",
     "src/server/Seeds/initPets.luau",
     "src/server/Seeds",
     "src/shared/RemoteEvents/PetNew.model.json",
@@ -245,8 +247,6 @@
     "notes.md",
     "src/shared/utils/utils.luau",
     "src/shared/utils",
-    "src/shared/RemoteEvents/PetLevel.model.json",
-    "src/server/Pets/Registry/Registry.luau",
     "petlvl_task2.md"
   ]
 }
