@@ -30,6 +30,7 @@ end
 
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
+local initPets = require(script.Parent.Seeds.initPets)
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
 local PlayerInventoryHandler = require(Inventory.PlayerInventory)
@@ -80,7 +81,12 @@ Players.PlayerAdded:Connect(function(player)
 	}
 
 	PlayerInventoryHandler:InitPlayer(player, dataInit)
-
+	local petsInitialized = initPets()
+	
+	local PetNew = ReplicatedStorage.RemoteEvents.PetNew
+	PetNew:FireClient(player, {
+		pets = petsInitialized
+	})
 	local Amount = ReplicatedStorage.RemoteEvents.Amount
 	Amount:FireClient(player, {
 		amount = totalMoney,
@@ -114,4 +120,46 @@ Amount.OnServerEvent:Connect(function(player: Player, data)
 		amount = base,
 	})
 	--print("Main loaded")
+end)
+local PetClicked: RemoteEvent = Events.PetClicked
+
+-- Handle the remote event
+PetClicked.OnServerEvent:Connect(function(player, petModel)
+	-- Validate the pet exists and belongs to the player (security check)
+	if not petModel or not petModel:IsA("Model") then
+		warn("Invalid pet model from", player.Name)
+		return
+	end
+	
+	-- Do whatever you need when the pet is clicked
+	print(player.Name, "clicked pet:", petModel.Name)
+
+	-- TODO : really needs to create a new player binder to handle the pets
+	PetClicked:FireClient(player, {})
+	-- Example actions:
+	-- Award coins, open UI, trigger animation, etc.
+end)
+
+local PetLevel: RemoteEvent = Events.PetLevel
+local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
+
+local Registry = require(script.Parent.Pets.Registry.Registry)
+
+PetLevel.OnServerEvent:Connect(function(player, petModel)
+	local bestiaryHandler = Registry:GetHandler(player)
+
+	-- TODO: USE TIME STAMPS TO VERIFY THE REMOTE EVENT
+
+	local petId = petModel:GetAttribute("PetId")
+	
+	local lastLevel = bestiaryHandler[petId].petLvl
+	-- NEED to figure out how to create the XP based in the npc
+	local newPests = bestiaryHandler:increaseXP(petId, 50)
+	local petData = newPests[petId]
+	
+	local data = { lvl = petData.petLvl, prog = petData.petProg }
+	if lastLevel ~= petData.petLvl then
+		data.isLvlUp = true
+		ScaleToLvl(petModel, petData.petLvl)
+	end
 end)

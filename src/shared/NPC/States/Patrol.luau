@@ -11,7 +11,7 @@ Patrol.Transitions = {
 }
 
 function Patrol:OnEnter(data)
-	data.CurrencyController:StopAnim()
+	data.EatController:StopAnim()
 
 	data.patrolStartTime = data.timer
 	local goal: Vector3 = data.TargetingController:getRandomNearbyPosition(50)

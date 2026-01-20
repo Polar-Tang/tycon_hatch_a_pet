@@ -15,7 +15,7 @@ Eat.Transitions = {
 function Eat:OnEnter(data)
 	data.MovementController:Stop()
 	data.eatingStartTime = data.timer
-	data.CurrencyController:GenerateCurrency()
+	data.EatController:LevelUp()
 end
 
 function Eat:OnLeave(data)

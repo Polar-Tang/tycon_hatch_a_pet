@@ -23,8 +23,7 @@
       }
     },
     "StarterGui": {
-        "$path": "src/Gui"
-      }
+      "$path": "src/Gui"
     },
     "Workspace": {
       "$properties": {

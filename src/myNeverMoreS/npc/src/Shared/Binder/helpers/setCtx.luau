@@ -5,11 +5,15 @@ local Controllers = RS.NPC.Controllers
 local TargetingController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
-local CurrencyController = require(Controllers.CurrencyController.CurrencyController)
+local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
+local LevelController = require(ReplicatedStorage.NPC.Controllers.LevelController.LevelController)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
 local petStats = require(script.Parent.petData)
 
+-- EVENTS
+local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
+	
 local function onDescendantAdded(descendant)
 	-- Set collision group for any part descendant
 
@@ -21,6 +25,22 @@ local function onDescendantAdded(descendant)
 			descendant.Anchored = true
 		end
 	end
+end
+
+local function createClickDecteor(parent)
+	-- Create ClickDetector
+	local clickDetector = Instance.new("ClickDetector")
+	clickDetector.MaxActivationDistance = 32 -- Adjust distance as needed
+	clickDetector.Parent = parent
+	
+	-- Handle click event
+	clickDetector.MouseClick:Connect(function(playerWhoClicked)
+		-- Fire to server with the pet/NPC that was clicked
+		petClickedEvent:FireServer(parent)
+		
+		-- Optional: Visual feedback
+		print("Clicked NPC:", parent.Name)
+	end)	
 end
 
 return function(parent: Model, serviceBag: any, player)
@@ -37,6 +57,8 @@ return function(parent: Model, serviceBag: any, player)
 	petData.speed = current_pet_stats.speed
 	petData.root = root 
 
+	createClickDecteor(parent)
+
 	for _, descendant in parent:GetDescendants() do
 		if descendant:IsA("Model") then
 			for _, descendant in parent:GetDescendants() do
@@ -45,6 +67,8 @@ return function(parent: Model, serviceBag: any, player)
 		end
 		onDescendantAdded(descendant)
 	end
+
+
 
 	return {
 		pet = parent,
@@ -63,10 +87,11 @@ return function(parent: Model, serviceBag: any, player)
 		patrol_duration = current_pet_stats.patrol_duration,
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
-		CurrencyController = CurrencyController.new(petData, serviceBag, player),
+		EatController = EatController.new(petData, serviceBag, player),
 		SoundController = SoundController.new(petData, serviceBag),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),
 		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
+		LevelController = LevelController.new(petData)
 	}
 end

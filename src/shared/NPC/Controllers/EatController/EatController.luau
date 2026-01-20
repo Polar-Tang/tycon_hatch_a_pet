@@ -2,7 +2,7 @@ local RS = game:GetService("ReplicatedStorage")
 local packages = RS.Nevermore.Quenty
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
 -- TEST IF this doesn't break
-local Amount: RemoteEvent = RS.RemoteEvents.Amount
+local PetLevel: RemoteEvent = RS.RemoteEvents.PetLevel
 
 local CurrencyController = setmetatable({}, BaseObject)
 CurrencyController.__index = CurrencyController
@@ -33,7 +33,7 @@ function CurrencyController:getAnimHandler()
 	self._AnimationHandler = AnimationBinder:Get(self._character)
 end
 
-function CurrencyController:GenerateCurrency()
+function CurrencyController:LevelUp()
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
@@ -42,20 +42,20 @@ function CurrencyController:GenerateCurrency()
 	self._AnimationHandler:LoadAnimation(true, "eat")
 	self._AnimationHandler:OnSignal({
 		callback = function()
-			self:_generateCurrency()
+			self:_levelUp()
 		end,
 		animationName = "eat",
 		animationEventName = "Eat",
 	})
 end
 
-function CurrencyController:_generateCurrency()
-	Amount:FireServer({base = self.base})
+function CurrencyController:_levelUp()
+	PetLevel:FireServer(self.model)
 end
 
 function CurrencyController:StopAnim()
 	if not self._AnimationHandler then
-		return -- GenerateCurrency haven't be called yet
+		return -- LevelUp haven't be called yet
 	end
 	self._AnimationHandler:LoadAnimation(false, "eat")
 	--print("create the floating number that are at capture pet")
