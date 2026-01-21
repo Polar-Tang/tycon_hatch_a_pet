@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local CurrencyController = {}
@@ -16,6 +17,7 @@ function CurrencyController.new(player): PlayerData
 	self._timer = 0
 	self._lastTime = 0
 	self._player = player
+	self._maid = Maid.new()
 
 	self:_init()
 	return self
@@ -35,7 +37,6 @@ function CurrencyController:_init()
 
 			local count = 0
 			for petName, petData in pairs(pets) do
-				local Melee = petData.petStats.Melee
 				if petData.petStats.Melee <= 0 then
 					Melee = 1
 				end
@@ -44,8 +45,7 @@ function CurrencyController:_init()
 					Stamina = 1
 				end
 
-				local base = (Melee ^ 1.5) * (Stamina ^ 1.4) * 2
-				-- print(petName .. "produces " .. base)
+				local base = (Stamina ^ 1.8) * 2
 				count += base
 			end
 
@@ -56,11 +56,13 @@ function CurrencyController:_init()
 			})
 		end
 	end)
+	self._maid:GiveTask(self._mainCon)
 end
 
 function CurrencyController:Destroy()
-	self._mainCon:Disconnect()
 	print("self._mainCon ", self._mainCon)
+	self._maid:DoCleaning()
+	print("maid cleaning")
 end
 
 local CurrencyHandler = {}

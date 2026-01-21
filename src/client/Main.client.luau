@@ -9,7 +9,6 @@ local increaseStat = require(Facade.increaseStat)
 local currentAmount = 0 -- this data should come from the server
 Amount.OnClientEvent:Connect(function(data)
 	local newAmount = data.amount
-	currentAmount += newAmount
-	increaseMoney(currentAmount)
+	increaseMoney(newAmount)
 
 end)

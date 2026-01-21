@@ -19,7 +19,17 @@ function PlayerInventory.new(data): PlayerData
 	local self = setmetatable({}, PlayerInventory)
 	self.cash = cash or 0
 	self.inventory = inventory or {}
+	self.lastRegisterTime = os.time()
+
 	return self
+end
+
+function PlayerInventory:getRegisterTime()
+	return self.lastRegisterTime
+end
+
+function PlayerInventory:setRegisterTime()
+	self.lastRegisterTime = os.time()
 end
 
 function PlayerInventory:AddItem(newItem: itemType, key: string): PlayerData | nil
@@ -49,6 +59,7 @@ function PlayerInventory:RemoveItem(ItemId: string): PlayerData | nil
 end
 
 function PlayerInventory:IncreaseMoney(amount): IntValue
+	-- print("self.cash ", self.cash)
 	self.cash = self.cash + amount
 	return self.cash
 end

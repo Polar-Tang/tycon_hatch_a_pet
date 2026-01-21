@@ -28,98 +28,54 @@ do
 	_G.ServiceBag = serviceBag
 end
 
+local Mediator = require(script.Parent.Mediator)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
-local initPets = require(script.Parent.Seeds.initPets)
 local Registry = require(script.Parent.Pets.Registry.Registry)
 
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
 local PlayerInventoryHandler = require(Inventory.PlayerInventory)
-local ds = DataStoreService:GetDataStore("rise_a_pet_test")
+local ds = DataStoreService:GetDataStore("rise_a_pet_test2")
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 
-local function onDescendantAdded(descendant)
-	-- Set collision group for any part descendant
+--||PlayerRemoving||--
+Players.PlayerRemoving:Connect(function(player)
+	local newData = Mediator.PlayerRemoving(player)
+	print("========== BEFORE SetAsync ==========")
+	print("Data about to save:", game:GetService("HttpService"):JSONEncode(newData))
+	print("lastConnection:", newData)
 
-	if descendant:IsA("BasePart") then
-		descendant.CollisionGroup = "Players"
+	local success, errorMessage = pcall(function()
+		ds:SetAsync("data_" .. player.UserId, newData)
+	end)
+
+	if success then
+		print("========== AFTER SetAsync ==========")
+		print("SetAsync completed successfully")
+		print("=====================================")
+	else
+		warn("========== SetAsync FAILED ==========")
+		warn("Error:", errorMessage)
+		warn("Player:", player.Name)
+		warn("UserId:", player.UserId)
+		warn("====================================")
 	end
-end
+
+	-- Small wait to ensure prints appear before connection ends
+end)
 
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
-	----print("playerData ", playerData)
-	if not playerData then
-		playerData = {
-			inventory = {},
-			cash = 0,
-			pets = {},
-		}
-	end
+	print("========== LOADING DATA ==========")
+	print("playerData:", playerData)
+	print("Raw data received:", game:GetService("HttpService"):JSONEncode(playerData or {}))
+	print("lastConnection received:", "NIL")
 
-	local character = player.Character or player.CharacterAdded:Wait()
-	for _, descendant in character:GetDescendants() do
-		onDescendantAdded(descendant)
-	end
-
-	local totalMoney = playerData.cash or 0
-
-	print("playerData.pets ", playerData.pets["Panda"])
-	local dataInit = {
-		cash = totalMoney,
-		pets = playerData.pets,
-	}
-
-	Registry:InitPlayer(player, playerData.pets)
-
-	if playerData.lastConnection then
-		local offlineTime = os.time() - playerData.lastConnection
-
-		local money, _, _ = OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
-		if money then
-			totalMoney += money
-		end
-		--print(petName, " ate ", eats, " times and earned ", money, " coins")
-		OfflineRewards.CalculateXP(player, offlineTime)
-	end
-	PlayerInventoryHandler:InitPlayer(player, dataInit)
-
-	CurrencyController:InitPlayer(player)
-	-- local petsInitialized = initPets(player)
-
-	local PetNew = ReplicatedStorage.RemoteEvents.PetNew
-	PetNew:FireClient(player, {
-		allPets = playerData.pets,
-	})
-	local Amount = ReplicatedStorage.RemoteEvents.Amount
-	Amount:FireClient(player, {
-		amount = totalMoney,
-	})
-	character.DescendantAdded:Connect(onDescendantAdded)
-end)
-
---||PlayerRemoving||--
-Players.PlayerRemoving:Connect(function(player)
-	local playerInventory = PlayerInventoryHandler:GetHandler(player)
-	local bestiaryHandler = Registry:GetHandler(player)
-	----print("playerInventory ", playerInventory)
-	local newData = {}
-
-	newData.cash = playerInventory.cash
-	-- newData.cash = 0
-	--print("bestiaryHandler.pets ", bestiaryHandler.pets)
-	print("bestiaryHandler.pets ", bestiaryHandler.pets)
-	newData.pets = bestiaryHandler.pets
-	print("playerData.pets ", newData.pets["Panda"])
-
-	newData.lastConnection = os.time()
-	--newData.inventory = {}
-	PlayerInventoryHandler:RemovePlayer(player)
-	CurrencyController:RemovePlayer(player)
-	ds:SetAsync("data_" .. player.UserId, newData)
+	print("==================================")
+	Mediator.PlayerAdded(player, playerData)
 end)
 
 local Events = ReplicatedStorage.RemoteEvents

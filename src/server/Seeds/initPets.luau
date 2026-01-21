@@ -70,11 +70,11 @@ local init_data = {
 }
 
 return function(player)
-    local bestiaryHandler = Registry:GetHandler(player)
+    -- local bestiaryHandler = Registry:GetHandler(player)
 
-    local newPets
-    for petName, petData in pairs(init_data) do 
-        newPets = bestiaryHandler:listNewPet(petName, petData)
-    end
-    return newPets
+    -- local newPets
+    -- for petName, petData in pairs(init_data) do 
+    --     newPets = bestiaryHandler:listNewPet(petName, petData)
+    -- end
+    return init_data
 end

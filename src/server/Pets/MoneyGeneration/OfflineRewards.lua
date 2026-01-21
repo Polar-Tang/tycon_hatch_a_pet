@@ -46,7 +46,7 @@ function OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
 			Stamina = 1
 		end
 
-		local base = (Melee ^ 1.5) * (Stamina ^ 1.4) * 2
+		local base = (Stamina ^ 1.8) * 2
 		productionPerMinute += base
 	end
 

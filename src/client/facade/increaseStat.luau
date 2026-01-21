@@ -17,9 +17,8 @@ PetClicked.OnClientEvent:Connect(function(petData)
 		screen.Stats.Visible = true
 	end
 	screen.Stats.Header.Points.Text = "Points: " .. petData.avaiblePoints
-	local Melee = petData.petStats.Melee
 	local Stamina = petData.petStats.Stamina
-	local moneyPerSec = math.round((Melee ^ 1.5) * (Stamina ^ 1.4) * 2)
+	local moneyPerSec = math.round((Stamina ^ 1.8) * 2)
 	
 	screen.Stats.Holder.Production.Text = MoneyLib.HandleMoney(moneyPerSec) .. "/s"
 

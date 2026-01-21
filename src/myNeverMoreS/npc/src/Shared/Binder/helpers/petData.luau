@@ -12,7 +12,7 @@ module["Fox"] = {
 	["velocity"] = 4,
 	["speed"] = 2,
 	["patrol_interval"] = 7,
-	["patrol_duration"] = 3,
+	["patrol_duration"] = 500,
 	["base"] = 2,
 }
 
@@ -20,7 +20,7 @@ module["Panda"] = {
 	["eat_interval"] = 5,
 	["eat_duration"] = 4,
 	["patrol_interval"] = 6,
-	["patrol_duration"] = 3,
+	["patrol_duration"] = 500,
 	["range"] = 30,
 	["velocity"] = 8,
 	["speed"] = 1.25,
@@ -34,7 +34,7 @@ module["Elephant"] = {
 	["velocity"] = 4,
 	["speed"] = 3,
 	["patrol_interval"] = 8,
-	["patrol_duration"] = 3,
+	["patrol_duration"] = 500,
 	["base"] = 8,
 }
 
@@ -45,7 +45,7 @@ module["Hippo"] = {
 	["patrol_interval"] = 8,
 	["velocity"] = 8,
 	["speed"] = 2,
-	["patrol_duration"] = 3,
+	["patrol_duration"] = 500,
 	["base"] = 6,
 }
 
@@ -56,7 +56,7 @@ module["Rhino"] = {
 	["velocity"] = 4,
 	["speed"] = 3,
 	["patrol_interval"] = 8,
-	["patrol_duration"] = 3,
+	["patrol_duration"] = 500,
 	["base"] = 6,
 }
 --

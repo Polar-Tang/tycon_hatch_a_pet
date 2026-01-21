@@ -28,20 +28,23 @@ local function onDescendantAdded(descendant)
 	end
 end
 
-local function createClickDecteor(parent)
-	-- Create ClickDetector
-	local clickDetector = Instance.new("ClickDetector")
-	clickDetector.MaxActivationDistance = 32 -- Adjust distance as needed
-	clickDetector.Parent = parent
+local function createProximityPrompt(parent)
+	-- Create ProximityPrompt
+	local proximityPrompt = Instance.new("ProximityPrompt")
+	proximityPrompt.MaxActivationDistance = 3
+	proximityPrompt.ActionText = "See stats"
+	proximityPrompt.ObjectText = parent.Name
+	proximityPrompt.KeyboardKeyCode = Enum.KeyCode.E
+	proximityPrompt.Style = Enum.ProximityPromptStyle.Default
+	proximityPrompt.RequiresLineOfSight = false
+	proximityPrompt.Name = "See Stats"
+	proximityPrompt.Parent = parent
 	
-	-- Handle click event
-	clickDetector.MouseClick:Connect(function(playerWhoClicked)
-		-- Fire to server with the pet/NPC that was clicked
+	-- Handle triggered event
+	proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
+		-- Fire to server with the pet/NPC that was interacted with
 		petClickedEvent:FireServer(parent)
-		
-		-- Optional: Visual feedback
-		print("Clicked NPC:", parent.Name)
-	end)	
+	end)
 end
 
 return function(parent: Model, serviceBag: any, player)
@@ -60,7 +63,7 @@ return function(parent: Model, serviceBag: any, player)
 	petData.speed = current_pet_stats.speed
 	petData.root = root 
 
-	createClickDecteor(parent)
+	createProximityPrompt(parent)
 
 	for _, descendant in parent:GetDescendants() do
 		if descendant:IsA("Model") then
@@ -73,7 +76,7 @@ return function(parent: Model, serviceBag: any, player)
 
 	repeat task.wait() until _G["pets_registry"][parent.Name]
 	local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
-	print("petInfo ", petInfo)
+	
 	utils.ScaleToLvl(parent, petInfo.petLvl)
 	return {
 		pet = parent,
