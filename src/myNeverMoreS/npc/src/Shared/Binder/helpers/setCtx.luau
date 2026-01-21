@@ -9,6 +9,7 @@ local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
 local LevelController = require(ReplicatedStorage.NPC.Controllers.LevelController.LevelController)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
+local utils = require(ReplicatedStorage.utils.utils)
 local petStats = require(script.Parent.petData)
 
 -- EVENTS
@@ -47,6 +48,8 @@ return function(parent: Model, serviceBag: any, player)
 	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 	local current_pet_stats = petStats[parent.Name]
 
+	-- TODO [collectionable pets] ? we will need to initialize this from a server response
+	
 	local petData = {} -- ctx for the controllers
 
 	petData.animations = animData[parent.Name]
@@ -68,8 +71,10 @@ return function(parent: Model, serviceBag: any, player)
 		onDescendantAdded(descendant)
 	end
 
-
-
+	repeat task.wait() until _G["pets_registry"][parent.Name]
+	local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
+	print("petInfo ", petInfo)
+	utils.ScaleToLvl(parent, petInfo.petLvl)
 	return {
 		pet = parent,
 		-- timers

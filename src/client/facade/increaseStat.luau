@@ -2,13 +2,40 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetClicked = ReplicatedStorage.RemoteEvents.PetClicked
 
 local Players = game:GetService("Players")
+local StarterPlayer = game:GetService("StarterPlayer")
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
-PetClicked.OnClientEvent:Connect(function(petStats)
-	if not PlayerGui:WaitForChild("ScreenGui").Stats.Visible then
-		PlayerGui:WaitForChild("ScreenGui").Stats.Visible = true
+local maid = Maid.new()
+
+PetClicked.OnClientEvent:Connect(function(petData)
+	local screen = PlayerGui:WaitForChild("ScreenGui")
+
+	if not screen.Stats.Visible then
+		screen.Stats.Visible = true
 	end
-	PlayerGui:WaitForChild("ScreenGui").Stats.Header.Points.Text = "Points: " .. petStats.avaiblePoints
+	screen.Stats.Header.Points.Text = "Points: " .. petData.avaiblePoints
+	local Melee = petData.petStats.Melee
+	local Stamina = petData.petStats.Stamina
+	local moneyPerSec = math.round((Melee ^ 1.5) * (Stamina ^ 1.4) * 2)
+	
+	screen.Stats.Holder.Production.Text = MoneyLib.HandleMoney(moneyPerSec) .. "/s"
+
+	local upgrade_path = screen.Stats.Holder.Upgrades.Scroller
+
+	local innstance_names = { ["Health"] = "SlotHealth", ["Melee"] = "SlotMelee", ["Stamina"] = "SlotStamina" }
+	maid:DoCleaning()
+
+	for statName, name in pairs(innstance_names) do
+		maid:GiveTask(upgrade_path:FindFirstChild(name).UpgradeButton.MouseButton1Click:Connect(function()
+			ReplicatedStorage.RemoteEvents.PetStat:FireServer({
+				stat = statName,
+				petId = petData.petId
+			})
+		end))
+	end
+	-- PetStat.
 end)
-return{}
+return {}

@@ -143,7 +143,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "notes.md",
+                "file": "petlvl_task2.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -153,7 +153,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for notes"
+              "title": "Backlinks for petlvl_task2"
             }
           },
           {
@@ -162,12 +162,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "notes.md",
+                "file": "petlvl_task2.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from notes"
+              "title": "Outgoing links from petlvl_task2"
             }
           },
           {
@@ -205,13 +205,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes.md",
+                "file": "petlvl_task2.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of notes"
+              "title": "Outline of petlvl_task2"
             }
           }
         ]
@@ -232,8 +232,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "8030286d6b9449b0",
+  "active": "d6975be25115c030",
   "lastOpenFiles": [
+    "notes.md",
+    "Stats.rbxm",
+    "src/shared/RemoteEvents/PetStat.model.json",
     "src/server/Player/Currency/CurrencyController.luau",
     "src/server/Player/Currency",
     "src/server/Seeds/initPets.luau",
@@ -242,11 +245,7 @@
     "src/server/initPets.luau",
     "src/shared/NPC/Controllers/EatController/EatController.luau",
     "src/shared/NPC/Controllers/EatController/CurrencyController.luau",
-    "src/shared/NPC/Controllers/EatController",
     "Untitled.md",
-    "notes.md",
-    "src/shared/utils/utils.luau",
-    "src/shared/utils",
     "petlvl_task2.md"
   ]
 }

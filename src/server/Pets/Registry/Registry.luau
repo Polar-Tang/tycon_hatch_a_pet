@@ -22,9 +22,9 @@ local function shallowCopy(t)
 	return out
 end
 
-function BestiaryList.new(bestiaryProg)
+function BestiaryList.new(pets)
 	local self = setmetatable({}, BestiaryList)
-	self.pets = bestiaryProg or {}
+	self.pets = pets or {}
 
 
 	return self
@@ -81,25 +81,30 @@ function BestiaryList:spendPoint(petId: string, abillityName: string): { petData
 	return self.pets
 end
 
-function BestiaryList:_levelUpPet(petId: string): { petData } | nil
-	local clone = table.clone(self.pets[petId])
-	clone.avaiblePoints = clone.avaiblePoints + 1
-	clone.petLvl = clone.petLvl + 1
-	clone.petProg = 100 - clone.petProg
-	--self.pets[petId] = clone
-	return clone
+function BestiaryList:_levelUpPet(pet)
+	pet.avaiblePoints += 1
+	pet.petLvl += 1
+	pet.petProg -= 100 -- carry over excess XP
+	return pet
 end
 
-function BestiaryList:increaseXP(petId: string, newPetProg): { petData } | nil
-	local clone = table.clone(self.pets[petId])
-	clone.petProg = clone.petProg + newPetProg
-	--print("newPetProg xp", clone.petProg)
-	if clone.petProg >= 100 then
-		clone = self:_levelUpPet(clone.petId)
-	end
 
-	self.pets[petId] = clone
-	return self.pets
+function BestiaryList:increaseXP(petId: string, newPetProg)
+	local pet = table.clone(self.pets[petId])
+	
+	pet.petProg += newPetProg
+	
+	while pet.petProg >= 100 do
+		self:_levelUpPet(pet)
+	end
+	
+	self.pets[petId] = pet
+	return pet
+end
+
+
+function BestiaryList:setPetClicked(petId: string)
+	self.petClicked = petId
 end
 
 function BestiaryList:listBuff(petId: string, item)
@@ -149,8 +154,8 @@ type PlayerData = {
 	pets: {},
 }
 
-function BestiaryListHandler:InitPlayer(player, lastList)
-	local handler = BestiaryList.new(lastList)
+function BestiaryListHandler:InitPlayer(player, pets)
+	local handler = BestiaryList.new(pets)
 	self._players[player.UserId] = handler
 end
 

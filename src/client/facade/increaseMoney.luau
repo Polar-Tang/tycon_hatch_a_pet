@@ -4,9 +4,13 @@ local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 return function(amount)
-	if not PlayerGui:WaitForChild("ScreenGui").BottomLeft.CashAmount.Visible then
-	PlayerGui:WaitForChild("ScreenGui").BottomLeft.CashAmount.Visible = true
-	PlayerGui:WaitForChild("ScreenGui").BottomLeft.FriendBoost.Visible = true
+	local screenGui = PlayerGui:WaitForChild("ScreenGui")
+
+	print("new amount ", amount)
+	if not screenGui.BottomLeft.Visible then
+		screenGui.BottomLeft.Visible = true	
+		screenGui.BottomLeft.CashAmount.Visible = true
+		screenGui.BottomLeft.FriendBoost.Visible = true
 	end
-	PlayerGui:WaitForChild("ScreenGui").BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(amount)
+	screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(amount)
 end

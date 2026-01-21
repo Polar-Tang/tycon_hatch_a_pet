@@ -22,9 +22,7 @@
         "$path": "src/client"
       }
     },
-    "StarterGui": {
-      "$path": "src/Gui"
-    },
+   
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true

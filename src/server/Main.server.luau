@@ -30,6 +30,7 @@ end
 
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
+local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
 local initPets = require(script.Parent.Seeds.initPets)
 local Registry = require(script.Parent.Pets.Registry.Registry)
 
@@ -65,31 +66,33 @@ Players.PlayerAdded:Connect(function(player)
 	end
 
 	local totalMoney = playerData.cash or 0
-	if playerData.lastConnection then
-		local offlineTime = os.time() - playerData.lastConnection
-		--print("Player has been offline for ", offlineTime, " seconds")
-		for petName, petStats in pairs(petData) do
-			local money, eats = OfflineRewards:CalculateOfflineEarnings(petStats, offlineTime)
-			if not money then
-				break
-			end
-			--print(petName, " ate ", eats, " times and earned ", money, " coins")
-			totalMoney += money
-		end
-	end
 
+	print("playerData.pets ", playerData.pets["Panda"])
 	local dataInit = {
 		cash = totalMoney,
-		pets = playerData.pets
+		pets = playerData.pets,
 	}
 
-	PlayerInventoryHandler:InitPlayer(player, dataInit)
 	Registry:InitPlayer(player, playerData.pets)
+
+	if playerData.lastConnection then
+		local offlineTime = os.time() - playerData.lastConnection
+
+		local money, _, _ = OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
+		if money then
+			totalMoney += money
+		end
+		--print(petName, " ate ", eats, " times and earned ", money, " coins")
+		OfflineRewards.CalculateXP(player, offlineTime)
+	end
+	PlayerInventoryHandler:InitPlayer(player, dataInit)
+
+	CurrencyController:InitPlayer(player)
 	-- local petsInitialized = initPets(player)
-	
+
 	local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 	PetNew:FireClient(player, {
-		allPets = playerData.pets
+		allPets = playerData.pets,
 	})
 	local Amount = ReplicatedStorage.RemoteEvents.Amount
 	Amount:FireClient(player, {
@@ -108,11 +111,14 @@ Players.PlayerRemoving:Connect(function(player)
 	newData.cash = playerInventory.cash
 	-- newData.cash = 0
 	--print("bestiaryHandler.pets ", bestiaryHandler.pets)
+	print("bestiaryHandler.pets ", bestiaryHandler.pets)
 	newData.pets = bestiaryHandler.pets
+	print("playerData.pets ", newData.pets["Panda"])
 
 	newData.lastConnection = os.time()
 	--newData.inventory = {}
 	PlayerInventoryHandler:RemovePlayer(player)
+	CurrencyController:RemovePlayer(player)
 	ds:SetAsync("data_" .. player.UserId, newData)
 end)
 
@@ -137,7 +143,7 @@ PetClicked.OnServerEvent:Connect(function(player, petModel)
 		warn("Invalid pet model from", player.Name)
 		return
 	end
-	
+
 	-- Do whatever you need when the pet is clicked
 	--print(player.Name, "clicked pet:", petModel.Name)
 
@@ -149,7 +155,9 @@ PetClicked.OnServerEvent:Connect(function(player, petModel)
 	local petId = petModel.Name -- TODO [collectionable pets] use the code below instead
 	-- local petId = petModel:GetAttribute("PetId")
 
+	bestiaryHandler:setPetClicked(petId)
 	local petData = bestiaryHandler.pets[petId]
+
 	PetClicked:FireClient(player, petData)
 	-- Example actions:
 	-- Award coins, open UI, trigger animation, etc.
@@ -157,7 +165,6 @@ end)
 
 local PetLevel: RemoteEvent = Events.PetLevel
 local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
-
 
 PetLevel.OnServerEvent:Connect(function(player, petModel)
 	local bestiaryHandler = Registry:GetHandler(player)
@@ -171,12 +178,39 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 	--print("petId ", petId)
 	local lastLevel = bestiaryHandler.pets[petId].petLvl
 	-- NEED to figure out how to create the XP based in the npc
-	local newPests = bestiaryHandler:increaseXP(petId, 50)
-	local petData = newPests[petId]
-	
+	local petData = bestiaryHandler:increaseXP(petId, 50)
+
 	local data = { lvl = petData.petLvl, prog = petData.petProg }
 	if lastLevel ~= petData.petLvl then
 		data.isLvlUp = true
 		ScaleToLvl(petModel, petData.petLvl)
+		if petId == bestiaryHandler.petClicked then
+			PetClicked:FireClient(player, petData)
+		end
+	end
+end)
+
+local PetStat: RemoteEvent = Events.PetStat
+PetStat.OnServerEvent:Connect(function(player, data)
+	local bestiaryHandler = Registry:GetHandler(player)
+
+	-- TODO [pet leveling] : USE TIME STAMPS TO VERIFY THE REMOTE EVENT
+
+	local petId = data.petId
+	local stat = data.stat
+
+	--print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
+	--print("petId ", petId)
+	-- NEED to figure out how to create the XP based in the npc
+	local newPests = bestiaryHandler:spendPoint(petId, stat)
+	if not newPests then
+		return
+	end
+	local petData = newPests[petId]
+	if not newPests then
+		return
+	end
+	if petId == bestiaryHandler.petClicked then
+		PetClicked:FireClient(player, petData)
 	end
 end)
