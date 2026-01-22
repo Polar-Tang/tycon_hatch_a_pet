@@ -1,4 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 
 local init_data = {
@@ -73,8 +75,9 @@ return function(player)
     -- local bestiaryHandler = Registry:GetHandler(player)
 
     -- local newPets
-    -- for petName, petData in pairs(init_data) do 
-    --     newPets = bestiaryHandler:listNewPet(petName, petData)
-    -- end
+    for petName, petData in pairs(init_data) do 
+        -- newPets = bestiaryHandler:listNewPet(petName, petData)
+        petData.petStats = utils.GenerateRandStats(5)
+    end
     return init_data
 end

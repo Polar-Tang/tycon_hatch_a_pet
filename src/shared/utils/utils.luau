@@ -30,4 +30,23 @@ utils.setUpStats = function(model, stats)
 
 end
 
+utils.GenerateRandStats = function(LVL)
+	local statsMap = {
+		0,
+		0,
+		0
+	}	
+	
+	while LVL > 0  do
+		LVL -= 1
+		local rand = math.random(1, 3)
+		statsMap[rand]+= 1
+	end
+	return {
+		["Health"] = statsMap[1],
+		["Melee"] = statsMap[2],
+		["Stamina"] = statsMap[3],
+	}
+end
+
 return utils

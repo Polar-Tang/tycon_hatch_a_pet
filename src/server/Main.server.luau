@@ -38,7 +38,7 @@ local Registry = require(script.Parent.Pets.Registry.Registry)
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
 local PlayerInventoryHandler = require(Inventory.PlayerInventory)
-local ds = DataStoreService:GetDataStore("rise_a_pet_test3")
+local ds = DataStoreService:GetDataStore("rise_a_pet_test4")
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 
@@ -175,7 +175,6 @@ PetStat.OnServerEvent:Connect(function(player, data)
 	local petData = newPests[petId]
 	-- TODO: [collectionable pets] get the pet model by its id
 	local petModel = workspace:FindFirstChild(petId)
-	print("is there petStats? ", petData)
 	utils.setUpStats(petModel, petData.petStats)
 
 	if petId == bestiaryHandler.petClicked then
