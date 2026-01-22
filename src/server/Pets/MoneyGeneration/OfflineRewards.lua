@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 -- OfflineRewards.lua
 local OfflineRewards = {}
@@ -46,7 +47,7 @@ function OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
 			Stamina = 1
 		end
 
-		local base = (Stamina ^ 1.8) * 2
+		local base = utils.MoneyCalc(Stamina)
 		productionPerMinute += base
 	end
 

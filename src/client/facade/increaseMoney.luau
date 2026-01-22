@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local utils = require(ReplicatedStorage.utils.utils)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -28,7 +30,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 			if petData.petStats.Stamina <= 0 then
 				Stamina = 1
 			end
-
+			
 			local base = (Stamina ^ 1.8) * 2
 			total += base
 		end

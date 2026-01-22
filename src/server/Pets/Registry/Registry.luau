@@ -82,6 +82,10 @@ function BestiaryList:spendPoint(petId: string, abillityName: string): { petData
 end
 
 function BestiaryList:_levelUpPet(pet)
+	if pet.petLvl >= 150 then
+		warn("max level reached")
+		return
+	end
 	pet.avaiblePoints += 1
 	pet.petLvl += 1
 	pet.petProg -= 100 -- carry over excess XP
@@ -106,6 +110,11 @@ end
 function BestiaryList:setPetClicked(petId: string)
 	self.petClicked = petId
 end
+
+function BestiaryList:unsetPetClicked()
+	self.petClicked = nil
+end
+
 
 function BestiaryList:listBuff(petId: string, item)
 	local pet = self.pets[petId]

@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
+local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalculator)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
@@ -71,8 +72,10 @@ function module.PlayerRemoving(player)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local bestiaryHandler = Registry:GetHandler(player)
 	local newData = {}
-
-	newData.cash = playerInventory.cash
+    local newMoney = MoneyCalculator.collectPendingMoney(player)
+    local allTheCash = playerInventory.cash + newMoney
+    print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash )
+	newData.cash = allTheCash
 	newData.pets = bestiaryHandler.pets
 
 	newData.lastConnection = os.time()
@@ -81,10 +84,11 @@ function module.PlayerRemoving(player)
 	print("Player:", player.Name)
 	print("Timestamp being saved:", newData.lastConnection)
 	print("=================================")
-    
+
 
 	-- CurrencyController:RemovePlayer(player)
 	return newData
 end
+
 
 return module

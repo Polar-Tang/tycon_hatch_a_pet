@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local CurrencyController = {}
@@ -45,7 +46,7 @@ function CurrencyController:_init()
 					Stamina = 1
 				end
 
-				local base = (Stamina ^ 1.8) * 2
+				local base = utils.MoneyCalc(Stamina)
 				count += base
 			end
 

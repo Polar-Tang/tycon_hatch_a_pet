@@ -11,8 +11,44 @@ Idle.Transitions = {
 }
 
 function Idle:OnInit(data)
-	-- data.PetAnimatorController:Init()
-	-- data.PetAnimatorController:PlayIdle()
+	local model = data.pet
+	local maid = data.maid
+
+	-- TODO [TASK collectonable pets] use real id
+	local petId = model.Name
+	local registry = _G.pets_registry
+	local petEntry = registry[petId]
+
+	if not petEntry or not petEntry.petStats then
+		warn("Pet registry entry missing for:", petId)
+		return
+	end
+
+	local stats = petEntry.petStats
+
+	-- Helper to sync a single attribute
+	local function bindAttribute(attributeName)
+		-- Initial sync
+		local value = model:GetAttribute(attributeName)
+		if value ~= nil then
+			stats[attributeName] = value
+		end
+
+		-- Listen for changes
+		local connection = model:GetAttributeChangedSignal(attributeName):Connect(function()
+			local newValue = model:GetAttribute(attributeName)
+			if newValue ~= nil then
+				stats[attributeName] = newValue
+			end
+		end)
+
+		maid:GiveTask(connection)
+	end
+
+	-- Bind all required attributes
+	bindAttribute("Melee")
+	bindAttribute("Health")
+	bindAttribute("Stamina")
 end
 
 function Idle:OnEnter(data)

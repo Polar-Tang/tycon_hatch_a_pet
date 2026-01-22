@@ -30,6 +30,7 @@ end
 
 local Mediator = require(script.Parent.Mediator)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local utils = require(ReplicatedStorage.utils.utils)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
 local Registry = require(script.Parent.Pets.Registry.Registry)
@@ -37,9 +38,15 @@ local Registry = require(script.Parent.Pets.Registry.Registry)
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
 local PlayerInventoryHandler = require(Inventory.PlayerInventory)
-local ds = DataStoreService:GetDataStore("rise_a_pet_test2")
+local ds = DataStoreService:GetDataStore("rise_a_pet_test3")
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+
+-- 🔥 CRITICAL: Server shutdown handler
+game:BindToClose(function()
+	-- Yield is allowed here
+	task.wait(2)
+end)
 
 --||PlayerRemoving||--
 Players.PlayerRemoving:Connect(function(player)
@@ -149,7 +156,10 @@ end)
 local PetStat: RemoteEvent = Events.PetStat
 PetStat.OnServerEvent:Connect(function(player, data)
 	local bestiaryHandler = Registry:GetHandler(player)
-
+	if data.close then
+		bestiaryHandler:unsetPetClicked()
+		return
+	end
 	-- TODO [pet leveling] : USE TIME STAMPS TO VERIFY THE REMOTE EVENT
 
 	local petId = data.petId
@@ -163,9 +173,11 @@ PetStat.OnServerEvent:Connect(function(player, data)
 		return
 	end
 	local petData = newPests[petId]
-	if not newPests then
-		return
-	end
+	-- TODO: [collectionable pets] get the pet model by its id
+	local petModel = workspace:FindFirstChild(petId)
+	print("is there petStats? ", petData)
+	utils.setUpStats(petModel, petData.petStats)
+
 	if petId == bestiaryHandler.petClicked then
 		PetClicked:FireClient(player, petData)
 	end

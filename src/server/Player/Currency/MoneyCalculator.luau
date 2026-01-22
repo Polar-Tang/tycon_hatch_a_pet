@@ -1,3 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local utils = require(ReplicatedStorage.utils.utils)
+local Registry = require(ServerScriptService.Pets.Registry.Registry)
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local MoneyCalculator = {}
 
 -- Calculate money earned based on pets and time elapsed
@@ -15,7 +20,7 @@ function MoneyCalculator.calculateEarnings(pets, timeElapsed)
 			Stamina = 1
 		end
 
-		local base = (Stamina ^ 1.8) * 2
+		local base = utils.MoneyCalc(Stamina)
 		moneyPerSecond += base
 	end
 	
@@ -24,7 +29,7 @@ function MoneyCalculator.calculateEarnings(pets, timeElapsed)
 end
 
 -- Helper function to get time since last registration and calculate earnings
-function MoneyCalculator.calculatePendingMoney(player, Registry, PlayerInventory)
+function MoneyCalculator.calculatePendingMoney(player)
 	local inventory = PlayerInventory:GetHandler(player)
 	local registry = Registry:GetHandler(player)
 	
@@ -34,17 +39,17 @@ function MoneyCalculator.calculatePendingMoney(player, Registry, PlayerInventory
 	
 	local pets = registry.pets
 	local moneyEarned = MoneyCalculator.calculateEarnings(pets, timeElapsed)
-	
+	print("earned ", moneyEarned, "for ", timeElapsed)
 	return moneyEarned, timeElapsed
 end
 
 -- Full workflow: calculate and apply pending money
-function MoneyCalculator.collectPendingMoney(player, Registry, PlayerInventory)
+function MoneyCalculator.collectPendingMoney(player)
 	local inventory = PlayerInventory:GetHandler(player)
-	local moneyEarned, timeElapsed = MoneyCalculator.calculatePendingMoney(player, Registry, PlayerInventory)
+	local moneyEarned, timeElapsed = MoneyCalculator.calculatePendingMoney(player)
 	
 	-- Add the money
-	inventory:increaseMoney(moneyEarned)
+	inventory:IncreaseMoney(moneyEarned)
 	
 	-- Reset the register time
 	inventory:setRegisterTime()

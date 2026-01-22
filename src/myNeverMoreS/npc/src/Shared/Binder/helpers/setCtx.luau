@@ -28,10 +28,18 @@ local function onDescendantAdded(descendant)
 	end
 end
 
+local setUpAtt = function(parent, petInfo)
+		local stats = petInfo.petStats
+		parent:SetAttribute("Melee", utils.MeleeCalc(stats.Melee))
+		parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
+		parent:SetAttribute("Stamina", stats.Stamina)
+
+	end
+
 local function createProximityPrompt(parent)
 	-- Create ProximityPrompt
 	local proximityPrompt = Instance.new("ProximityPrompt")
-	proximityPrompt.MaxActivationDistance = 3
+	proximityPrompt.MaxActivationDistance = 8
 	proximityPrompt.ActionText = "See stats"
 	proximityPrompt.ObjectText = parent.Name
 	proximityPrompt.KeyboardKeyCode = Enum.KeyCode.E
@@ -47,7 +55,7 @@ local function createProximityPrompt(parent)
 	end)
 end
 
-return function(parent: Model, serviceBag: any, player)
+return function(parent: Model, serviceBag: any, player, maid)
 	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 	local current_pet_stats = petStats[parent.Name]
 
@@ -78,7 +86,11 @@ return function(parent: Model, serviceBag: any, player)
 	local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
 	
 	utils.ScaleToLvl(parent, petInfo.petLvl)
+
+	setUpAtt(parent, petInfo)
+	
 	return {
+		maid = maid,
 		pet = parent,
 		-- timers
 		timer = 0,
