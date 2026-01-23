@@ -3,14 +3,6 @@
 [] The pets can be also be tagged by its owner
 [] the pets can be tagged by id, so we can retrive the model by its id, orrr the pets may start with its default name and be changed after initializing setCtx
 
-### [Link updated](https://www.roblox.com/games/80420751886453/Raise-and-hatch)
-- **New resize formula**
-    Since the pet can go up to level 150, its size growth needs to be more gradual. Instead of growing a lot early, it slowly gets bigger over many levels, which keeps the pet from becoming oversized and keeps the game balanced. The pet at max level becomes exaclty twice its size
-- **New stats fromula**
-    The stats are generated randomly for every pet, each stat has its own formula, the data store was restarted so you can see the changes
-
-
-todo: look for GenerateRandStats in CaptureAllPets 
 
 These two task holds all the logic needed to finish the basic stuff for the game (before any boss fighing logic)
 ### Pets Colection Task $40

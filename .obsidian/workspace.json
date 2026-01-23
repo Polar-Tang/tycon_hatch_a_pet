@@ -22,6 +22,32 @@
             }
           },
           {
+            "id": "f74ad0f362869c93",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.11.5"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.11.5"
+            }
+          },
+          {
+            "id": "5fddfb17feaf36c4",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "m1 start final phase.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "m1 start final phase"
+            }
+          },
+          {
             "id": "7c37d2eb6d4b5461",
             "type": "leaf",
             "state": {
@@ -35,42 +61,8 @@
               "title": "Untitled"
             }
           }
-        ]
-      },
-      {
-        "id": "98eda34bfffcffc7",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "c44703f570b26707",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Untitled.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Untitled"
-            }
-          },
-          {
-            "id": "8030286d6b9449b0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "notes"
-            }
-          }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -127,7 +119,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "9de7879ce2a59b39",
@@ -232,8 +225,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "d6975be25115c030",
+  "active": "5fddfb17feaf36c4",
   "lastOpenFiles": [
+    "m1 start final phase.md",
     "notes.md",
     "Stats.rbxm",
     "src/shared/RemoteEvents/PetStat.model.json",
