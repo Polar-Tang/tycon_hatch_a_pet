@@ -14,7 +14,7 @@ local petStats = require(script.Parent.petData)
 
 -- EVENTS
 local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
-	
+
 local function onDescendantAdded(descendant)
 	-- Set collision group for any part descendant
 
@@ -29,12 +29,11 @@ local function onDescendantAdded(descendant)
 end
 
 local setUpAtt = function(parent, petInfo)
-		local stats = petInfo.petStats
-		parent:SetAttribute("Melee", utils.MeleeCalc(stats.Melee))
-		parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
-		parent:SetAttribute("Stamina", stats.Stamina)
-
-	end
+	local stats = petInfo.petStats
+	parent:SetAttribute("Melee", utils.MeleeCalc(stats.Melee))
+	parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
+	parent:SetAttribute("Stamina", stats.Stamina)
+end
 
 local function createProximityPrompt(parent)
 	-- Create ProximityPrompt
@@ -47,7 +46,7 @@ local function createProximityPrompt(parent)
 	proximityPrompt.RequiresLineOfSight = false
 	proximityPrompt.Name = "See Stats"
 	proximityPrompt.Parent = parent
-	
+
 	-- Handle triggered event
 	proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
 		-- Fire to server with the pet/NPC that was interacted with
@@ -55,12 +54,12 @@ local function createProximityPrompt(parent)
 	end)
 end
 
-return function(parent: Model, serviceBag: any, player, maid)
+return function(parent, serviceBag: any, player, maid)
 	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 	local current_pet_stats = petStats[parent.Name]
 
 	-- TODO [collectionable pets] ? we will need to initialize this from a server response
-	
+
 	local petData = {} -- ctx for the controllers
 
 	petData.animations = animData[parent.Name]
@@ -69,7 +68,7 @@ return function(parent: Model, serviceBag: any, player, maid)
 	petData.base = current_pet_stats.base
 	petData.velocity = current_pet_stats.velocity
 	petData.speed = current_pet_stats.speed
-	petData.root = root 
+	petData.root = root
 
 	createProximityPrompt(parent)
 
@@ -82,13 +81,41 @@ return function(parent: Model, serviceBag: any, player, maid)
 		onDescendantAdded(descendant)
 	end
 
-	repeat task.wait() until _G["pets_registry"][parent.Name]
+	repeat
+		task.wait()
+	until _G["pets_registry"][parent.Name]
 	local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
-	
+
 	utils.ScaleToLvl(parent, petInfo.petLvl)
 
-	setUpAtt(parent, petInfo)
-	
+	setUpAtt(parent, petInfo, maid, current_pet_stats)
+
+	local stats = petInfo.petStats
+	local billboard = ReplicatedStorage.NPC.Overhead:Clone()
+	-- resizes billboard
+	do
+		local modelSize = parent:GetExtentsSize()
+		local magnitude = modelSize.Magnitude
+		local baseScale = 1
+		local scale = baseScale + math.log(magnitude) * 0.3
+		scale = math.clamp(scale, 1, 2.2)
+		local originalSize = billboard.Size
+		billboard.Size = UDim2.fromScale(originalSize.X.Scale * scale, originalSize.Y.Scale * scale)
+	end
+
+	billboard.Frame.NpcName.Text = parent.Name
+	billboard.Frame.Production.Text = "$" .. math.round(utils.MoneyCalc(stats.Stamina)) .. "/s"
+	billboard.Adornee = parent.PrimaryPart
+	if current_pet_stats.adorneeOffset then
+		billboard.StudsOffset = current_pet_stats.adorneeOffset
+	end
+	billboard.Parent = parent.PrimaryPart
+
+	maid:GiveTask(parent:GetAttributeChangedSignal("Stamina"):Connect(function()
+		local Stamina: NumberValue = parent:GetAttribute("Stamina")
+
+		billboard.Frame.Production.Text = "$" .. math.round(utils.MoneyCalc(Stamina)) .. "/s"
+	end))
 	return {
 		maid = maid,
 		pet = parent,
@@ -112,6 +139,6 @@ return function(parent: Model, serviceBag: any, player, maid)
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),
 		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
-		LevelController = LevelController.new(petData)
+		LevelController = LevelController.new(petData),
 	}
 end
