@@ -38,7 +38,7 @@ local Registry = require(script.Parent.Pets.Registry.Registry)
 ------------------Once initilized-------------------------------
 local Inventory = ServerScriptService.Player.Inventory
 local PlayerInventoryHandler = require(Inventory.PlayerInventory)
-local ds = DataStoreService:GetDataStore("rise_a_pet_test4")
+local ds = DataStoreService:GetDataStore("rise_a_pet_test5")
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 
