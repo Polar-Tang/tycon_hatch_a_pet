@@ -28,17 +28,15 @@ do
 	_G.ServiceBag = serviceBag
 end
 
+local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local utils = require(ReplicatedStorage.utils.utils)
-local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
-local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
 local Registry = require(script.Parent.Pets.Registry.Registry)
 
 ------------------Once initilized-------------------------------
-local Inventory = ServerScriptService.Player.Inventory
-local PlayerInventoryHandler = require(Inventory.PlayerInventory)
-local ds = DataStoreService:GetDataStore("rise_a_pet_test5")
+local ds = DataStoreService:GetDataStore(Env.DB_URI)
+
+local MAX_PLAYERS = 8
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 
@@ -69,6 +67,11 @@ Players.PlayerRemoving:Connect(function(player)
 		warn("Player:", player.Name)
 		warn("UserId:", player.UserId)
 		warn("====================================")
+	end
+
+	-- TODO : 	In Game Settings → Basic Settings: Set Max Players = 8
+	if #Players:GetPlayers() > MAX_PLAYERS then
+		player:Kick("This server is full (8/8).")
 	end
 
 	-- Small wait to ensure prints appear before connection ends

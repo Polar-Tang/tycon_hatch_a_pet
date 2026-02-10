@@ -1,7 +1,9 @@
 -- Utility setting the npc context
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 local Controllers = RS.NPC.Controllers
+local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local TargetingController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
@@ -104,7 +106,7 @@ return function(parent, serviceBag: any, player, maid)
 	end
 
 	billboard.Frame.NpcName.Text = parent.Name
-	billboard.Frame.Production.Text = "$" .. math.round(utils.MoneyCalc(stats.Stamina)) .. "/s"
+	billboard.Frame.Production.Text = "$" .. MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
 	billboard.Adornee = parent.PrimaryPart
 	if current_pet_stats.adorneeOffset then
 		billboard.StudsOffset = current_pet_stats.adorneeOffset
@@ -114,7 +116,7 @@ return function(parent, serviceBag: any, player, maid)
 	maid:GiveTask(parent:GetAttributeChangedSignal("Stamina"):Connect(function()
 		local Stamina: NumberValue = parent:GetAttribute("Stamina")
 
-		billboard.Frame.Production.Text = "$" .. math.round(utils.MoneyCalc(Stamina)) .. "/s"
+		billboard.Frame.Production.Text = "$" .. MoneyLib.HandleMoney(math.round(utils.MoneyCalc(Stamina))) .. "/s"
 	end))
 	return {
 		maid = maid,

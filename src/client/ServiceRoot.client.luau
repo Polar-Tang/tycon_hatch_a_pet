@@ -44,7 +44,8 @@ local animationsData = require(ReplicatedStorage.Animations.animationsData)
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
 	--print("animationsData ", animationsData, binder.Char)
-	binder:registryAnims(animationsData[binder.Char.Name])
+	local petName = binder.Char:GetAttribute("petName")
+	binder:registryAnims(animationsData[petName])
 	binder:PreloadAnims({ "eat", "walk", "idle" })
 	binder:LoadAnimation(true, "idle")
 end)
@@ -56,7 +57,9 @@ local MachineBinder = BinderProviderStarted:Get("NPC")
 -- Register all the animations registered with the models name
 MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
 	local player = Players.LocalPlayer
-	machine_binder:Init(player)
+	task.delay(2, function()
+		machine_binder:Init(player)
+	end)
 end)
 ----- ------------------------ START SERVICEBAG -----------------------------
 
@@ -68,6 +71,7 @@ _G.BinderProvider = AllBinders
 local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 
 PetNew.OnClientEvent:Connect(function(data)
+	print("data ", data)
 	if data.allPets then
 		-- TODO [Collectionable Pets task]: pets should be tagged and placed in a slot here, with data from the server
 		_G["pets_registry"] = data.allPets

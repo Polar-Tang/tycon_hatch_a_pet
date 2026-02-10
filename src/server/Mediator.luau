@@ -2,9 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
-local CurrencyController = require(ServerScriptService.Player.Currency.CurrencyController)
 local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalculator)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+local InitPlot = require(ServerScriptService.Seeds.InitPlot)
 local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
 
@@ -19,7 +19,7 @@ end
 function module.PlayerAdded(player, playerData)
 	----print("playerData ", playerData)
 	if not playerData then
-        local petsInitialized = initPets(player)
+		local petsInitialized = initPets(player)
 		playerData = {
 			inventory = {},
 			cash = 0,
@@ -35,12 +35,12 @@ function module.PlayerAdded(player, playerData)
 
 	local totalMoney = playerData.cash or 0
 
+	InitPlot(player, playerData.pets)
 	Registry:InitPlayer(player, playerData.pets)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
 	})
 	local inventory = PlayerInventory:GetHandler(player)
-
 
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
@@ -72,9 +72,9 @@ function module.PlayerRemoving(player)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local bestiaryHandler = Registry:GetHandler(player)
 	local newData = {}
-    local newMoney = MoneyCalculator.collectPendingMoney(player)
-    local allTheCash = playerInventory.cash + newMoney
-    print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash )
+	local newMoney = MoneyCalculator.collectPendingMoney(player)
+	local allTheCash = playerInventory.cash + newMoney
+	print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
 	newData.pets = bestiaryHandler.pets
 
@@ -85,10 +85,8 @@ function module.PlayerRemoving(player)
 	print("Timestamp being saved:", newData.lastConnection)
 	print("=================================")
 
-
 	-- CurrencyController:RemovePlayer(player)
 	return newData
 end
-
 
 return module
