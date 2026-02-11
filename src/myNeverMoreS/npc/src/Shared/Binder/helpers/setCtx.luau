@@ -1,9 +1,7 @@
 -- Utility setting the npc context
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
 local Controllers = RS.NPC.Controllers
-local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local TargetingController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
@@ -11,6 +9,7 @@ local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
 local LevelController = require(ReplicatedStorage.NPC.Controllers.LevelController.LevelController)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
+local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
 local petStats = require(script.Parent.petData)
 
@@ -87,37 +86,6 @@ local getStats = function(parent, maid, isOwnerLocal)
 	return petData
 end
 
-local function setBillboard(parent, maid, petInfo)
-	local current_pet_stats = petStats[parent:GetAttribute("petName")]
-
-	local stats = petInfo.petStats
-	local billboard = ReplicatedStorage.NPC.Overhead:Clone()
-	-- resizes billboard
-	do
-		local modelSize = parent:GetExtentsSize()
-		local magnitude = modelSize.Magnitude
-		local baseScale = 1
-		local scale = baseScale + math.log(magnitude) * 0.3
-		scale = math.clamp(scale, 1, 2.2)
-		local originalSize = billboard.Size
-		billboard.Size = UDim2.fromScale(originalSize.X.Scale * scale, originalSize.Y.Scale * scale)
-	end
-
-	billboard.Frame.NpcName.Text = parent:GetAttribute("petName")
-	billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
-	billboard.Adornee = parent.PrimaryPart
-	if current_pet_stats.adorneeOffset then
-		billboard.StudsOffset = current_pet_stats.adorneeOffset
-	end
-	billboard.Parent = parent.PrimaryPart
-
-	maid:GiveTask(parent:GetAttributeChangedSignal("Stamina"):Connect(function()
-		local Stamina: NumberValue = parent:GetAttribute("Stamina")
-
-		billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(Stamina))) .. "/s"
-	end))
-end
-
 return function(parent, serviceBag: any, player, maid)
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 
@@ -136,7 +104,9 @@ return function(parent, serviceBag: any, player, maid)
 		until _G["pets_registry"] and _G["pets_registry"][parent.Name]
 		local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
 
-		setBillboard(parent, maid, petInfo)
+		local billboardService = BillboardService.new(parent, maid, petInfo)
+		billboardService:resizes()
+		petData.billboardService = billboardService
 		setUpAtt(parent, petInfo, maid, current_pet_stats)
 	end
 

@@ -139,22 +139,28 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 
 	local petId = petModel.Name -- TODO [collectionable pets] use the code below instead
 	-- local petId = petModel:GetAttribute("PetId")
-	print("petId ", petId)
 	----print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
 	----print("petId ", petId)
-	local lastLevel = bestiaryHandler.pets[petId].petLvl
-	-- NEED to figure out how to create the XP based in the npc
-	local petData = bestiaryHandler:increaseXP(petId, 50)
+	local petData = bestiaryHandler.pets[petId]
+
 	if not petData then
 		return
 	end
 
-	local data = { lvl = petData.petLvl, prog = petData.petProg }
-	if lastLevel ~= petData.petLvl then
+	local lastLevel = petData.petLvl
+	-- NEED to figure out how to create the XP based in the npc
+	local newPetData = bestiaryHandler:increaseXP(petId, 50)
+	if not newPetData then
+		return
+	end
+
+	local data = { lvl = newPetData.petLvl, prog = newPetData.petProg }
+	if lastLevel ~= newPetData.petLvl then
 		data.isLvlUp = true
-		ScaleToLvl(petModel, petData.petLvl)
+		ScaleToLvl(petModel, newPetData.petLvl)
+
 		if petId == bestiaryHandler.petClicked then
-			PetClicked:FireClient(player, petData)
+			PetClicked:FireClient(player, newPetData)
 		end
 	end
 end)

@@ -11,7 +11,7 @@ StateMachineBinder.__index = StateMachineBinder
 function StateMachineBinder.new(char: Model, serviceBag)
 	local self = setmetatable({}, StateMachineBinder)
 	self.id = HttpService:GenerateGUID()
-	
+
 	char:AddTag(self.id)
 	self.char = char
 	self.state = nil
@@ -19,6 +19,7 @@ function StateMachineBinder.new(char: Model, serviceBag)
 	self._players = {}
 	self.serviceBag = serviceBag
 	self.maid = Maid.new()
+
 	return self
 end
 
@@ -26,8 +27,11 @@ end
 function StateMachineBinder:Init(player)
 	-- the state machine is like the npc's brain
 
-	local state =
-		StateMachine.new("Idle", StateMachine:LoadDirectory(StatesFolder), setCTX(self.char, self.serviceBag, player, self.maid))
+	local state = StateMachine.new(
+		"Idle",
+		StateMachine:LoadDirectory(StatesFolder),
+		setCTX(self.char, self.serviceBag, player, self.maid)
+	)
 	self.state = state
 	self._initialized = true
 	return self

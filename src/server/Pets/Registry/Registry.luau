@@ -1,18 +1,11 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local PetData = require(ServerScriptService.types.PetData)
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local BestiaryList = {}
 -- PlayerQuestHandler.lua
 BestiaryList.__index = BestiaryList
 --local petRegistry = require(script.Parent.PetRegistry)
-
-type petData = {
-	petProg: number,
-	isInvoked: boolean,
-	avaiblePoints: number,
-	petName: string,
-	petLvl: number,
-	petStats: petStats,
-	buffs: {},
-	petHandler: {},
-}
 
 local function shallowCopy(t)
 	local out = {}
@@ -22,7 +15,7 @@ local function shallowCopy(t)
 	return out
 end
 
-function BestiaryList.new(pets)
+function BestiaryList.new(pets: PetData.InitData)
 	local self = setmetatable({}, BestiaryList)
 	self.pets = pets or {}
 
@@ -69,7 +62,7 @@ function BestiaryList:removeBuffH(petId: string)
 	--print("self.pets ",self.pets)
 end
 
-function BestiaryList:spendPoint(petId: string, abillityName: string): { petData } | nil
+function BestiaryList:spendPoint(petId: string, abillityName: string): PetData.InitData | nil
 	local pet = self.pets[petId]
 	if 0 >= pet.avaiblePoints then
 		return
@@ -90,12 +83,39 @@ function BestiaryList:_levelUpPet(pet)
 	return pet
 end
 
+-- The state machine uses remote event, check the intervals between the eat time is the same that the state machine use
+function BestiaryList:_ensureValidEat(petId: string): boolean
+	local pet = table.clone(self.pets[petId])
+	if not pet.startTrack then
+		pet.lastEat = tick()
+		pet.startTrack = true
+
+		self.pets[petId] = pet
+		return true
+	end
+	local puddingTime = tick() - pet.lastEat
+	print("last eat - now ", puddingTime)
+	local petInformation = petData[pet.petName]
+	-- substract by 1 just in case
+	local isValidEat = puddingTime > (petInformation.eat_interval + petInformation.eat_duration - 1)
+	if isValidEat then
+		pet.lastEat = tick()
+		self.pets[petId] = pet
+	end
+
+	return isValidEat
+end
+
 function BestiaryList:increaseXP(petId: string, newPetProg)
 	local pet = table.clone(self.pets[petId])
 	local petModel = workspace:FindFirstChild(petId)
 	if pet.petLvl >= 150 then
 		warn("max level reached")
 		petModel:SetAttribute("Level", pet.petLvl)
+		return
+	end
+	if not self:_ensureValidEat(petId) then
+		print("invalid interval")
 		return
 	end
 

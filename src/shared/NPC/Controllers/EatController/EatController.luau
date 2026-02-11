@@ -23,6 +23,8 @@ function CurrencyController.new(data, serviceBag: any, player)
 	self.isOwnerLocal = data.isOwnerLocal
 	self._player = player
 
+	self.billboardService = data.billboardService
+
 	return self
 end
 
@@ -45,6 +47,7 @@ function CurrencyController:LevelUp()
 		self._AnimationHandler:OnSignal({
 			callback = function()
 				self:_levelUp()
+				self.billboardService:resizes()
 			end,
 			animationName = "eat",
 			animationEventName = "Eat",

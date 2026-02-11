@@ -10,6 +10,25 @@ Idle.Transitions = {
 	require(ReplicatedSorage.NPC.Transitions.StartEating),
 }
 
+-- Helper to sync a single attribute
+local function bindAttribute(attributeName, pet_stats, model)
+	-- Initial sync
+	local value = model:GetAttribute(attributeName)
+	if value ~= nil then
+		pet_stats[attributeName] = value
+	end
+
+	-- Listen for changes
+	local connection = model:GetAttributeChangedSignal(attributeName):Connect(function()
+		local newValue = model:GetAttribute(attributeName)
+		if newValue ~= nil then
+			pet_stats[attributeName] = newValue
+		end
+	end)
+
+	return connection
+end
+
 function Idle:OnInit(data)
 	local model = data.pet
 	local maid = data.maid
@@ -18,7 +37,6 @@ function Idle:OnInit(data)
 		return
 	end
 
-	-- TODO [TASK collectonable pets] use real id
 	local petId = model.Name
 	local registry = _G.pets_registry
 	local petEntry = registry[petId]
@@ -28,31 +46,12 @@ function Idle:OnInit(data)
 		return
 	end
 
-	local stats = petEntry.petStats
-
-	-- Helper to sync a single attribute
-	local function bindAttribute(attributeName)
-		-- Initial sync
-		local value = model:GetAttribute(attributeName)
-		if value ~= nil then
-			stats[attributeName] = value
-		end
-
-		-- Listen for changes
-		local connection = model:GetAttributeChangedSignal(attributeName):Connect(function()
-			local newValue = model:GetAttribute(attributeName)
-			if newValue ~= nil then
-				stats[attributeName] = newValue
-			end
-		end)
-
-		maid:GiveTask(connection)
-	end
+	local pet_stats = petEntry.petStats
 
 	-- Bind all required attributes
-	bindAttribute("Melee")
-	bindAttribute("Health")
-	bindAttribute("Stamina")
+	maid:GiveTask(bindAttribute("Melee", pet_stats, model))
+	maid:GiveTask(bindAttribute("Health", pet_stats, model))
+	maid:GiveTask(bindAttribute("Stamina", pet_stats, model))
 end
 
 function Idle:OnEnter(data)
