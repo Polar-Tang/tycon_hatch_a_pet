@@ -14,6 +14,10 @@ function Idle:OnInit(data)
 	local model = data.pet
 	local maid = data.maid
 
+	if not data.isOwnerLocal then
+		return
+	end
+
 	-- TODO [TASK collectonable pets] use real id
 	local petId = model.Name
 	local registry = _G.pets_registry

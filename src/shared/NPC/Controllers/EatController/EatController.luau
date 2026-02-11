@@ -20,6 +20,7 @@ function CurrencyController.new(data, serviceBag: any, player)
 	self._currentPlayer = nil
 	self._humanoidTracker = nil
 
+	self.isOwnerLocal = data.isOwnerLocal
 	self._player = player
 
 	return self
@@ -40,13 +41,15 @@ function CurrencyController:LevelUp()
 	-- BUG: if there are invited players this will be an issue because it also updates the amount of money thing
 
 	self._AnimationHandler:LoadAnimation(true, "eat")
-	self._AnimationHandler:OnSignal({
-		callback = function()
-			self:_levelUp()
-		end,
-		animationName = "eat",
-		animationEventName = "Eat",
-	})
+	if self.isOwnerLocal then
+		self._AnimationHandler:OnSignal({
+			callback = function()
+				self:_levelUp()
+			end,
+			animationName = "eat",
+			animationEventName = "Eat",
+		})
+	end
 end
 
 function CurrencyController:_levelUp()

@@ -83,9 +83,23 @@ return function(player): PetData.InitData
 	-- local bestiaryHandler = Registry:GetHandler(player)
 
 	-- local newPets
-	for petName, petData in pairs(init_data) do
+
+	local idArr = {
+		foxId,
+		HippoId,
+		RhinoId,
+		ElephantId,
+		PandaId,
+	}
+
+	local petShit = {}
+	for i = 1, 3 do -- i, petId in ipairs(idArr) do
+		local rand = math.random(1, 5)
+		local petId = idArr[rand]
+		local petData = init_data[petId]
 		-- newPets = bestiaryHandler:listNewPet(petName, petData)
 		petData.petStats = utils.GenerateRandStats(5)
+		petShit[petId] = petData
 	end
-	return init_data
+	return petShit
 end

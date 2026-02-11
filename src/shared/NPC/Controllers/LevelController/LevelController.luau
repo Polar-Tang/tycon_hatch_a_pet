@@ -12,6 +12,9 @@ function LevelController.new(petData)
 end
 
 function LevelController:gainXp()
+	if self.model:GetAttribute("Level") >= 150 then
+		return
+	end
 	PetLevel:FireServer(self.model)
 end
 

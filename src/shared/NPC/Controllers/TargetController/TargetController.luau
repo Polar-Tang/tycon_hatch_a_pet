@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packages = RS.Nevermore.Quenty
@@ -26,13 +27,22 @@ end
 
 function TargetingController:getRandomNearbyPosition(radius: number?): Vector3
 	local origin = self._root.Position
-	local angle = math.rad(math.random(0, 360))
-	local range = radius or self._range
-	local distance = math.random() * range
-	local xOffset = math.cos(angle) * distance
-	local zOffset = math.sin(angle) * distance
-	local randPosition = Vector3.new(origin.X + xOffset, origin.Y, origin.Z + zOffset)
-	local boundedPos = FenceBoundsService:ClampToBounds(randPosition)
+	-- local angle = math.rad(math.random(0, 360))
+	-- local range = radius or self._range
+	-- local distance = math.random() * range
+	-- local xOffset = math.cos(angle) * distance
+	-- local zOffset = math.sin(angle) * distance
+	-- local randPosition = Vector3.new(origin.X + xOffset, origin.Y, origin.Z + zOffset)
+
+	local owner: Player = self._character:FindFirstChild("Owner").Value
+	-- if not owner then
+	-- 	print("Player has left ", owner)
+	-- 	return
+	-- end
+	local plot = assert(CollectionService:GetTagged("plot_" .. owner.UserId)[1], "player not initialized")
+
+	local boundedPos = FenceBoundsService:GetRandPosition(plot)
+
 	if (boundedPos - origin).Magnitude < 2 then
 		local fenceCF = workspace.FenceBounds.CFrame
 		local center = fenceCF.Position

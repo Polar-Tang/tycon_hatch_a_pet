@@ -42,7 +42,7 @@ local function createProximityPrompt(parent)
 	local proximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.MaxActivationDistance = 8
 	proximityPrompt.ActionText = "See stats"
-	proximityPrompt.ObjectText = parent.Name
+	proximityPrompt.ObjectText = parent:GetAttribute("petName")
 	proximityPrompt.KeyboardKeyCode = Enum.KeyCode.E
 	proximityPrompt.Style = Enum.ProximityPromptStyle.Default
 	proximityPrompt.RequiresLineOfSight = false
@@ -56,24 +56,7 @@ local function createProximityPrompt(parent)
 	end)
 end
 
-return function(parent, serviceBag: any, player, maid)
-	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
-	local current_pet_stats = petStats[parent.Name]
-
-	-- TODO [collectionable pets] ? we will need to initialize this from a server response
-
-	local petData = {} -- ctx for the controllers
-
-	petData.animations = animData[parent.Name]
-	petData.range = current_pet_stats.range
-	petData.pet = parent
-	petData.base = current_pet_stats.base
-	petData.velocity = current_pet_stats.velocity
-	petData.speed = current_pet_stats.speed
-	petData.root = root
-
-	createProximityPrompt(parent)
-
+local setCollider = function(parent)
 	for _, descendant in parent:GetDescendants() do
 		if descendant:IsA("Model") then
 			for _, descendant in parent:GetDescendants() do
@@ -82,15 +65,30 @@ return function(parent, serviceBag: any, player, maid)
 		end
 		onDescendantAdded(descendant)
 	end
+end
 
-	repeat
-		task.wait()
-	until _G["pets_registry"][parent.Name]
-	local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
+local getStats = function(parent, maid, isOwnerLocal)
+	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 
-	utils.ScaleToLvl(parent, petInfo.petLvl)
+	local current_pet_stats = petStats[parent:GetAttribute("petName")]
+	-- global
+	local petData = {} -- ctx for the controllers
 
-	setUpAtt(parent, petInfo, maid, current_pet_stats)
+	petData.animations = animData[parent:GetAttribute("petName")]
+	petData.range = current_pet_stats.range
+	petData.pet = parent
+	petData.base = current_pet_stats.base
+	petData.velocity = current_pet_stats.velocity
+	petData.speed = current_pet_stats.speed
+	petData.root = root
+	petData.isOwnerLocal = isOwnerLocal
+	-- global
+
+	return petData
+end
+
+local function setBillboard(parent, maid, petInfo)
+	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 
 	local stats = petInfo.petStats
 	local billboard = ReplicatedStorage.NPC.Overhead:Clone()
@@ -105,8 +103,8 @@ return function(parent, serviceBag: any, player, maid)
 		billboard.Size = UDim2.fromScale(originalSize.X.Scale * scale, originalSize.Y.Scale * scale)
 	end
 
-	billboard.Frame.NpcName.Text = parent.Name
-	billboard.Frame.Production.Text = "$" .. MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
+	billboard.Frame.NpcName.Text = parent:GetAttribute("petName")
+	billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
 	billboard.Adornee = parent.PrimaryPart
 	if current_pet_stats.adorneeOffset then
 		billboard.StudsOffset = current_pet_stats.adorneeOffset
@@ -116,11 +114,36 @@ return function(parent, serviceBag: any, player, maid)
 	maid:GiveTask(parent:GetAttributeChangedSignal("Stamina"):Connect(function()
 		local Stamina: NumberValue = parent:GetAttribute("Stamina")
 
-		billboard.Frame.Production.Text = "$" .. MoneyLib.HandleMoney(math.round(utils.MoneyCalc(Stamina))) .. "/s"
+		billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(Stamina))) .. "/s"
 	end))
+end
+
+return function(parent, serviceBag: any, player, maid)
+	local current_pet_stats = petStats[parent:GetAttribute("petName")]
+
+	local player_owner = parent:WaitForChild("Owner").Value
+	local isOwnerLocal = player_owner == player
+
+	local petData = getStats(parent, maid, isOwnerLocal)
+	setCollider(parent)
+
+	if isOwnerLocal then
+		createProximityPrompt(parent)
+
+		-- TODO: pets_registry is a table of player.UserId = petData
+		repeat
+			task.wait()
+		until _G["pets_registry"] and _G["pets_registry"][parent.Name]
+		local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
+
+		setBillboard(parent, maid, petInfo)
+		setUpAtt(parent, petInfo, maid, current_pet_stats)
+	end
+
 	return {
 		maid = maid,
 		pet = parent,
+		isOwnerLocal = isOwnerLocal,
 		-- timers
 		timer = 0,
 		lastIdleTime = 0,
@@ -136,11 +159,11 @@ return function(parent, serviceBag: any, player, maid)
 		patrol_duration = current_pet_stats.patrol_duration,
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
+		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
+		LevelController = isOwnerLocal and LevelController.new(petData) or nil,
 		EatController = EatController.new(petData, serviceBag, player),
-		SoundController = SoundController.new(petData, serviceBag),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),
 		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
-		LevelController = LevelController.new(petData),
 	}
 end

@@ -6,6 +6,7 @@ FenceBoundsService.__index = FenceBoundsService
 local FenceBounds = require(script.FenceBounds)
 
 local plots = CollectionService:GetTagged("plots")
+local plotCount = 0
 
 -- Utility
 local function isFree(plot)
@@ -55,6 +56,14 @@ function FenceBoundsService:AssignPlot(plot, player)
 	isOn.Value = true
 
 	plot:SetAttribute("CachedAt", nil)
+	CollectionService:AddTag(plot, "plot_" .. player.UserId)
+
+	local plotId = plot:FindFirstChild("PlotId")
+	if plotId.Value == 0 then
+		plotCount = plotCount + 1
+		plotId.Value = plotCount
+		print("plotId.Value ", plotId.Value)
+	end
 end
 
 function FenceBoundsService:MarkOffline(plot)
@@ -73,9 +82,18 @@ function FenceBoundsService:_resetPlot(plot)
 	plot:SetAttribute("CachedAt", nil)
 end
 
-function FenceBoundsService:ClampToBounds(position)
-	local fenceCF = workspace.FenceBounds.CFrame
-	local fenceSize = workspace.FenceBounds.Size
+function FenceBoundsService:_GetPlotByUserId(Id: string): BasePart?
+	for _, plot in pairs(plots) do
+		if plot:FindFirstChild("OwnerUserId").value == Id then
+			return plot
+		end
+	end
+	return
+end
+
+function FenceBoundsService:ClampToBounds(plot, position)
+	local fenceCF = plot.CFrame
+	local fenceSize = plot.Size
 
 	local offset = position - fenceCF.Position
 

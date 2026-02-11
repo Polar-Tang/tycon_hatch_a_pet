@@ -49,18 +49,18 @@ end)
 --||PlayerRemoving||--
 Players.PlayerRemoving:Connect(function(player)
 	local newData = Mediator.PlayerRemoving(player)
-	print("========== BEFORE SetAsync ==========")
-	print("Data about to save:", game:GetService("HttpService"):JSONEncode(newData))
-	print("lastConnection:", newData)
+	--print("========== BEFORE SetAsync ==========")
+	--print("Data about to save:", game:GetService("HttpService"):JSONEncode(newData))
+	--print("lastConnection:", newData)
 
 	local success, errorMessage = pcall(function()
 		ds:SetAsync("data_" .. player.UserId, newData)
 	end)
 
 	if success then
-		print("========== AFTER SetAsync ==========")
-		print("SetAsync completed successfully")
-		print("=====================================")
+		--print("========== AFTER SetAsync ==========")
+		--print("SetAsync completed successfully")
+		--print("=====================================")
 	else
 		warn("========== SetAsync FAILED ==========")
 		warn("Error:", errorMessage)
@@ -74,17 +74,17 @@ Players.PlayerRemoving:Connect(function(player)
 		player:Kick("This server is full (8/8).")
 	end
 
-	-- Small wait to ensure prints appear before connection ends
+	-- Small wait to ensure --prints appear before connection ends
 end)
 
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
-	print("========== LOADING DATA ==========")
-	print("playerData:", playerData)
-	print("Raw data received:", game:GetService("HttpService"):JSONEncode(playerData or {}))
-	print("lastConnection received:", "NIL")
+	--print("========== LOADING DATA ==========")
+	--print("playerData:", playerData)
+	--print("Raw data received:", game:GetService("HttpService"):JSONEncode(playerData or {}))
+	--print("lastConnection received:", "NIL")
 
-	print("==================================")
+	--print("==================================")
 	Mediator.PlayerAdded(player, playerData)
 end)
 
@@ -98,7 +98,7 @@ Amount.OnServerEvent:Connect(function(player: Player, data)
 	Amount:FireClient(player, {
 		amount = base,
 	})
-	----print("Main loaded")
+	------print("Main loaded")
 end)
 local PetClicked: RemoteEvent = Events.PetClicked
 
@@ -111,7 +111,7 @@ PetClicked.OnServerEvent:Connect(function(player, petModel)
 	end
 
 	-- Do whatever you need when the pet is clicked
-	--print(player.Name, "clicked pet:", petModel.Name)
+	----print(player.Name, "clicked pet:", petModel.Name)
 
 	-- TODO : really needs to create a new player binder to handle the pets
 	local bestiaryHandler = Registry:GetHandler(player)
@@ -139,12 +139,15 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 
 	local petId = petModel.Name -- TODO [collectionable pets] use the code below instead
 	-- local petId = petModel:GetAttribute("PetId")
-
-	--print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
-	--print("petId ", petId)
+	print("petId ", petId)
+	----print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
+	----print("petId ", petId)
 	local lastLevel = bestiaryHandler.pets[petId].petLvl
 	-- NEED to figure out how to create the XP based in the npc
 	local petData = bestiaryHandler:increaseXP(petId, 50)
+	if not petData then
+		return
+	end
 
 	local data = { lvl = petData.petLvl, prog = petData.petProg }
 	if lastLevel ~= petData.petLvl then
@@ -168,8 +171,8 @@ PetStat.OnServerEvent:Connect(function(player, data)
 	local petId = data.petId
 	local stat = data.stat
 
-	--print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
-	--print("petId ", petId)
+	----print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
+	----print("petId ", petId)
 	-- NEED to figure out how to create the XP based in the npc
 	local newPests = bestiaryHandler:spendPoint(petId, stat)
 	if not newPests then

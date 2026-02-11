@@ -26,7 +26,6 @@ function BestiaryList.new(pets)
 	local self = setmetatable({}, BestiaryList)
 	self.pets = pets or {}
 
-
 	return self
 end
 
@@ -35,7 +34,6 @@ function BestiaryList:listController(petId: string, controller)
 end
 
 function BestiaryList:listNewPet(petId: string, data)
-	
 	self.pets[petId] = data
 	return self.pets
 end
@@ -92,20 +90,25 @@ function BestiaryList:_levelUpPet(pet)
 	return pet
 end
 
-
 function BestiaryList:increaseXP(petId: string, newPetProg)
 	local pet = table.clone(self.pets[petId])
-	
+	local petModel = workspace:FindFirstChild(petId)
+	if pet.petLvl >= 150 then
+		warn("max level reached")
+		petModel:SetAttribute("Level", pet.petLvl)
+		return
+	end
+
 	pet.petProg += newPetProg
-	
+
 	while pet.petProg >= 100 do
 		self:_levelUpPet(pet)
 	end
-	
+
 	self.pets[petId] = pet
+	petModel:SetAttribute("Level", pet.petLvl)
 	return pet
 end
-
 
 function BestiaryList:setPetClicked(petId: string)
 	self.petClicked = petId
@@ -114,7 +117,6 @@ end
 function BestiaryList:unsetPetClicked()
 	self.petClicked = nil
 end
-
 
 function BestiaryList:listBuff(petId: string, item)
 	local pet = self.pets[petId]
@@ -149,7 +151,6 @@ end
 --	return pet.petStats["stamina"]*32 +128
 
 --end
-
 
 local BestiaryListHandler = {}
 

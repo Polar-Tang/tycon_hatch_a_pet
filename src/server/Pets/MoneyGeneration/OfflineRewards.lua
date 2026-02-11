@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local petInformation = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PetData = require(ServerScriptService.types.PetData)
@@ -67,10 +68,10 @@ function OfflineRewards.CalculateXP(player, offlineTime)
 	local bestiary = Registry:GetHandler(player)
 	local pets = bestiary.pets
 	for petId, petData: PetData.PetData in pairs(pets) do
-		local petStats = petData.petName
+		local petStats = petInformation[petData.petName]
 		local _, eats = OfflineRewards:CalculateOfflineEarnings(petStats, offlineTime)
 		if eats then
-			bestiary:increaseXP(petData.petName, eats * 2)
+			bestiary:increaseXP(petId, eats * 2)
 		end
 	end
 end

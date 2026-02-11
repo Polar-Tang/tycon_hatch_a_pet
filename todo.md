@@ -48,3 +48,6 @@ Vector.new(-6,-6,-6) = Vector.new(6,6,6) cos(D)
 Vector.new(-6,-6,-6) / Vector.new(6,6,6) = cos(D)
 Vector.new(-1,-1,-1) = cos(D)
 arcCos(Vector.new(-1,-1,-1))
+
+
+check if the petId id exists on bestiary

@@ -1,8 +1,7 @@
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
-local utils = require(ReplicatedStorage.utils.utils)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -17,12 +16,13 @@ RunService.Heartbeat:Connect(function(dt: number)
 	if timer - lastTime >= 1 then
 		lastTime = timer
 
-		local pets = _G["pets_registry"]
+		local pets = CollectionService:GetTagged("pets_" .. player.UserId)
 		if not pets then
 			return
 		end
 
-		for petName, petData in pairs(pets) do
+		for _, petInstance in ipairs(pets) do
+			local petData = _G["pets_registry"][petInstance.Name]
 			if petData.petStats.Melee <= 0 then
 				Melee = 1
 			end
@@ -30,11 +30,11 @@ RunService.Heartbeat:Connect(function(dt: number)
 			if petData.petStats.Stamina <= 0 then
 				Stamina = 1
 			end
-			
+
 			local base = (Stamina ^ 1.8) * 2
 			total += base
 		end
-		screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(total)
+		screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(math.round(total))
 	end
 end)
 

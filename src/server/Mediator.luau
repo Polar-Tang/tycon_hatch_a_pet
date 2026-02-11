@@ -36,6 +36,7 @@ function module.PlayerAdded(player, playerData)
 	local totalMoney = playerData.cash or 0
 
 	InitPlot(player, playerData.pets)
+	print(playerData.pets, "playerData.pets has petId or petName as key?")
 	Registry:InitPlayer(player, playerData.pets)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
