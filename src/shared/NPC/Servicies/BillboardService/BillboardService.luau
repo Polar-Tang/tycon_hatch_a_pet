@@ -33,6 +33,8 @@ function module.new(parent, maid, petInfo)
 	return self
 end
 
+local ORIGINAL_SIZE = UDim2.fromScale(9, 3)
+
 function module:resizes()
 	local current_billboard = self.billboard
 	assert(current_billboard, " trying to resize pet billboard without initialize it")
@@ -42,14 +44,8 @@ function module:resizes()
 
 	local scale = 1 + scale_factor
 	scale = math.clamp(scale, 1, 2.2)
-	local originalSize = current_billboard.Size
-	if not self.initialized then
-		print()
-		current_billboard.Size = UDim2.fromScale(originalSize.X.Scale * scale, originalSize.Y.Scale * scale)
-	else
-		local currentSize = current_billboard.Size
-		current_billboard.Size = UDim2.fromScale(currentSize.X.Scale + 0.0134, currentSize.Y.Scale + 0.0134)
-	end
+
+	current_billboard.Size = UDim2.fromScale(ORIGINAL_SIZE.X.Scale * scale, ORIGINAL_SIZE.Y.Scale * scale)
 
 	local current_pet_stats = petStats[self.pet:GetAttribute("petName")]
 

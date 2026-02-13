@@ -32,7 +32,7 @@ local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(script.Parent.Pets.Registry.Registry)
-
+local _ = require(script.Parent.ShopKeepers.npcMediator)
 ------------------Once initilized-------------------------------
 local ds = DataStoreService:GetDataStore(Env.DB_URI)
 

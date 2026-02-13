@@ -54,9 +54,7 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	if targetPosition.Y < 20 then
-		targetPosition = workspace.FenceBounds.CFrame.Position
-	end
+
 	return self:PlainMove(targetPosition)
 end
 

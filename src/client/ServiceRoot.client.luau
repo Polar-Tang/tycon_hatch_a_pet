@@ -97,3 +97,5 @@ do
 		end)
 	end
 end
+
+local _ = require(script.Parent.RoactApp)
