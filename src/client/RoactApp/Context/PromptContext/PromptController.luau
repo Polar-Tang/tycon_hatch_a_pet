@@ -34,11 +34,19 @@ function PromptController:StartCheckDistance()
 			--print("hrp prompty", hrp)
 			--print("prompy parent ", prompty.Parent)
 			local prompty = self.prompt
-			if not hrp or not prompty.Parent or not prompty.Parent:IsA("BasePart") then
+			if not hrp or not prompty.Parent then
 				return
 			end
+			local promptHRP
+			if prompty.Parent:IsA("BasePart") then
+				promptHRP = prompty.Parent
+			elseif prompty.Parent:IsA("Model") then
+				promptHRP = prompty.Parent.PrimaryPart
+			else
+				print("Unkown prompt parent type ", prompty.Parent)
+			end
 
-			local distance = (prompty.Parent.Position - hrp.Position).Magnitude
+			local distance = (promptHRP.Position - hrp.Position).Magnitude
 			if distance > 25 then
 				print("disconnect con")
 				self:DisconnectPrompt(prompty)

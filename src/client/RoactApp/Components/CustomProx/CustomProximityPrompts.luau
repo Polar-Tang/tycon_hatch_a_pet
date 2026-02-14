@@ -10,7 +10,6 @@ function CustomProximityPrompts:render()
 	local withCtx = useContext({ PromptContext = PromptContext })
 
 	return withCtx(function(ctx)
-		local dropCTX = ctx.dropItemCtx
 		local prompCTX = ctx.PromptContext
 		local customProxComponents = {}
 
@@ -18,8 +17,6 @@ function CustomProximityPrompts:render()
 			customProxComponents[id] = Roact.createElement(CustomProximityPrompt, {
 				prompt = prompt,
 				callClose = prompCTX.callClose,
-				dropItems = dropCTX.dropItems,
-				removerItem = dropCTX.removerItem,
 			})
 		end
 		return Roact.createFragment(customProxComponents)

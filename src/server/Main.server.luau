@@ -36,7 +36,7 @@ local _ = require(script.Parent.ShopKeepers.npcMediator)
 ------------------Once initilized-------------------------------
 local ds = DataStoreService:GetDataStore(Env.DB_URI)
 
-local MAX_PLAYERS = 8
+local MAX_PLAYERS = 6
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 

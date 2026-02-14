@@ -17,7 +17,7 @@ function CustomProximityPrompt:render()
 	-- UDim2.new(1, 0, 1, 0)
 	return Roact.createElement("BillboardGui", {
 		AlwaysOnTop = true,
-		Size = UDim2.fromOffset(64, 64),
+		Size = nameToImage[npc.Name].imageSize or UDim2.fromOffset(64, 64),
 		StudsOffset = Vector3.new(0, -1, 0),
 		Adornee = npc,
 		Active = true,
