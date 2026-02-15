@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local npcUtils = require(ReplicatedStorage.utils.npcUtils)
-local npcMap = require(script.Parent.npcMap)
-local npcTypes = require(script.Parent.npcTypes)
+local npcMap = require(ReplicatedStorage.utils.npcMap)
+local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 
 local Events = ReplicatedStorage.RemoteEvents
 
@@ -9,7 +8,18 @@ local npcMediator = {}
 
 function initAllNpcs()
 	for npcName, npcData in pairs(npcMap) do
-		npcUtils.initNpc(npcData)
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.Style = Enum.ProximityPromptStyle.Default
+		prompt.ActionText = "Shop"
+		prompt.Name = "Shop"
+		prompt.ObjectText = npcData.id
+		prompt.KeyboardKeyCode = Enum.KeyCode.E
+		prompt.HoldDuration = 0
+		prompt.Style = Enum.ProximityPromptStyle.Custom
+		prompt.RequiresLineOfSight = false
+		prompt.MaxActivationDistance = 24
+		prompt.ClickablePrompt = true
+		prompt.Parent = npcData.model
 	end
 end
 

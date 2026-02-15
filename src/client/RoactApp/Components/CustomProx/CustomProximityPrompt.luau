@@ -9,7 +9,8 @@ function CustomProximityPrompt:render()
 
 	local npc = prompt.Parent
 
-	local imagePrompt = nameToImage[npc.Name].image
+	local npcUtility = nameToImage[npc.Name]
+	local imagePrompt = npcUtility.image
 
 	if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
 		return
@@ -27,7 +28,7 @@ function CustomProximityPrompt:render()
 			BackgroundTransparency = 1,
 			Image = imagePrompt,
 			[Roact.Event.Activated] = function()
-				print("Hello World!")
+				npcUtility.promptTrigger()
 			end,
 		}),
 	})

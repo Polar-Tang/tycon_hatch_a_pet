@@ -1,4 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 
 export type nameToAction = {
@@ -12,6 +14,8 @@ local module = {}
 module["Kibly Shop Keeper"] = {
 	image = assets["store_icon"],
 	greetings = function(selfParent: Model)
+		npcUtils.lookAtPlayer(selfParent)
+
 		local animator: Animator = selfParent:WaitForChild("Humanoid"):WaitForChild("Animator")
 
 		local cheerAnimation = Instance.new("Animation")

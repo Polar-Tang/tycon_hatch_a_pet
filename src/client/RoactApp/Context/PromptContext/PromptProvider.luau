@@ -4,7 +4,6 @@ local repStore = game:getService("ReplicatedStorage")
 
 local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
-local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local Roact = require(repStore.Roact)
 
 local PromptContext = require(script.Parent.PromptContext)
@@ -58,8 +57,8 @@ end
 function PromptProvider:didMount()
 	local promptCon = game:GetService("ProximityPromptService").PromptShown:Connect(function(prompty: ProximityPrompt)
 		local promptParent = prompty.Parent
+		print("prompty ", promptParent)
 		if promptParent then
-			npcUtils.lookAtPlayer(promptParent)
 			NPCs:FireServer({ prompt = prompty, Parent = promptParent, ObjectText = prompty.ObjectText })
 		end
 	end)
@@ -73,10 +72,6 @@ function PromptProvider:didMount()
 		if nameToAction[npc.Name] then
 			nameToAction[npc.Name].greetings(npc)
 		end
-
-		-- __prompts is the roact component's currently active prompts controllers
-		print("#self.__prompts[id] ", self.__prompts[id])
-		print("prompty ", prompty)
 
 		if self.__prompts[id] then
 			return
