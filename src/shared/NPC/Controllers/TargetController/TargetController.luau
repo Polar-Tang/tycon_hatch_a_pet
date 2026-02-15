@@ -44,7 +44,7 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3
 	local boundedPos = FenceBoundsService:GetRandPosition(plot)
 
 	if (boundedPos - origin).Magnitude < 2 then
-		local fenceCF = workspace.FenceBounds.CFrame
+		local fenceCF = plot.CFrame
 		local center = fenceCF.Position
 
 		-- direction from center to pet

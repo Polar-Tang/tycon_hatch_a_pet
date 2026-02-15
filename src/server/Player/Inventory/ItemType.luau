@@ -1,11 +1,12 @@
 local ItemTypes = {}
 
-export type Item = {
-	rarity: "common" | "uncommon" | "rare" | "epic",
-	buffKind: "XP" | "DMG" | "speed" | "stamina" | "poisonHealth",
-	type: "consumable" | "buff",
-	name: string,
-	buff: number,
+export type ItemFrontend = {
+
+	image: string,
+	title: string,
+	description: string,
+	price: number,
+	itemName: string,
 }
 
 return ItemTypes

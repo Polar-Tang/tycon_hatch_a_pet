@@ -32,7 +32,7 @@ function PlayerInventory:setRegisterTime()
 	self.lastRegisterTime = os.time()
 end
 
-function PlayerInventory:AddItem(newItem: itemType, key: string): PlayerData | nil
+function PlayerInventory:AddItem(newItem, key: string): PlayerData | nil
 	--print("New item ", newItem)
 	local index = key or newItem.itemId
 	if not newItem then
@@ -70,6 +70,7 @@ function PlayerInventory:DecreaseMoney(amount): IntValue?
 		warn("The player's money is negative")
 		return
 	end
+	print("player cash ", self.cash)
 	return self.cash
 end
 function PlayerInventory:findItem(itemId)
