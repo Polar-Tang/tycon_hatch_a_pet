@@ -8,18 +8,7 @@ local npcMediator = {}
 
 function initAllNpcs()
 	for npcName, npcData in pairs(npcMap) do
-		local prompt = Instance.new("ProximityPrompt")
-		prompt.Style = Enum.ProximityPromptStyle.Default
-		prompt.ActionText = "Shop"
-		prompt.Name = "Shop"
-		prompt.ObjectText = npcData.id
-		prompt.KeyboardKeyCode = Enum.KeyCode.E
-		prompt.HoldDuration = 0
-		prompt.Style = Enum.ProximityPromptStyle.Custom
-		prompt.RequiresLineOfSight = false
-		prompt.MaxActivationDistance = 24
-		prompt.ClickablePrompt = true
-		prompt.Parent = npcData.model
+		npcData.init()
 	end
 end
 

@@ -71,7 +71,7 @@ function gearShop.createViewport(parentSLot, itemName: string)
 	parentSLot.PlaceHolder:Destroy()
 end
 
-local Items = ReplicatedStorage.RemoteEvents.Items
+local Items = ReplicatedStorage.RemoteEvents.ItemsEvent
 
 function gearShop.createItem(data: itemData)
 	local local_maid = Maid.new()

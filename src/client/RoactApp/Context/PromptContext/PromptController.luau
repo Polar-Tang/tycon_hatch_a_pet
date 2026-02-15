@@ -1,8 +1,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local player = Players.LocalPlayer
+local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 
 local PromptController = {}
@@ -34,6 +36,7 @@ function PromptController:StartCheckDistance()
 			--print("hrp prompty", hrp)
 			--print("prompy parent ", prompty.Parent)
 			local prompty = self.prompt
+
 			if not hrp or not prompty.Parent then
 				return
 			end
@@ -49,7 +52,10 @@ function PromptController:StartCheckDistance()
 			local distance = (promptHRP.Position - hrp.Position).Magnitude
 			if distance > 25 then
 				print("disconnect con")
+				nameToAction[prompty.Parent.Name].finishPrompt()
 				self:DisconnectPrompt(prompty)
+			else
+				nameToAction[prompty.Parent.Name].updatePrompt()
 			end
 		end
 	end)

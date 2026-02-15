@@ -10,9 +10,15 @@ export type nameToAction = {
 	greetings: (selfParent: Model) -> (),
 	imageSize: UDim2,
 	promptTrigger: () -> (),
+	updatePrompt: () -> (),
+	finishPrompt: () -> (),
 }
 
 local module = {}
+
+local kibly: Model = workspace:WaitForChild("ShopKeepers"):WaitForChild("Kibly Shop Keeper")
+local kibly_primaryPart = kibly.PrimaryPart
+local kibly_original_CF = kibly_primaryPart.CFrame
 
 module["Kibly Shop Keeper"] = {
 	image = assets["store_icon"],
@@ -21,7 +27,7 @@ module["Kibly Shop Keeper"] = {
 
 		local animator: Animator = selfParent:WaitForChild("Humanoid"):WaitForChild("Animator")
 
-		local cheerAnimation = Instance.new("Animation")
+		local cheerAnimation: Animation = Instance.new("Animation")
 		cheerAnimation.AnimationId = "http://www.roblox.com/asset/?id=507770677"
 		local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
 		anim_track:Play()
@@ -35,6 +41,45 @@ module["Kibly Shop Keeper"] = {
 	promptTrigger = function()
 		gearShop.open()
 		gearShop.createItem(ItemData["SpeedCoil"])
+	end,
+	updatePrompt = function()
+		npcUtils.lookAtPlayer(kibly)
+	end,
+	finishPrompt = function()
+		kibly_primaryPart.CFrame = kibly_original_CF
+	end,
+	imageSize = UDim2.fromOffset(128, 86),
+}
+
+local egg = workspace:WaitForChild("ShopKeepers"):WaitForChild("Egg Shop Keeper")
+
+local egg_primaryPart = egg.PrimaryPart
+local egg_original_CF = egg_primaryPart.CFrame
+
+module["Egg Shop Keeper"] = {
+	image = assets["egg_icon"],
+	greetings = function(selfParent: Model)
+		npcUtils.lookAtPlayer(selfParent)
+
+		local animator: Animator = selfParent:WaitForChild("Humanoid"):WaitForChild("Animator")
+
+		local cheerAnimation: Animation = Instance.new("Animation")
+		cheerAnimation.AnimationId = "http://www.roblox.com/asset/?id=507770239"
+		local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
+		anim_track.Looped = false
+		anim_track:Play()
+	end,
+	originalCF = workspace:FindFirstChild("ShopKeepers"):FindFirstChild("Egg Shop Keeper").PrimaryPart.CFrame,
+
+	promptTrigger = function()
+		gearShop.open()
+		-- gearShop.createItem(ItemData["SpeedCoil"])
+	end,
+	updatePrompt = function()
+		npcUtils.lookAtPlayer(egg)
+	end,
+	finishPrompt = function()
+		egg_primaryPart.CFrame = egg_original_CF
 	end,
 	imageSize = UDim2.fromOffset(128, 86),
 }

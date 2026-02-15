@@ -4,7 +4,7 @@ local ItemData = require(ReplicatedStorage.Items.ItemData)
 local ItemType = require(script.Parent.ItemType)
 local PlayerInventory = require(script.Parent.PlayerInventory)
 
-local Items = rs.RemoteEvents.Items
+local Items = rs.RemoteEvents.ItemsEvent
 
 Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
 	local playerInventory = PlayerInventory:GetHandler(player)
