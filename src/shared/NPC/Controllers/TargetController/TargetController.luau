@@ -25,7 +25,7 @@ function TargetingController.new(data, serviceBag: any)
 	return self
 end
 
-function TargetingController:getRandomNearbyPosition(radius: number?): Vector3
+function TargetingController:getRandomNearbyPosition(radius: number?): Vector3?
 	local origin = self._root.Position
 	-- local angle = math.rad(math.random(0, 360))
 	-- local range = radius or self._range
@@ -35,6 +35,11 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3
 	-- local randPosition = Vector3.new(origin.X + xOffset, origin.Y, origin.Z + zOffset)
 
 	local owner: Player = self._character:FindFirstChild("Owner").Value
+
+	-- owner may be not initialized yet
+	if not owner then
+		return
+	end
 	-- if not owner then
 	-- 	print("Player has left ", owner)
 	-- 	return

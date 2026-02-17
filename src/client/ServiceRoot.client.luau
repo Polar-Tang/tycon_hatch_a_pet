@@ -62,12 +62,21 @@ MachineBinder:GetClassAddedSignal():Connect(function(machine_binder)
 	local player = Players.LocalPlayer
 	machine_binder:Init(player)
 end)
+
 ----- ------------------------ START SERVICEBAG -----------------------------
 
 serviceBag:Start()
 _G.FistBag = nil
 _G.ServiceBag = serviceBag
 _G.BinderProvider = AllBinders
+
+do
+	for _, npc in CollectionService:GetTagged("NPC") do
+		print("is a model i guess ", npc)
+		local binder = MachineBinder:Get(npc)
+		binder:Init(Players.LocalPlayer)
+	end
+end
 
 local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 PetNew.OnClientEvent:Connect(function(data)

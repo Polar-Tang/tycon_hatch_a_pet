@@ -23,6 +23,9 @@ RunService.Heartbeat:Connect(function(dt: number)
 
 		for _, petInstance in ipairs(pets) do
 			local petData = _G["pets_registry"][petInstance.Name]
+			if not petData then
+				continue
+			end
 			if petData.petStats.Melee <= 0 then
 				Melee = 1
 			end
