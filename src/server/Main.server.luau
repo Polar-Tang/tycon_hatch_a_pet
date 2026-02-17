@@ -28,6 +28,7 @@ do
 	_G.ServiceBag = serviceBag
 end
 
+local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.FenceBoundsService)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -68,10 +69,11 @@ Players.PlayerRemoving:Connect(function(player)
 		warn("UserId:", player.UserId)
 		warn("====================================")
 	end
-
+	local plot = FenceBoundsService.GetPlotByUserId(player.UserId)
+		FenceBoundsService:MarkOffline(plot)
 	-- TODO : 	In Game Settings → Basic Settings: Set Max Players = 8
 	if #Players:GetPlayers() > MAX_PLAYERS then
-		player:Kick("This server is full (8/8).")
+		player:Kick("This server is full (6/6).")
 	end
 
 	-- Small wait to ensure --prints appear before connection ends

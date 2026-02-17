@@ -54,7 +54,7 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-
+	
 	return self:PlainMove(targetPosition)
 end
 

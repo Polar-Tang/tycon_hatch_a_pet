@@ -70,13 +70,13 @@ _G.FistBag = nil
 _G.ServiceBag = serviceBag
 _G.BinderProvider = AllBinders
 
-do
-	for _, npc in CollectionService:GetTagged("NPC") do
-		print("is a model i guess ", npc)
-		local binder = MachineBinder:Get(npc)
-		binder:Init(Players.LocalPlayer)
-	end
-end
+-- do
+-- 	for _, npc in CollectionService:GetTagged("NPC") do
+-- 		print("is a model i guess ", npc)
+-- 		local binder = MachineBinder:Get(npc)
+-- 		binder:Init(Players.LocalPlayer)
+-- 	end
+-- end
 
 local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 PetNew.OnClientEvent:Connect(function(data)
@@ -103,6 +103,26 @@ do
 	for i = 1, 6 do
 		CollectionService:GetInstanceAddedSignal("plot_" .. i):Connect(function(model)
 			CollectionService:AddTag(model, "NPC")
+
+			-- Observe ancestry: fires whenever parent changes
+			local sub = model.AncestryChanged:Connect(function(_, newParent)
+				if newParent == nil then
+					-- model was removed from the tree, destroy its binder
+					local binder = MachineBinder:Get(model) -- or however you retrieve it
+					if binder then
+						binder:Destroy()
+					end
+					local anim_binder = AnimBinder:Get(model)
+					if anim_binder then 
+						anim_binder:Destroy()
+					end
+				end
+			end)
+
+			-- Also clean up the connection itself when model is destroyed
+			model.Destroying:Connect(function()
+				sub:Disconnect()
+			end)
 		end)
 	end
 end

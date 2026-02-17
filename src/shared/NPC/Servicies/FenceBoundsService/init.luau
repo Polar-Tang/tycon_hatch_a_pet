@@ -10,52 +10,40 @@ local plotCount = 0
 
 -- Utility
 local function isFree(plot)
-	return not plot:FindFirstChild("IsOnline").Value
+
+	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId").Value == ""
 end
 
 local function isCached(plot)
-	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId") ~= nil
+	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId").Value
 end
 
 -- MAIN ENTRY POINT
 function FenceBoundsService:GetAvailablePlot()
 	-- 1️⃣ Prefer free plots
+	local oldestPlot
 	for _, plot in ipairs(plots) do
 		if isFree(plot) then
 			return plot
+		elseif isCached(plot) then
+			oldestPlot = plot
 		end
 	end
 
-	-- 2️⃣ Evict oldest cached plot
-	local oldestPlot
-	local oldestTime = math.huge
-
-	for _, plot in ipairs(plots) do
-		if isCached(plot) then
-			local cachedAt = plot:GetAttribute("CachedAt")
-			if cachedAt and cachedAt < oldestTime then
-				oldestTime = cachedAt
-				oldestPlot = plot
-			end
-		end
-	end
-
-	if oldestPlot then
-		self:_resetPlot(oldestPlot)
-		return oldestPlot
-	end
-
-	return nil
+	return oldestPlot
 end
 
 function FenceBoundsService:AssignPlot(plot, player)
+	if isCached(plot) then 
+		self:_resetPlot(plot)
+	end
+
 	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
 	userId.Value = player.UserId
 
 	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
 	isOn.Value = true
 
-	plot:SetAttribute("CachedAt", nil)
 	CollectionService:AddTag(plot, "plot_" .. player.UserId)
 
 	local plotId = plot:FindFirstChild("PlotId")
@@ -73,18 +61,19 @@ function FenceBoundsService:MarkOffline(plot)
 end
 
 function FenceBoundsService:_resetPlot(plot)
-	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
-	userId.Value = ""
-
-	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
-	isOn.Value = false
-
+	
+	local plotId: StringValue = plot:FindFirstChild("PlotId")
+	local plot_tag = "plot_"..tostring(plotId.Value)
+	local pets = CollectionService:GetTagged(plot_tag)
+	for _, model in ipairs(pets) do 
+		model:Destroy()
+	end
 	plot:SetAttribute("CachedAt", nil)
 end
 
-function FenceBoundsService:_GetPlotByUserId(Id: string): BasePart?
+function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
 	for _, plot in pairs(plots) do
-		if plot:FindFirstChild("OwnerUserId").value == Id then
+		if tostring(plot:FindFirstChild("OwnerUserId").Value) == tostring(Id) then
 			return plot
 		end
 	end

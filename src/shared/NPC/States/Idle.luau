@@ -41,6 +41,10 @@ function Idle:OnInit(data)
 	local registry = _G.pets_registry
 	local petEntry = registry[petId]
 
+	if petId == "fd4ed60c-94a9-4965-8776-3dcd094a89c7" then 
+		print()
+	end
+
 	if not petEntry or not petEntry.petStats then
 		warn("Pet registry entry missing for:", petId)
 		return

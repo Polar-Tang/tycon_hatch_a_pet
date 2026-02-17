@@ -9,6 +9,10 @@ local PetData = require(ServerScriptService.types.PetData)
 return function(player: Player, playerPets: PetData.InitData)
 	local plot = FenceBoundsService:GetAvailablePlot()
 
+	if not plot then 
+		player:Kick("This server is full (6/6).")
+	end
+
 	FenceBoundsService:AssignPlot(plot, player)
 
 	for petId, petInfo in pairs(playerPets) do
@@ -17,9 +21,10 @@ return function(player: Player, playerPets: PetData.InitData)
 		assert(pet.PrimaryPart, "model " .. pet.Name .. " has no primary part")
 		pet:SetAttribute("petName", pet.Name)
 
-		local playerRegistry = Instance.new("ObjectValue", pet)
-		playerRegistry.Value = player
+		local playerRegistry = Instance.new("StringValue", pet)
+		playerRegistry.Value = tostring(player.UserId)
 		playerRegistry.Name = "Owner"
+		
 
 		pet.Name = petId
 		pet.PrimaryPart.Position = FenceBoundsService:GetRandPosition(plot)

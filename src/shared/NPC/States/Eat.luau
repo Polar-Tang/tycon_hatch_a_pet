@@ -13,6 +13,7 @@ Eat.Transitions = {
 }
 
 function Eat:OnEnter(data)
+	
 	data.MovementController:Stop()
 	data.eatingStartTime = data.timer
 	data.EatController:LevelUp()

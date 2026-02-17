@@ -41,6 +41,8 @@ function StateMachineBinder:Destroy()
 	print("State machine cleaned")
 	-- TODO: test this
 	self.maid:DoCleaning()
-	self.state:Destroy()
+	if self.state then 
+		self.state:Destroy()
+	end
 end
 return StateMachineBinder

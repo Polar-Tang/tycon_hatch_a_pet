@@ -34,17 +34,20 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3?
 	-- local zOffset = math.sin(angle) * distance
 	-- local randPosition = Vector3.new(origin.X + xOffset, origin.Y, origin.Z + zOffset)
 
-	local owner: Player = self._character:FindFirstChild("Owner").Value
+	local owner: string = self._character:FindFirstChild("Owner").Value
 
 	-- owner may be not initialized yet
 	if not owner then
 		return
 	end
+
+	
 	-- if not owner then
 	-- 	print("Player has left ", owner)
 	-- 	return
 	-- end
-	local plot = assert(CollectionService:GetTagged("plot_" .. owner.UserId)[1], "player not initialized")
+
+	local plot = assert(CollectionService:GetTagged("plot_" .. owner)[1], "player not initialized")
 
 	local boundedPos = FenceBoundsService:GetRandPosition(plot)
 

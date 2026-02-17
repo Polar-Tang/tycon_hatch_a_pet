@@ -5,6 +5,7 @@ export type FenceBoundsService = {
 	_resetPlot: (self: FenceBoundsService, plot: Model) -> (),
 	ClampToBounds: (self: FenceBoundsService, plot: BasePart, position: Vector3) -> Vector3,
 	GetRandPosition: (self: FenceBoundsService, plot: Model) -> Vector3,
+	GetPlotByUserId: (Id: string) -> BasePart?
 }
 
 return {}

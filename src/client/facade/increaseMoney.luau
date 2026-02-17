@@ -22,6 +22,10 @@ RunService.Heartbeat:Connect(function(dt: number)
 		end
 
 		for _, petInstance in ipairs(pets) do
+			if not _G["pets_registry"] then
+				continue
+			end
+			print("_G['pets_registry'] ", _G["pets_registry"])
 			local petData = _G["pets_registry"][petInstance.Name]
 			if not petData then
 				continue
