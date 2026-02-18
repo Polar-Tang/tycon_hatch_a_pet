@@ -10,6 +10,7 @@ export type PetData = {
 		Melee: number,
 		Stamina: number,
 	},
+	petId: string,
 }
 
 export type InitData = { [string]: PetData }

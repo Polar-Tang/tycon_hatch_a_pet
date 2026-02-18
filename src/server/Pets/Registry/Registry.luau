@@ -26,7 +26,7 @@ function BestiaryList:listController(petId: string, controller)
 	self.pets[petId] = controller
 end
 
-function BestiaryList:listNewPet(petId: string, data)
+function BestiaryList:listNewPet(petId: string, data: PetData.PetData)
 	self.pets[petId] = data
 	return self.pets
 end
