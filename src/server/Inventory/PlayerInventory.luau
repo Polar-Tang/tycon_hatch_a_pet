@@ -52,6 +52,7 @@ end
 
 function PlayerInventory:DecreaseMoney(amount): IntValue
 	self.gold = self.gold - amount
+	print("#self.gold ", self.gold)
 	if self.gold < 0 then
 		warn("The player's money is negative")
 		return

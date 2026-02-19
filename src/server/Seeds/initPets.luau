@@ -93,13 +93,13 @@ return function(player): PetData.InitData
 	}
 
 	local petShit = {}
-	for i = 1, 3 do -- i, petId in ipairs(idArr) do
-		local rand = math.random(1, 5)
-		local petId = idArr[rand]
-		local petData = init_data[petId]
-		-- newPets = bestiaryHandler:listNewPet(petName, petData)
-		petData.petStats = utils.GenerateRandStats(5)
-		petShit[petId] = petData
-	end
+	-- for i = 1, 3 do
+	local rand = math.random(1, 5)
+	local petId = idArr[rand]
+	local petData = init_data[foxId] --init_data[petId]
+	-- newPets = bestiaryHandler:listNewPet(petName, petData)
+	petData.petStats = utils.GenerateRandStats(5)
+	petShit[petId] = petData
+	-- end
 	return petShit
 end

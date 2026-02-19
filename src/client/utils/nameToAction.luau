@@ -5,6 +5,8 @@ local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local gearShop = require(StarterPlayer.StarterPlayerScripts.facade.gearShop)
 
+local ItemsEvent = ReplicatedStorage.RemoteEvents.ItemsEvent
+
 export type nameToAction = {
 	image: string,
 	greetings: (selfParent: Model) -> (),
@@ -40,7 +42,9 @@ module["Kibly Shop Keeper"] = {
 	end,
 	promptTrigger = function()
 		gearShop.open()
-		gearShop.createItem(ItemData["SpeedCoil"])
+		gearShop.createItem(ItemData["SpeedCoil"], function()
+			ItemsEvent:FireServer(ItemData["SpeedCoil"])
+		end)
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(kibly)
@@ -73,7 +77,9 @@ module["Egg Shop Keeper"] = {
 
 	promptTrigger = function()
 		gearShop.open()
-		-- gearShop.createItem(ItemData["SpeedCoil"])
+		gearShop.createItem(ItemData["White_Egg"], function()
+			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
+		end)
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(egg)

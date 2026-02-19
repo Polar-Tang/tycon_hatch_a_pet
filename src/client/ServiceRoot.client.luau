@@ -85,7 +85,7 @@ PetNew.OnClientEvent:Connect(function(data)
 		-- TODO [Collectionable Pets task]: pets should be tagged and placed in a slot here, with data from the server
 		_G["pets_registry"] = data.allPets
 	elseif data.newPet then
-		table.insert(_G["pets_registry"], data.newPet)
+		_G["pets_registry"][data.newPet.petId] = data.newPet
 	else
 		warn("Unkown attribute")
 	end
@@ -113,7 +113,7 @@ do
 						binder:Destroy()
 					end
 					local anim_binder = AnimBinder:Get(model)
-					if anim_binder then 
+					if anim_binder then
 						anim_binder:Destroy()
 					end
 				end

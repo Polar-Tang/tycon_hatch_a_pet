@@ -81,20 +81,17 @@ local getStats = function(parent, maid, isOwnerLocal)
 	petData.speed = current_pet_stats.speed
 	petData.root = root
 	petData.isOwnerLocal = isOwnerLocal
+	petData.YOffset = current_pet_stats.YOffset
 	-- global
 
 	return petData
 end
 
 return function(parent, serviceBag: any, player, maid)
-	
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 
 	local player_owner = parent:WaitForChild("Owner").Value
 	local isOwnerLocal = tostring(player_owner) == tostring(player.UserId)
-
-	print("player_owner ", player_owner)
-	print("player.UserId ", player.UserId)
 
 	local petData = getStats(parent, maid, isOwnerLocal)
 	setCollider(parent)

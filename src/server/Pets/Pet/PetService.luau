@@ -12,7 +12,7 @@ local PetData = require(ServerScriptService.types.PetData)
 local PetService = {}
 PetService.__index = PetService
 
-function PetService.fromDataToWorld(Owner: Player, petInfo: PetData.PetData)
+function PetService.fromDataToWorld(Owner: Player, petInfo: PetData.PetData, position: Vector3?)
 	local userId = tostring(Owner.UserId)
 	local pet: Model = ServerStorage.Pets[petInfo.petName]:Clone()
 	assert(pet.PrimaryPart, "model " .. pet.Name .. " has no primary part")
@@ -25,7 +25,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetData.PetData)
 	local plot = PlotService.GetPlotByUserId(userId)
 
 	pet.Name = petInfo.petId
-	pet.PrimaryPart.Position = PlotService:GetRandPosition(plot)
+	pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	pet.Parent = workspace
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
@@ -35,7 +35,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetData.PetData)
 	utils.ScaleToLvl(pet, petInfo.petLvl)
 end
 
-function PetService.createPet(Owner: Player, petName)
+function PetService.createPet(Owner: Player, petName, position: Vector3?)
 	assert(petName and typeof(petName) == "string")
 
 	local bestiaryHandler = Registry:GetHandler(Owner)
@@ -45,7 +45,11 @@ function PetService.createPet(Owner: Player, petName)
 	newPet.petId = petId
 
 	bestiaryHandler:listNewPet(petId, newPet)
-	PetService.fromDataToWorld(Owner, newPet)
+	PetService.fromDataToWorld(Owner, newPet, position)
+
+	local dataToReplica = {}
+	dataToReplica.newPet = table.clone(newPet)
+	ReplicatedStorage.RemoteEvents.PetNew:FireClient(Owner, dataToReplica)
 end
 
 return PetService

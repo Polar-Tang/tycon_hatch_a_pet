@@ -15,6 +15,7 @@ module["Fox"] = {
 	["patrol_duration"] = 500,
 	["base"] = 2,
 	["adorneeOffset"] = Vector3.new(0, 4, 0),
+	YOffset = 0.5,
 }
 
 module["Panda"] = {
@@ -27,6 +28,7 @@ module["Panda"] = {
 	["speed"] = 1.25,
 	["base"] = 4, -- money generation
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.925,
 }
 
 module["Elephant"] = {
@@ -38,7 +40,7 @@ module["Elephant"] = {
 	["patrol_interval"] = 8,
 	["patrol_duration"] = 500,
 	["base"] = 8,
-	["adorneeOffset"] = Vector3.new(0, 16, 0),
+	["adorneeOffset"] = Vector3.new(0, 9, 0),
 }
 
 module["Hippo"] = {
@@ -63,6 +65,7 @@ module["Rhino"] = {
 	["patrol_duration"] = 500,
 	["base"] = 6,
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
+	YOffset = 0.994,
 }
 --
 return module

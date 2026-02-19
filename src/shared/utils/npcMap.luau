@@ -1,6 +1,7 @@
 -- nameToAction but in the server
 
 local HttpService = game:GetService("HttpService")
+local npcUtils = require(script.Parent.npcUtils)
 
 local function InitNpc(model: Model, animId: string, npcId: string)
 	local animator: Animator = model:WaitForChild("Humanoid"):WaitForChild("Animator")
@@ -10,18 +11,9 @@ local function InitNpc(model: Model, animId: string, npcId: string)
 	local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
 	anim_track:Play()
 
-	local prompt = Instance.new("ProximityPrompt")
-	-- prompt.Style = Enum.ProximityPromptStyle.Default
-	prompt.ActionText = "Shop"
-	prompt.Name = "Shop"
-	prompt.ObjectText = npcId
-	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.HoldDuration = 0
-	prompt.Style = Enum.ProximityPromptStyle.Custom
-	prompt.RequiresLineOfSight = false
-	prompt.MaxActivationDistance = 24
-	prompt.ClickablePrompt = true
-	prompt.Parent = model
+	-- TODO: copy the roblox.create proximity prompt that is very very similar to the default one
+
+	npcUtils.createProximityPrompt(model, npcId)
 end
 
 local npcMap = {}

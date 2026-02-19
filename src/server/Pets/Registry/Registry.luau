@@ -108,7 +108,8 @@ end
 
 function BestiaryList:increaseXP(petId: string, newPetProg)
 	local pet = table.clone(self.pets[petId])
-	local petModel = workspace:FindFirstChild(petId)
+	print("petId ", petId)
+	local petModel = workspace:WaitForChild(petId)
 	if pet.petLvl >= 150 then
 		warn("max level reached")
 		petModel:SetAttribute("Level", pet.petLvl)

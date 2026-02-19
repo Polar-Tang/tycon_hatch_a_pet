@@ -114,7 +114,7 @@ function FenceBoundsService:ClampToBounds(plot, position)
 	return bouncedPosition
 end
 
-function FenceBoundsService:GetRandPosition(plot): Vector3
+function FenceBoundsService:GetRandPosition(plot, YOffset): Vector3
 	local fenceCF = plot.CFrame
 	local fenceSize = plot.Size
 
@@ -127,7 +127,7 @@ function FenceBoundsService:GetRandPosition(plot): Vector3
 	local x = math.random(minX, maxX)
 	local z = math.random(minZ, maxZ)
 
-	return Vector3.new(x, fenceCF.Position.Y, z)
+	return Vector3.new(x, YOffset and YOffset + fenceCF.Position.Y or fenceCF.Position.Y, z)
 end
 
 return FenceBoundsService :: FenceBounds.FenceBoundsService

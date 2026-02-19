@@ -1,19 +1,13 @@
 --!strict
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local ServerStorage = game:GetService("ServerStorage")
+local npcMap = require(ReplicatedStorage.utils.npcMap)
+local npcUtils = require(ReplicatedStorage.utils.npcUtils)
+local EggTypes = require(script.Parent.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 
-local EggsFolder = ServerStorage:WaitForChild("Eggs")
-
-export type EggColor = "red" | "green" | "blue" | "white"
-
-export type EggData = {
-	color: EggColor,
-	time: number,
-	model: Model?,
-	player: Player,
-	plot: BasePart,
-}
+local EggsFolder = ReplicatedStorage.Items.Templates.Eggs
+type EggColor = EggTypes.EggColor
 
 local Egg = {}
 Egg.__index = Egg
@@ -27,7 +21,7 @@ local PetPools: { [EggColor]: { string } } = {
 function Egg.new(player: Player, plot: BasePart, color: EggColor, hatchTime: number)
 	assert(PetPools[color], "Invalid egg color")
 
-	local self = setmetatable({} :: EggData, Egg)
+	local self = setmetatable({} :: EggTypes.EggData, Egg)
 	self.color = color
 	self.time = hatchTime
 	self.player = player
@@ -54,10 +48,16 @@ function Egg:Spawn(position: Vector3)
 		self:CloneModel()
 	end
 
+	self.position = position
+
+	-- Do no why the egg is placed weird
+	local YFixed = Vector3.new(position.X, position.Y + 1.225, position.Z)
 	assert(self.model)
 
-	self.model:PivotTo(CFrame.new(position))
+	self.model:PivotTo(CFrame.new(YFixed))
 	self.model.Parent = workspace
+	local index = math.random(100, 999)
+	npcUtils.createProximityPrompt(self.model, "Egg_" .. index)
 end
 
 -- start hatching timer
@@ -76,8 +76,7 @@ function Egg:Hatch()
 
 	local index = math.random(1, #petCategories)
 	local petName = petCategories[index]
-	PetService.createPet(self.player, petName)
-
+	PetService.createPet(self.player, petName, self.position)
 	-- destroy egg model
 	if self.model then
 		self.model:Destroy()

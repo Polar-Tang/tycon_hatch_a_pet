@@ -1,4 +1,4 @@
 {
-  "className": "BuyEggRemote",
-  "Name": "ItemsEvent"
+  "className": "RemoteEvent",
+  "Name": "BuyEggRemote"
 }
