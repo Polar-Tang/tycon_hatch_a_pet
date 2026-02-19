@@ -1,7 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local npcMap = require(ReplicatedStorage.utils.npcMap)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local EggTypes = require(script.Parent.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
@@ -51,13 +50,15 @@ function Egg:Spawn(position: Vector3)
 	self.position = position
 
 	-- Do no why the egg is placed weird
-	local YFixed = Vector3.new(position.X, position.Y + 1.225, position.Z)
+	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
 	assert(self.model)
 
 	self.model:PivotTo(CFrame.new(YFixed))
 	self.model.Parent = workspace
-	local index = math.random(100, 999)
-	npcUtils.createProximityPrompt(self.model, "Egg_" .. index)
+	npcUtils.createBillboard(self.model, {
+		componentName = "ProgresBar",
+		npc = self.model,
+	})
 end
 
 -- start hatching timer

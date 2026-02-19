@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local StateMachine = require(ReplicatedStorage.StateMachine)
@@ -10,9 +9,7 @@ StateMachineBinder.__index = StateMachineBinder
 
 function StateMachineBinder.new(char: Model, serviceBag)
 	local self = setmetatable({}, StateMachineBinder)
-	self.id = HttpService:GenerateGUID()
 
-	char:AddTag(self.id)
 	self.char = char
 	self.state = nil
 	self._initialized = false
@@ -41,7 +38,7 @@ function StateMachineBinder:Destroy()
 	print("State machine cleaned")
 	-- TODO: test this
 	self.maid:DoCleaning()
-	if self.state then 
+	if self.state then
 		self.state:Destroy()
 	end
 end

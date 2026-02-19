@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local repStore = game:getService("ReplicatedStorage")
 
+local DefaultProximityPrompt =
+	require(StarterPlayer.StarterPlayerScripts.RoactApp.Components.CustomProx.DefaultProximityPrompt)
 local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Roact = require(repStore.Roact)
@@ -13,7 +15,7 @@ local PromptProvider = Roact.Component:extend("PromptProvider")
 local PromptController = require(script.Parent.PromptController)
 
 local Events = repStore.RemoteEvents
-local NPCs = Events.NPCs
+local ProximityPrompt = Events.ProximityPrompt
 
 function PromptProvider:init()
 	self.distanceCheckConnections = {}
@@ -55,29 +57,38 @@ function PromptProvider:DisconnectPrompt(prompty)
 end
 
 function PromptProvider:didMount()
-	local promptCon = game:GetService("ProximityPromptService").PromptShown:Connect(function(prompty: ProximityPrompt)
-		local promptParent = prompty.Parent
-		print("prompty ", promptParent)
-		if promptParent then
-			NPCs:FireServer({ prompt = prompty, Parent = promptParent, ObjectText = prompty.ObjectText })
-		end
-	end)
+	local promptCon = game:GetService("ProximityPromptService").PromptShown
+		:Connect(function(prompty: ProximityPrompt, inputType)
+			local promptParent = prompty.Parent
+			print("prompty ", promptParent)
+			if promptParent then
+				ProximityPrompt:FireServer({
+					prompt = prompty,
+					Parent = promptParent,
+					id = prompty.Name,
+					inputType = inputType,
+				})
+			end
+		end)
 
 	-- Here we can blindly trust
-	local promptCreator = NPCs.OnClientEvent:Connect(function(data)
+	local promptCreator = ProximityPrompt.OnClientEvent:Connect(function(data)
 		local npc = data.npc
 		local id = data.id
 		local prompty = data.prompt
 
-		if nameToAction[npc.Name] then
-			nameToAction[npc.Name].greetings(npc)
+		local npcInterface = nameToAction[npc.Name]
+
+		if npcInterface.default then
+			npcInterface.greetings(npc)
+			DefaultProximityPrompt(prompty, data.inputType, npcInterface)
+			return
 		end
 
 		if self.__prompts[id] then
 			return
 		end
 
-		-- the prompt controller check player distance and if it is too far, disconnects the prompt controller
 		local PromptController = PromptController.new(prompty, function(p)
 			self:DisconnectPrompt(p)
 		end)
@@ -85,13 +96,12 @@ function PromptProvider:didMount()
 		if npc:HasTag("NPC") then
 			PromptController = PromptController.new(prompty, function(p)
 				self:DisconnectPrompt(p)
-				NPCs:FireServer(prompty, true)
+				ProximityPrompt:FireServer(prompty, true)
 			end)
 		end
 
 		self.__prompts[id] = PromptController
 		PromptController:StartCheckDistance()
-		-- then it set the prompt instance which is rendering in the client
 		local clone = table.clone(self.state.prompts)
 		clone[id] = prompty
 

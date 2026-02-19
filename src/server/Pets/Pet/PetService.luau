@@ -43,6 +43,7 @@ function PetService.createPet(Owner: Player, petName, position: Vector3?)
 	assert(newPet, "Pet '" .. petName .. "' is not registered")
 	local petId = HttpService:GenerateGUID(false)
 	newPet.petId = petId
+	newPet.petStats = utils.GenerateRandStats(5)
 
 	bestiaryHandler:listNewPet(petId, newPet)
 	PetService.fromDataToWorld(Owner, newPet, position)

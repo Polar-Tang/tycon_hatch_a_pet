@@ -1,20 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local ItemData = require(ReplicatedStorage.Items.ItemData)
+local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local gearShop = require(StarterPlayer.StarterPlayerScripts.facade.gearShop)
 
 local ItemsEvent = ReplicatedStorage.RemoteEvents.ItemsEvent
-
-export type nameToAction = {
-	image: string,
-	greetings: (selfParent: Model) -> (),
-	imageSize: UDim2,
-	promptTrigger: () -> (),
-	updatePrompt: () -> (),
-	finishPrompt: () -> (),
-}
 
 local module = {}
 
@@ -53,6 +45,10 @@ module["Kibly Shop Keeper"] = {
 		kibly_primaryPart.CFrame = kibly_original_CF
 	end,
 	imageSize = UDim2.fromOffset(128, 86),
+	default = true,
+	checkIsOpen = function()
+		return gearShop.isOpen()
+	end,
 }
 
 local egg = workspace:WaitForChild("ShopKeepers"):WaitForChild("Egg Shop Keeper")
@@ -88,6 +84,10 @@ module["Egg Shop Keeper"] = {
 		egg_primaryPart.CFrame = egg_original_CF
 	end,
 	imageSize = UDim2.fromOffset(128, 86),
+	default = true,
+	checkIsOpen = function()
+		return gearShop.isOpen()
+	end,
 }
 
-return module :: { [string]: nameToAction }
+return module :: { [string]: npcTypes.nameToAction }

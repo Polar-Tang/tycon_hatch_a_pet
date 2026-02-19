@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local npcMap = require(ReplicatedStorage.utils.npcMap)
 local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 
@@ -14,10 +15,11 @@ end
 
 initAllNpcs()
 -- Server
-Events.NPCs.OnServerEvent:Connect(function(player, promptInfo)
+Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
 	local npcModel = promptInfo.Parent
-	local id = promptInfo.ObjectText
+	local id = promptInfo.id
 	local prompt = promptInfo.prompt
+
 	-- EZ anti exploits checks
 	do
 		local theNpcInfo: npcTypes.npcMap = npcMap[npcModel.Name]
@@ -52,12 +54,36 @@ Events.NPCs.OnServerEvent:Connect(function(player, promptInfo)
 		-- end
 	end
 
-	Events.NPCs:FireClient(player, {
+	Events.ProximityPrompt:FireClient(player, {
 		npc = npcModel,
 		id = id,
 		prompt = prompt,
+		inputType = promptInfo.inputType,
 	})
 	return true
+end)
+
+local rs = game:GetService("ReplicatedStorage")
+local ItemType = require(ServerScriptService.Player.Inventory.ItemType)
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+local ItemData = require(ReplicatedStorage.Items.ItemData)
+
+local Items = rs.RemoteEvents.ItemsEvent
+
+Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
+	local playerInventory = PlayerInventory:GetHandler(player)
+	local itemData = ItemData[data.itemName]
+	print("data ", data)
+	print("itemData ", itemData)
+	if not itemData then
+		print("Item ", data.itemName, " not found")
+		return
+	end
+	local ItemsTemplate = rs.Items:FindFirstChild(data.itemName):Clone()
+
+	playerInventory:DecreaseMoney(itemData.price)
+
+	ItemsTemplate.Parent = player.Backpack
 end)
 
 return npcMediator

@@ -11,9 +11,11 @@ local function InitNpc(model: Model, animId: string, npcId: string)
 	local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
 	anim_track:Play()
 
-	-- TODO: copy the roblox.create proximity prompt that is very very similar to the default one
-
-	npcUtils.createProximityPrompt(model, npcId)
+	npcUtils.createProximityPrompt(model, {
+		npcId = npcId,
+		Name = "Shop",
+		ActionText = "Shop",
+	})
 end
 
 local npcMap = {}

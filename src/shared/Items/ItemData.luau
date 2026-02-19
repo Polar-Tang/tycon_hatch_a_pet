@@ -7,7 +7,7 @@ itemData["SpeedCoil"] = {
 	image = assets["egg_icon"],
 	title = "Speed Coil",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-	price = 10,
+	price = 0,
 	itemName = "SpeedCoil",
 	template = game.ReplicatedStorage:WaitForChild("Items"):WaitForChild("Templates"):WaitForChild("SpeedCoil"),
 	createPivot = function()
@@ -33,7 +33,7 @@ itemData["White_Egg"] = {
 		:WaitForChild("Templates")
 		:WaitForChild("Eggs")
 		:WaitForChild("white"),
-	price = 10,
+	price = 0,
 	createPivot = function(modelCFrame)
 		return CFrame.new(1, 1, 0)
 	end,

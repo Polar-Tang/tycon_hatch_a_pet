@@ -13,6 +13,7 @@ local screen = PlayerGui:WaitForChild("ScreenGui")
 local gearShop = {}
 
 local global_maid = Maid.new()
+local itemNum = 0
 
 function gearShop.open()
 	screen.GearShop.Visible = true
@@ -27,6 +28,7 @@ function gearShop.open()
 end
 
 function gearShop.close()
+	itemNum = 0
 	screen.GearShop.Visible = false
 	global_maid:DoCleaning()
 end
@@ -63,26 +65,37 @@ function gearShop.createViewport(parentSLot, data: itemTypes.itemData)
 end
 
 function gearShop.createItem(data: itemTypes.itemData, cb: () -> ())
+	itemNum += 1
 	local local_maid = Maid.new()
-
 	local new_slot = screen.GearShop.Slots.Scroller.Slot:Clone()
+	new_slot.Name = "Slot" .. itemNum
 	new_slot.Details.GearDescription.Text = data.description
 
 	new_slot.Details.GearName.Text = data.title
 
-	new_slot.BuyButton.Price.Text = MoneyLib.HandleMoney(data.price)
 	-- new_slot.PlaceHolder.Image = data.image
 	gearShop.createViewport(new_slot, data)
 	new_slot.Visible = true
 	new_slot.Parent = screen.GearShop.Slots.Scroller
-	local buy_button: ImageButton = new_slot.BuyButton
+	local buy_button = new_slot.BuyButton
 	local con = buy_button.Activated:Connect(function(a0: InputObject, a1: number)
 		cb()
 	end)
 
+	if data.price == 0 then
+		new_slot.BuyButton.Price.Text = "Get Free"
+		buy_button.Txt.Text = "Free"
+	else
+		new_slot.BuyButton.Price.Text = MoneyLib.HandleMoney(data.price)
+	end
+
 	local_maid:GiveTask(new_slot)
 	local_maid:GiveTask(con)
 	global_maid:GiveTask(local_maid)
+end
+
+function gearShop.isOpen()
+	return screen.GearShop.Visible
 end
 
 return gearShop
