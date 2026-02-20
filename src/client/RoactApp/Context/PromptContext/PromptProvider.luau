@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local repStore = game:getService("ReplicatedStorage")
@@ -59,8 +60,8 @@ end
 function PromptProvider:didMount()
 	local promptCon = game:GetService("ProximityPromptService").PromptShown
 		:Connect(function(prompty: ProximityPrompt, inputType)
+			print("IS THIS TRIGGERING BEFORE THE SERVER SETUP?")
 			local promptParent = prompty.Parent
-			print("prompty ", promptParent)
 			if promptParent then
 				ProximityPrompt:FireServer({
 					prompt = prompty,
@@ -73,9 +74,16 @@ function PromptProvider:didMount()
 
 	-- Here we can blindly trust
 	local promptCreator = ProximityPrompt.OnClientEvent:Connect(function(data)
-		local npc = data.npc
+		local npc: Model = data.npc
 		local id = data.id
-		local prompty = data.prompt
+		local prompty: ProximityPrompt = data.prompt
+
+		if
+			(Players.LocalPlayer.Character.PrimaryPart.Position - data.npc.PrimaryPart.Position).Magnitude
+			> prompty.MaxActivationDistance
+		then
+			return
+		end
 
 		local npcInterface = nameToAction[npc.Name]
 

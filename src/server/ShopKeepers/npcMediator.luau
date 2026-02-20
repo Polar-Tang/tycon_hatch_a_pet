@@ -14,11 +14,33 @@ function initAllNpcs()
 end
 
 initAllNpcs()
+
+export type promptyInfo = {
+	npc: Model,
+	id: string,
+	prompt: ProximityPrompt,
+	inputType: EnumItem,
+}
+
+local sendProximityPrompt = function(player, promptInfo: promptyInfo)
+	local npcModel = promptInfo.npc
+	local id = promptInfo.id
+	local prompt = promptInfo.prompt
+
+	Events.ProximityPrompt:FireClient(player, {
+		npc = npcModel,
+		id = id,
+		prompt = prompt,
+		inputType = promptInfo.inputType,
+	})
+end
+
 -- Server
 Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
 	local npcModel = promptInfo.Parent
 	local id = promptInfo.id
 	local prompt = promptInfo.prompt
+	local inputType = promptInfo.inputType
 
 	-- EZ anti exploits checks
 	do
@@ -54,13 +76,33 @@ Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
 		-- end
 	end
 
-	Events.ProximityPrompt:FireClient(player, {
-		npc = npcModel,
+	local prompt_contract: promptyInfo = {
 		id = id,
+		npc = npcModel,
 		prompt = prompt,
-		inputType = promptInfo.inputType,
-	})
+		inputType = inputType,
+	}
+	sendProximityPrompt(player, prompt_contract)
 	return true
+end)
+
+function sendDataToFrontend(npcData: npcMap.NpcEntry, inputType: EnumItem, player: Player)
+	local poxyPrompt = npcData.get_prompty()
+	assert(poxyPrompt, "Server npcs were not initialized")
+
+	local prompt_contract: promptyInfo = {
+		id = npcData.id,
+		npc = npcData.model,
+		prompt = poxyPrompt,
+		inputType = inputType,
+	}
+	sendProximityPrompt(player, prompt_contract)
+end
+
+game.ReplicatedStorage.RemoteEvents.RemoteSync.OnServerEvent:Connect(function(player: Player, info)
+	local inputType = info.inputType
+	sendDataToFrontend(npcMap["Kibly Shop Keeper"], inputType, player)
+	sendDataToFrontend(npcMap["Egg Shop Keeper"], inputType, player)
 end)
 
 local rs = game:GetService("ReplicatedStorage")

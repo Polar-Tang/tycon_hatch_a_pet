@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 --||Nevermore Shit||--
 ----------------------------- getting servicebag and loader -----------------------------
 
@@ -89,6 +90,7 @@ PetNew.OnClientEvent:Connect(function(data)
 	else
 		warn("Unkown attribute")
 	end
+	print("_G['pets_registry'] ", _G["pets_registry"])
 end)
 
 -- REPLICATE THE PETS TO OTHER PLAYERS
@@ -128,3 +130,17 @@ do
 end
 
 local _ = require(script.Parent.RoactApp)
+
+local function getInputType(): EnumItem
+	local lastInput = UserInputService:GetLastInputType()
+
+	if lastInput == Enum.UserInputType.Touch then
+		return Enum.ProximityPromptInputType.Touch
+	elseif lastInput.Name:find("Gamepad") then
+		return Enum.ProximityPromptInputType.Gamepad
+	else
+		return Enum.ProximityPromptInputType.Keyboard
+	end
+end
+
+game.ReplicatedStorage.RemoteEvents.RemoteSync:FireServer({ loaded = "all", inputType = getInputType() })

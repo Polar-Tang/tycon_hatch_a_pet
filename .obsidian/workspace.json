@@ -37,12 +37,14 @@
             "id": "5fddfb17feaf36c4",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "CloseButton.png"
+                "file": "update (finnish last task).md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "CloseButton"
+              "icon": "lucide-file",
+              "title": "update (finnish last task)"
             }
           },
           {
@@ -224,6 +226,7 @@
   },
   "active": "5fddfb17feaf36c4",
   "lastOpenFiles": [
+    "CloseButton.png",
     "Compehend the phisics engine.md",
     "hastch system scheme.md",
     "m1 start final phase.md",

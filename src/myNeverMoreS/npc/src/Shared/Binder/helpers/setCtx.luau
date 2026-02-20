@@ -7,7 +7,6 @@ local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
 local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
-local LevelController = require(ReplicatedStorage.NPC.Controllers.LevelController.LevelController)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
 local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -131,7 +130,6 @@ return function(parent, serviceBag: any, player, maid)
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
 		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
-		LevelController = isOwnerLocal and LevelController.new(petData) or nil,
 		EatController = EatController.new(petData, serviceBag, player),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),

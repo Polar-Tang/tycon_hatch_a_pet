@@ -1,6 +1,7 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local EggTypes = require(script.Parent.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
@@ -59,6 +60,7 @@ function Egg:Spawn(position: Vector3)
 		componentName = "ProgresBar",
 		npc = self.model,
 	})
+	print("sent create billboard")
 end
 
 -- start hatching timer
@@ -77,7 +79,14 @@ function Egg:Hatch()
 
 	local index = math.random(1, #petCategories)
 	local petName = petCategories[index]
-	PetService.createPet(self.player, petName, self.position)
+	local petData = petData[petName]
+	if not petData then
+		print("wtf?")
+		return
+	end
+	local position = PetService.fixPetYFromPLayer(self.player, petName)
+	local newPos = Vector3.new(self.position.X, position.Y, self.position.Z)
+	PetService.createPet(self.player, petName, newPos)
 	-- destroy egg model
 	if self.model then
 		self.model:Destroy()

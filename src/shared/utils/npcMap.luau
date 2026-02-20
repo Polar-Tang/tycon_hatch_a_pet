@@ -10,6 +10,7 @@ local function InitNpc(model: Model, animId: string, npcId: string)
 	cheerAnimation.AnimationId = animId
 	local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
 	anim_track:Play()
+	print("IS THIS set up BEFORE THE triggering frontend?")
 
 	npcUtils.createProximityPrompt(model, {
 		npcId = npcId,
@@ -25,6 +26,14 @@ local kibly_id = HttpService:GenerateGUID(false)
 
 local kibly_shop_keeper = workspace:FindFirstChild("ShopKeepers"):FindFirstChild(kibly_name)
 
+export type NpcEntry = {
+	id: string,
+	name: string,
+	model: Model,
+	init: () -> (),
+	get_prompty: () -> ProximityPrompt?,
+}
+
 npcMap[kibly_name] = {
 	id = kibly_id,
 	name = kibly_name,
@@ -32,6 +41,9 @@ npcMap[kibly_name] = {
 	model = kibly_shop_keeper,
 	init = function()
 		InitNpc(kibly_shop_keeper, "http://www.roblox.com/asset/?id=507766666", kibly_id)
+	end,
+	get_prompty = function()
+		return kibly_shop_keeper:FindFirstChild(kibly_id)
 	end,
 }
 
@@ -48,6 +60,9 @@ npcMap[egg_name] = {
 	init = function()
 		InitNpc(Egg_shop_keeper, "http://www.roblox.com/asset/?id=507766388", Egg_id)
 	end,
+	get_prompty = function()
+		return Egg_shop_keeper:FindFirstChild(Egg_id)
+	end,
 }
 
-return npcMap
+return npcMap :: { [string]: NpcEntry }

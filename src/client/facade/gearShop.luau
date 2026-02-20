@@ -15,9 +15,20 @@ local gearShop = {}
 local global_maid = Maid.new()
 local itemNum = 0
 
-function gearShop.open()
+function gearShop.changeTitle(name: string)
+	screen.GearShop.Header.Txt.Text = name
+end
+
+function gearShop.isDifferentShop(name: string)
+	return screen.GearShop.Header.Txt.Text == name
+end
+
+function gearShop.open(name: string?)
 	screen.GearShop.Visible = true
 
+	if name then
+		gearShop.changeTitle(name)
+	end
 	do
 		local close_button: ImageButton = screen.GearShop.Header.CloseButton
 		local closeSignal = close_button.Activated:Connect(function(a0: InputObject, a1: number)

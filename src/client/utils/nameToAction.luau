@@ -16,6 +16,7 @@ local kibly_original_CF = kibly_primaryPart.CFrame
 
 module["Kibly Shop Keeper"] = {
 	image = assets["store_icon"],
+	name = "Gear Shop",
 	greetings = function(selfParent: Model)
 		npcUtils.lookAtPlayer(selfParent)
 
@@ -33,6 +34,11 @@ module["Kibly Shop Keeper"] = {
 		end)
 	end,
 	promptTrigger = function()
+		if not gearShop.isDifferentShop("Gear Shop") then
+			gearShop.close()
+		elseif gearShop.isOpen() then
+			return
+		end
 		gearShop.open()
 		gearShop.createItem(ItemData["SpeedCoil"], function()
 			ItemsEvent:FireServer(ItemData["SpeedCoil"])
@@ -58,6 +64,7 @@ local egg_original_CF = egg_primaryPart.CFrame
 
 module["Egg Shop Keeper"] = {
 	image = assets["egg_icon"],
+	name = "Egg Shop",
 	greetings = function(selfParent: Model)
 		npcUtils.lookAtPlayer(selfParent)
 
@@ -72,7 +79,12 @@ module["Egg Shop Keeper"] = {
 	originalCF = workspace:FindFirstChild("ShopKeepers"):FindFirstChild("Egg Shop Keeper").PrimaryPart.CFrame,
 
 	promptTrigger = function()
-		gearShop.open()
+		if not gearShop.isDifferentShop("Egg Shop") then
+			gearShop.close()
+		elseif gearShop.isOpen() then
+			return
+		end
+		gearShop.open("Egg Shop")
 		gearShop.createItem(ItemData["White_Egg"], function()
 			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
 		end)

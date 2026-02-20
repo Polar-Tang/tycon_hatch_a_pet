@@ -28,6 +28,7 @@ end
 
 function BestiaryList:listNewPet(petId: string, data: PetData.PetData)
 	self.pets[petId] = data
+	--print(self.pets, "self.pets ")
 	return self.pets
 end
 
@@ -50,8 +51,8 @@ function BestiaryList:registerHealth(petId: string, newH, maxH)
 		self:died(petId, false)
 		pet.health = 0
 	end
-	--print("pet ", pet)
-	--print("petInfo ", pet)
+	----print("pet ", pet)
+	----print("petInfo ", pet)
 	self.pets[petId] = pet
 end
 
@@ -59,7 +60,7 @@ function BestiaryList:removeBuffH(petId: string)
 	local pet = self.pets[petId]
 	pet.maxHealth = nil
 	self.pets[petId] = pet
-	--print("self.pets ",self.pets)
+	----print("self.pets ",self.pets)
 end
 
 function BestiaryList:spendPoint(petId: string, abillityName: string): PetData.InitData | nil
@@ -94,7 +95,7 @@ function BestiaryList:_ensureValidEat(petId: string): boolean
 		return true
 	end
 	local puddingTime = tick() - pet.lastEat
-	print("last eat - now ", puddingTime)
+	--print("last eat - now ", puddingTime)
 	local petInformation = petData[pet.petName]
 	-- substract by 1 just in case
 	local isValidEat = puddingTime > (petInformation.eat_interval + petInformation.eat_duration - 1)
@@ -108,25 +109,28 @@ end
 
 function BestiaryList:increaseXP(petId: string, newPetProg)
 	local pet = table.clone(self.pets[petId])
-	print("petId ", petId)
 	local petModel = workspace:WaitForChild(petId)
+	--print(petModel)
 	if pet.petLvl >= 150 then
 		warn("max level reached")
 		petModel:SetAttribute("Level", pet.petLvl)
 		return
 	end
 	if not self:_ensureValidEat(petId) then
-		print("invalid interval")
+		--print("invalid interval")
 		return
 	end
 
 	pet.petProg += newPetProg
-
+	--print("pet ", pet)
 	while pet.petProg >= 100 do
 		self:_levelUpPet(pet)
 	end
+	--print("pet ", pet)
 
 	self.pets[petId] = pet
+
+	--print("self.pets[petId] ", self.pets[petId])
 	petModel:SetAttribute("Level", pet.petLvl)
 	return pet
 end
@@ -148,7 +152,7 @@ function BestiaryList:listBuff(petId: string, item)
 	local clone = table.clone(pet)
 	clone.buffs = shallowCopy(pet.buffs) or {}
 	clone.buffs[item.itemId] = item
-	--print("data.item ", item)
+	----print("data.item ", item)
 	self.pets[petId] = clone
 	return self.pets
 end

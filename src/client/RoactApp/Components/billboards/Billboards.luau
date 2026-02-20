@@ -11,22 +11,19 @@ function CustomProximityPrompts:render()
 
 	return withCtx(function(ctx)
 		local billboardCtx = ctx.BillboardContext
-		print("billboardCtx ", billboardCtx)
-		local customProxComponents = {}
-
+		local billboards = {}
 		for id, billboard: billboardTypes.billboardShit in ipairs(billboardCtx.billboards) do
 			local component = require(script.Parent:FindFirstChild(billboard.componentName))
-
 			if not component then
 				print(billboard.componentName, "Not found")
 				return
 			else
-				return Roact.createElement(component, {
+				billboards[id] = Roact.createElement(component, {
 					model = billboard.model,
 				})
 			end
 		end
-		return Roact.createFragment(customProxComponents)
+		return Roact.createFragment(billboards)
 	end)
 end
 

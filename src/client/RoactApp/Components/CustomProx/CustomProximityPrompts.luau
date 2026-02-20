@@ -12,7 +12,6 @@ function CustomProximityPrompts:render()
 	return withCtx(function(ctx)
 		local prompCTX = ctx.PromptContext
 		local customProxComponents = {}
-
 		for id, prompt in pairs(prompCTX.prompts) do
 			customProxComponents[id] = Roact.createElement(CustomProximityPrompt, {
 				prompt = prompt,

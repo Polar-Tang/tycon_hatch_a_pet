@@ -8,15 +8,19 @@ utils.ScaleToLvl = function(npc: Model, LVL: number)
 end
 
 utils.MoneyCalc = function(stamina)
-	return (stamina ^ 1.8) * 2
+	local staminaGT1 = stamina
+	if stamina == 0 then
+		staminaGT1 = 1
+	end
+	return (staminaGT1 ^ 1.8) * 2
 end
 
 utils.HealthCalc = function(health)
-	return 50 + (50 * health) 
+	return 50 + (50 * health)
 end
 
 utils.MeleeCalc = function(melee)
-	return 100 + (10 * melee) 
+	return 100 + (10 * melee)
 end
 
 utils.setUpStats = function(model, stats)
@@ -27,20 +31,19 @@ utils.setUpStats = function(model, stats)
 	model:SetAttribute("Melee", utils.MeleeCalc(melee))
 	model:SetAttribute("Health", utils.HealthCalc(health))
 	model:SetAttribute("Stamina", stamina)
-
 end
 
 utils.GenerateRandStats = function(LVL)
 	local statsMap = {
 		0,
 		0,
-		0
-	}	
-	
-	while LVL > 0  do
+		0,
+	}
+
+	while LVL > 0 do
 		LVL -= 1
 		local rand = math.random(1, 3)
-		statsMap[rand]+= 1
+		statsMap[rand] += 1
 	end
 	return {
 		["Health"] = statsMap[1],

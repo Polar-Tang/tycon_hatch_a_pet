@@ -126,7 +126,6 @@ function FenceBoundsService:GetRandPosition(plot, YOffset): Vector3
 
 	local x = math.random(minX, maxX)
 	local z = math.random(minZ, maxZ)
-
 	return Vector3.new(x, YOffset and YOffset + fenceCF.Position.Y or fenceCF.Position.Y, z)
 end
 

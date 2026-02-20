@@ -5,7 +5,7 @@ local Roact = require(ReplicatedStorage.Roact)
 
 local ultiBar = Roact.Component:extend("ultiBar")
 
-local PERCENTAGE = 120
+local PERCENTAGE = 60
 
 function ultiBar:init()
 	self.initialized = false
@@ -31,10 +31,17 @@ function ultiBar:didMount()
 			end
 		end
 	end)
+	local parent: Model = self.props.model
+	self._ancestryConnection = parent.AncestryChanged:Connect(function(a0: Instance, a1: Instance?)
+		if not a0.Parent then
+			self:unMount()
+		end
+	end)
 end
 
 function ultiBar:unMount()
 	self._increaseConnection:Disconnect()
+	self._ancestryConnection:Disconnect()
 end
 
 function ultiBar:render()
@@ -56,18 +63,6 @@ function ultiBar:render()
 			BackgroundColor3 = Color3.fromRGB(38, 38, 38),
 			BackgroundTransparency = 0.6,
 		}, {
-
-			InfoText = self.state.percentage >= PERCENTAGE and Roact.createElement("TextLabel", {
-				Font = Enum.Font.FredokaOne,
-				Text = "(Press G)",
-				BackgroundTransparency = 1,
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextScaled = true,
-				TextStrokeTransparency = 1,
-				Size = UDim2.fromScale(1, 1),
-				Position = UDim2.fromScale(0.5, -1),
-				AnchorPoint = Vector2.new(0.5, 1),
-			}) or nil,
 
 			UICorner = Roact.createElement("UICorner", {
 				CornerRadius = UDim.new(0, 8),
