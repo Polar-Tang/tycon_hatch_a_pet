@@ -7,6 +7,7 @@ local DefaultProximityPrompt =
 	require(StarterPlayer.StarterPlayerScripts.RoactApp.Components.CustomProx.DefaultProximityPrompt)
 local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 local Roact = require(repStore.Roact)
 
 local PromptContext = require(script.Parent.PromptContext)
@@ -85,7 +86,7 @@ function PromptProvider:didMount()
 			return
 		end
 
-		local npcInterface = nameToAction[npc.Name]
+		local npcInterface: npcTypes.nameToAction = nameToAction[npc.Name]
 
 		if npcInterface.default then
 			npcInterface.greetings(npc)

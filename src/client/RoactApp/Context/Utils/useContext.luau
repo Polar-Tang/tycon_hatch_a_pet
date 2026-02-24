@@ -9,7 +9,6 @@ return function(contextMap)
 		table.insert(contexts, ctx)
 	end
 
-	local values = {}
 	return function(renderFn)
 		local function wrap(i, collected)
 			local ctx = contexts[i]
