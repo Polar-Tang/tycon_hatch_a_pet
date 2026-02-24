@@ -48,6 +48,32 @@
             }
           },
           {
+            "id": "81c9d48824e9d46d",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.11.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.11.7"
+            }
+          },
+          {
+            "id": "b3d6d67d851c579b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Calculating the torque.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Calculating the torque"
+            }
+          },
+          {
             "id": "7c37d2eb6d4b5461",
             "type": "leaf",
             "state": {
@@ -62,7 +88,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -225,8 +251,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "5fddfb17feaf36c4",
+  "active": "b3d6d67d851c579b",
   "lastOpenFiles": [
+    "yellow_button.png",
+    "noFilter.3",
+    "noFilter.2",
+    "noFilter.1",
+    "closeBackground",
+    "noFilter",
+    "Calculating the torque.md",
     "m1 start final phase.md",
     "notes.md",
     "Stats.rbxm",
@@ -234,11 +267,6 @@
     "src/server/Player/Currency/CurrencyController.luau",
     "src/server/Player/Currency",
     "src/server/Seeds/initPets.luau",
-    "src/server/Seeds",
-    "src/shared/RemoteEvents/PetNew.model.json",
-    "src/server/initPets.luau",
-    "src/shared/NPC/Controllers/EatController/EatController.luau",
-    "src/shared/NPC/Controllers/EatController/CurrencyController.luau",
     "Untitled.md",
     "petlvl_task2.md"
   ]
