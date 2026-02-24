@@ -39,12 +39,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "m1 start final phase.md",
+                "file": "update (finnish last task).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "m1 start final phase"
+              "title": "update (finnish last task)"
             }
           },
           {
@@ -145,8 +145,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "9de7879ce2a59b39",
@@ -253,6 +252,7 @@
   },
   "active": "b3d6d67d851c579b",
   "lastOpenFiles": [
+<<<<<<< HEAD
     "yellow_button.png",
     "noFilter.3",
     "noFilter.2",
@@ -260,14 +260,36 @@
     "closeBackground",
     "noFilter",
     "Calculating the torque.md",
+=======
+    "CloseButton.png",
+    "Compehend the phisics engine.md",
+    "hastch system scheme.md",
+>>>>>>> 6c3eb06f6d3a04020436e13a45149fa51b2f6e92
     "m1 start final phase.md",
+    "mAXIMUN CALL STACK EXCEED.md",
     "notes.md",
+    "Pasted image 20260128150520.png",
+    "Pasted image 20260128150537.png",
+    "petlvl_task2.md",
+    "README.md",
+    "todo.md",
+    "Untitled.md",
+    "update (finnish last task).md",
+    "wtf StarterPlayerScript.md",
     "Stats.rbxm",
     "src/shared/RemoteEvents/PetStat.model.json",
     "src/server/Player/Currency/CurrencyController.luau",
     "src/server/Player/Currency",
     "src/server/Seeds/initPets.luau",
+<<<<<<< HEAD
     "Untitled.md",
     "petlvl_task2.md"
+=======
+    "src/server/Seeds",
+    "src/shared/RemoteEvents/PetNew.model.json",
+    "src/server/initPets.luau",
+    "src/shared/NPC/Controllers/EatController/EatController.luau",
+    "src/shared/NPC/Controllers/EatController/CurrencyController.luau"
+>>>>>>> 6c3eb06f6d3a04020436e13a45149fa51b2f6e92
   ]
 }

@@ -2,7 +2,7 @@ local CollectionService = game:GetService("CollectionService")
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packages = RS.Nevermore.Quenty
-local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.FenceBoundsService)
+local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
 -- TEST IF this doesn't break
 
@@ -21,6 +21,7 @@ function TargetingController.new(data, serviceBag: any)
 
 	self._currentPlayer = nil
 	self._humanoidTracker = nil
+	self.YOffset = data.YOffset
 
 	return self
 end
@@ -41,7 +42,6 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3?
 		return
 	end
 
-	
 	-- if not owner then
 	-- 	print("Player has left ", owner)
 	-- 	return
@@ -49,7 +49,7 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3?
 
 	local plot = assert(CollectionService:GetTagged("plot_" .. owner)[1], "player not initialized")
 
-	local boundedPos = FenceBoundsService:GetRandPosition(plot)
+	local boundedPos = FenceBoundsService:GetRandPosition(plot, self.YOffset)
 
 	if (boundedPos - origin).Magnitude < 2 then
 		local fenceCF = plot.CFrame

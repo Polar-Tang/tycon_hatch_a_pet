@@ -7,7 +7,6 @@ local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
 local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
-local LevelController = require(ReplicatedStorage.NPC.Controllers.LevelController.LevelController)
 local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
 local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -81,20 +80,17 @@ local getStats = function(parent, maid, isOwnerLocal)
 	petData.speed = current_pet_stats.speed
 	petData.root = root
 	petData.isOwnerLocal = isOwnerLocal
+	petData.YOffset = current_pet_stats.YOffset
 	-- global
 
 	return petData
 end
 
 return function(parent, serviceBag: any, player, maid)
-	
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 
 	local player_owner = parent:WaitForChild("Owner").Value
 	local isOwnerLocal = tostring(player_owner) == tostring(player.UserId)
-
-	print("player_owner ", player_owner)
-	print("player.UserId ", player.UserId)
 
 	local petData = getStats(parent, maid, isOwnerLocal)
 	setCollider(parent)
@@ -134,7 +130,6 @@ return function(parent, serviceBag: any, player, maid)
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
 		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
-		LevelController = isOwnerLocal and LevelController.new(petData) or nil,
 		EatController = EatController.new(petData, serviceBag, player),
 		MovementController = MovementController.new(petData, serviceBag),
 		TargetingController = TargetingController.new(petData, serviceBag),

@@ -1,5 +1,5 @@
 local CollectionService = game:GetService("CollectionService")
--- FenceBoundsService.lua
+-- PlotService.lua
 local FenceBoundsService = {}
 FenceBoundsService.__index = FenceBoundsService
 
@@ -10,40 +10,52 @@ local plotCount = 0
 
 -- Utility
 local function isFree(plot)
-
-	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId").Value == ""
+	return not plot:FindFirstChild("IsOnline").Value
 end
 
 local function isCached(plot)
-	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId").Value
+	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId") ~= nil
 end
 
 -- MAIN ENTRY POINT
 function FenceBoundsService:GetAvailablePlot()
 	-- 1️⃣ Prefer free plots
-	local oldestPlot
 	for _, plot in ipairs(plots) do
 		if isFree(plot) then
 			return plot
-		elseif isCached(plot) then
-			oldestPlot = plot
 		end
 	end
 
-	return oldestPlot
+	-- 2️⃣ Evict oldest cached plot
+	local oldestPlot
+	local oldestTime = math.huge
+
+	for _, plot in ipairs(plots) do
+		if isCached(plot) then
+			local cachedAt = plot:GetAttribute("CachedAt")
+			if cachedAt and cachedAt < oldestTime then
+				oldestTime = cachedAt
+				oldestPlot = plot
+			end
+		end
+	end
+
+	if oldestPlot then
+		self:_resetPlot(oldestPlot)
+		return oldestPlot
+	end
+
+	return nil
 end
 
 function FenceBoundsService:AssignPlot(plot, player)
-	if isCached(plot) then 
-		self:_resetPlot(plot)
-	end
-
 	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
 	userId.Value = player.UserId
 
 	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
 	isOn.Value = true
 
+	plot:SetAttribute("CachedAt", nil)
 	CollectionService:AddTag(plot, "plot_" .. player.UserId)
 
 	local plotId = plot:FindFirstChild("PlotId")
@@ -61,19 +73,18 @@ function FenceBoundsService:MarkOffline(plot)
 end
 
 function FenceBoundsService:_resetPlot(plot)
-	
-	local plotId: StringValue = plot:FindFirstChild("PlotId")
-	local plot_tag = "plot_"..tostring(plotId.Value)
-	local pets = CollectionService:GetTagged(plot_tag)
-	for _, model in ipairs(pets) do 
-		model:Destroy()
-	end
+	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
+	userId.Value = ""
+
+	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
+	isOn.Value = false
+
 	plot:SetAttribute("CachedAt", nil)
 end
 
 function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
 	for _, plot in pairs(plots) do
-		if tostring(plot:FindFirstChild("OwnerUserId").Value) == tostring(Id) then
+		if plot:FindFirstChild("OwnerUserId").value == Id then
 			return plot
 		end
 	end
@@ -103,7 +114,7 @@ function FenceBoundsService:ClampToBounds(plot, position)
 	return bouncedPosition
 end
 
-function FenceBoundsService:GetRandPosition(plot): Vector3
+function FenceBoundsService:GetRandPosition(plot, YOffset): Vector3
 	local fenceCF = plot.CFrame
 	local fenceSize = plot.Size
 
@@ -115,8 +126,7 @@ function FenceBoundsService:GetRandPosition(plot): Vector3
 
 	local x = math.random(minX, maxX)
 	local z = math.random(minZ, maxZ)
-
-	return Vector3.new(x, fenceCF.Position.Y, z)
+	return Vector3.new(x, YOffset and YOffset + fenceCF.Position.Y or fenceCF.Position.Y, z)
 end
 
 return FenceBoundsService :: FenceBounds.FenceBoundsService

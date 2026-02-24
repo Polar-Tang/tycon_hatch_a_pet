@@ -5,7 +5,7 @@ local src = script
 local MainAppUI = require(src.MainApp)
 local ctx = src.Context
 local PromptProvider = require(ctx.PromptContext.PromptProvider)
-
+local BillboardProvider = require(ctx.BillboardContext.BilldoardProvider)
 --local StarterGui: StarterGui = game:GetService("StarterGui")
 
 --StarterGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeRight
@@ -19,7 +19,9 @@ function App:render()
 	}, {
 
 		PromptProvider = Roact.createElement(PromptProvider, {}, {
-			AppUI = Roact.createElement(MainAppUI),
+			BillboardProvider = Roact.createElement(BillboardProvider, {}, {
+				AppUI = Roact.createElement(MainAppUI),
+			}),
 		}),
 	})
 end

@@ -3,10 +3,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalculator)
-local Items = require(ServerScriptService.Player.Inventory.Items)
+-- local Items = require(ServerScriptService.Player.Inventory.Items)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local InitPlot = require(ServerScriptService.Seeds.InitPlot)
-local initPets = require(ServerScriptService.Seeds.initPets)
+-- local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
 
 local function onDescendantAdded(descendant)
@@ -19,14 +19,15 @@ end
 
 function module.PlayerAdded(player, playerData)
 	----print("playerData ", playerData)
+
 	if not playerData then
-		local petsInitialized = initPets(player)
+		-- local petsInitialized = initPets(player)
 		playerData = {
 			inventory = {},
 			cash = 0,
-			pets = petsInitialized,
+			-- pets = petsInitialized,
+			pets = {},
 		}
-		print("INIT WITH NEW DATA")
 	end
 
 	local character = player.Character or player.CharacterAdded:Wait()
@@ -36,8 +37,8 @@ function module.PlayerAdded(player, playerData)
 
 	local totalMoney = playerData.cash or 0
 
-	InitPlot(player, playerData.pets)
 	print(playerData.pets, "playerData.pets has petId or petName as key?")
+	InitPlot(player, playerData.pets)
 	Registry:InitPlayer(player, playerData.pets)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
@@ -76,8 +77,10 @@ function module.PlayerRemoving(player)
 	local newData = {}
 	local newMoney = MoneyCalculator.collectPendingMoney(player)
 	local allTheCash = playerInventory.cash + newMoney
-	print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
+	-- print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
+	print("PETS ", bestiaryHandler.pets)
+
 	newData.pets = bestiaryHandler.pets
 
 	newData.lastConnection = os.time()

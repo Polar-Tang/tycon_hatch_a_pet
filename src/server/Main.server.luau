@@ -28,7 +28,7 @@ do
 	_G.ServiceBag = serviceBag
 end
 
-local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.FenceBoundsService)
+local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -70,7 +70,7 @@ Players.PlayerRemoving:Connect(function(player)
 		warn("====================================")
 	end
 	local plot = FenceBoundsService.GetPlotByUserId(player.UserId)
-		FenceBoundsService:MarkOffline(plot)
+	FenceBoundsService:MarkOffline(plot)
 	-- TODO : 	In Game Settings → Basic Settings: Set Max Players = 8
 	if #Players:GetPlayers() > MAX_PLAYERS then
 		player:Kick("This server is full (6/6).")
@@ -195,3 +195,5 @@ PetStat.OnServerEvent:Connect(function(player, data)
 		PetClicked:FireClient(player, petData)
 	end
 end)
+
+local _ = require(script.Parent.Pets.petMediator)

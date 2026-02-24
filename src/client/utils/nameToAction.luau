@@ -1,18 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local ItemData = require(ReplicatedStorage.Items.ItemData)
+local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local gearShop = require(StarterPlayer.StarterPlayerScripts.facade.gearShop)
 
-export type nameToAction = {
-	image: string,
-	greetings: (selfParent: Model) -> (),
-	imageSize: UDim2,
-	promptTrigger: () -> (),
-	updatePrompt: () -> (),
-	finishPrompt: () -> (),
-}
+local ItemsEvent = ReplicatedStorage.RemoteEvents.ItemsEvent
 
 local module = {}
 
@@ -22,6 +16,7 @@ local kibly_original_CF = kibly_primaryPart.CFrame
 
 module["Kibly Shop Keeper"] = {
 	image = assets["store_icon"],
+	name = "Gear Shop",
 	greetings = function(selfParent: Model)
 		npcUtils.lookAtPlayer(selfParent)
 
@@ -39,8 +34,15 @@ module["Kibly Shop Keeper"] = {
 		end)
 	end,
 	promptTrigger = function()
+		if not gearShop.isDifferentShop("Gear Shop") then
+			gearShop.close()
+		elseif gearShop.isOpen() then
+			return
+		end
 		gearShop.open()
-		gearShop.createItem(ItemData["SpeedCoil"])
+		gearShop.createItem(ItemData["SpeedCoil"], function()
+			ItemsEvent:FireServer(ItemData["SpeedCoil"])
+		end)
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(kibly)
@@ -49,6 +51,10 @@ module["Kibly Shop Keeper"] = {
 		kibly_primaryPart.CFrame = kibly_original_CF
 	end,
 	imageSize = UDim2.fromOffset(128, 86),
+	default = true,
+	checkIsOpen = function()
+		return gearShop.isOpen()
+	end,
 }
 
 local egg = workspace:WaitForChild("ShopKeepers"):WaitForChild("Egg Shop Keeper")
@@ -58,6 +64,7 @@ local egg_original_CF = egg_primaryPart.CFrame
 
 module["Egg Shop Keeper"] = {
 	image = assets["egg_icon"],
+	name = "Egg Shop",
 	greetings = function(selfParent: Model)
 		npcUtils.lookAtPlayer(selfParent)
 
@@ -72,8 +79,15 @@ module["Egg Shop Keeper"] = {
 	originalCF = workspace:FindFirstChild("ShopKeepers"):FindFirstChild("Egg Shop Keeper").PrimaryPart.CFrame,
 
 	promptTrigger = function()
-		gearShop.open()
-		-- gearShop.createItem(ItemData["SpeedCoil"])
+		if not gearShop.isDifferentShop("Egg Shop") then
+			gearShop.close()
+		elseif gearShop.isOpen() then
+			return
+		end
+		gearShop.open("Egg Shop")
+		gearShop.createItem(ItemData["White_Egg"], function()
+			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
+		end)
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(egg)
@@ -82,6 +96,10 @@ module["Egg Shop Keeper"] = {
 		egg_primaryPart.CFrame = egg_original_CF
 	end,
 	imageSize = UDim2.fromOffset(128, 86),
+	default = true,
+	checkIsOpen = function()
+		return gearShop.isOpen()
+	end,
 }
 
-return module :: { [string]: nameToAction }
+return module :: { [string]: npcTypes.nameToAction }

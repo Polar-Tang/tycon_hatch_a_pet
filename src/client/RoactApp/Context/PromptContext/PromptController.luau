@@ -14,7 +14,7 @@ PromptController.__index = PromptController
 function PromptController.new(prompt: ProximityPrompt, disconnectPrompt)
 	local self = setmetatable({}, PromptController)
 	self.prompt = prompt
-	self.promptId = prompt.ObjectText
+	self.promptId = prompt.Name
 	self.hiddePrompt = disconnectPrompt
 
 	self._maid = Maid.new()

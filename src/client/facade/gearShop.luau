@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+local itemTypes = require(script.Parent.itemTypes)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
@@ -12,10 +13,22 @@ local screen = PlayerGui:WaitForChild("ScreenGui")
 local gearShop = {}
 
 local global_maid = Maid.new()
+local itemNum = 0
 
-function gearShop.open()
+function gearShop.changeTitle(name: string)
+	screen.GearShop.Header.Txt.Text = name
+end
+
+function gearShop.isDifferentShop(name: string)
+	return screen.GearShop.Header.Txt.Text == name
+end
+
+function gearShop.open(name: string?)
 	screen.GearShop.Visible = true
 
+	if name then
+		gearShop.changeTitle(name)
+	end
 	do
 		local close_button: ImageButton = screen.GearShop.Header.CloseButton
 		local closeSignal = close_button.Activated:Connect(function(a0: InputObject, a1: number)
@@ -26,19 +39,12 @@ function gearShop.open()
 end
 
 function gearShop.close()
+	itemNum = 0
 	screen.GearShop.Visible = false
 	global_maid:DoCleaning()
 end
 
-export type itemData = {
-	title: string,
-	image: string,
-	description: string,
-	price: number,
-	itemName: string,
-}
-
-function gearShop.createViewport(parentSLot, itemName: string)
+function gearShop.createViewport(parentSLot, data: itemTypes.itemData)
 	-- local parentSLot = screen.GearShop.Slots.Scroller.Slot
 
 	local Viewport = Instance.new("ViewportFrame", parentSLot)
@@ -50,48 +56,57 @@ function gearShop.createViewport(parentSLot, itemName: string)
 	local Camera = Instance.new("Camera", Viewport)
 	Camera.CFrame = CFrame.new(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
 	Viewport.CurrentCamera = Camera
-
+	local item = data.template
 	-- model to copy
-	local speedCoil = game.ReplicatedStorage:WaitForChild("Items"):WaitForChild("SpeedCoil")
-	local speedCoilClone: Model = speedCoil:Clone()
 
-	speedCoilClone.Parent = Viewport
+	local itemClone: Model = item:Clone()
 
-	local _, modelSize = speedCoilClone:GetBoundingBox()
-	local modelCFrame = CFrame.new(1, 1, 0)
-	speedCoilClone:PivotTo(modelCFrame * CFrame.Angles(0, math.rad(315), 0))
+	itemClone.Parent = Viewport
 
-	local distance = math.max(modelSize.X, modelSize.Y, modelSize.Z) * 0.8
+	local modelCFrame, modelSize = itemClone:GetBoundingBox()
+	itemClone:PivotTo(data.createPivot(modelCFrame, modelSize))
 
-	Camera.CFrame = modelCFrame
-		* CFrame.new(0, 0, -distance)
-		* CFrame.Angles(math.rad(180), math.rad(350), math.rad(180))
+	if data.cameraRotation then
+		Camera.CFrame = data.cameraRotation(modelCFrame, modelSize)
+	end
+
 	Camera.FieldOfView = 70
 
 	parentSLot.PlaceHolder:Destroy()
 end
 
-local Items = ReplicatedStorage.RemoteEvents.ItemsEvent
-
-function gearShop.createItem(data: itemData)
+function gearShop.createItem(data: itemTypes.itemData, cb: () -> ())
+	itemNum += 1
 	local local_maid = Maid.new()
-
 	local new_slot = screen.GearShop.Slots.Scroller.Slot:Clone()
+	new_slot.Name = "Slot" .. itemNum
 	new_slot.Details.GearDescription.Text = data.description
 
 	new_slot.Details.GearName.Text = data.title
 
-	new_slot.BuyButton.Price.Text = MoneyLib.HandleMoney(data.price)
 	-- new_slot.PlaceHolder.Image = data.image
-	gearShop.createViewport(new_slot, data.itemName)
+	gearShop.createViewport(new_slot, data)
 	new_slot.Visible = true
 	new_slot.Parent = screen.GearShop.Slots.Scroller
-	local buy_button: ImageButton = new_slot.BuyButton
+	local buy_button = new_slot.BuyButton
 	local con = buy_button.Activated:Connect(function(a0: InputObject, a1: number)
-		Items:FireServer(data)
+		cb()
 	end)
+
+	if data.price == 0 then
+		new_slot.BuyButton.Price.Text = "Get Free"
+		buy_button.Txt.Text = "Free"
+	else
+		new_slot.BuyButton.Price.Text = MoneyLib.HandleMoney(data.price)
+	end
+
+	local_maid:GiveTask(new_slot)
 	local_maid:GiveTask(con)
 	global_maid:GiveTask(local_maid)
+end
+
+function gearShop.isOpen()
+	return screen.GearShop.Visible
 end
 
 return gearShop

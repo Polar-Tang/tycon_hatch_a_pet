@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local npcMap = require(ReplicatedStorage.utils.npcMap)
 local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 
@@ -13,11 +14,34 @@ function initAllNpcs()
 end
 
 initAllNpcs()
--- Server
-Events.NPCs.OnServerEvent:Connect(function(player, promptInfo)
-	local npcModel = promptInfo.Parent
-	local id = promptInfo.ObjectText
+
+export type promptyInfo = {
+	npc: Model,
+	id: string,
+	prompt: ProximityPrompt,
+	inputType: EnumItem,
+}
+
+local sendProximityPrompt = function(player, promptInfo: promptyInfo)
+	local npcModel = promptInfo.npc
+	local id = promptInfo.id
 	local prompt = promptInfo.prompt
+
+	Events.ProximityPrompt:FireClient(player, {
+		npc = npcModel,
+		id = id,
+		prompt = prompt,
+		inputType = promptInfo.inputType,
+	})
+end
+
+-- Server
+Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
+	local npcModel = promptInfo.Parent
+	local id = promptInfo.id
+	local prompt = promptInfo.prompt
+	local inputType = promptInfo.inputType
+
 	-- EZ anti exploits checks
 	do
 		local theNpcInfo: npcTypes.npcMap = npcMap[npcModel.Name]
@@ -52,12 +76,56 @@ Events.NPCs.OnServerEvent:Connect(function(player, promptInfo)
 		-- end
 	end
 
-	Events.NPCs:FireClient(player, {
-		npc = npcModel,
+	local prompt_contract: promptyInfo = {
 		id = id,
+		npc = npcModel,
 		prompt = prompt,
-	})
+		inputType = inputType,
+	}
+	sendProximityPrompt(player, prompt_contract)
 	return true
+end)
+
+function sendDataToFrontend(npcData: npcMap.NpcEntry, inputType: EnumItem, player: Player)
+	local poxyPrompt = npcData.get_prompty()
+	assert(poxyPrompt, "Server npcs were not initialized")
+
+	local prompt_contract: promptyInfo = {
+		id = npcData.id,
+		npc = npcData.model,
+		prompt = poxyPrompt,
+		inputType = inputType,
+	}
+	sendProximityPrompt(player, prompt_contract)
+end
+
+game.ReplicatedStorage.RemoteEvents.RemoteSync.OnServerEvent:Connect(function(player: Player, info)
+	local inputType = info.inputType
+	sendDataToFrontend(npcMap["Kibly Shop Keeper"], inputType, player)
+	sendDataToFrontend(npcMap["Egg Shop Keeper"], inputType, player)
+end)
+
+local rs = game:GetService("ReplicatedStorage")
+local ItemType = require(ServerScriptService.Player.Inventory.ItemType)
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+local ItemData = require(ReplicatedStorage.Items.ItemData)
+
+local Items = rs.RemoteEvents.ItemsEvent
+
+Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
+	local playerInventory = PlayerInventory:GetHandler(player)
+	local itemData = ItemData[data.itemName]
+	print("data ", data)
+	print("itemData ", itemData)
+	if not itemData then
+		print("Item ", data.itemName, " not found")
+		return
+	end
+	local ItemsTemplate = rs.Items:FindFirstChild(data.itemName):Clone()
+
+	playerInventory:DecreaseMoney(itemData.price)
+
+	ItemsTemplate.Parent = player.Backpack
 end)
 
 return npcMediator
