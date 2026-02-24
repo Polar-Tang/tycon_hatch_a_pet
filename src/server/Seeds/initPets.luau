@@ -1,8 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local utils = require(ReplicatedStorage.utils.utils)
-local PetData = require(ServerScriptService.types.PetData)
+local PetData = require(ReplicatedStorage.Pets.PetTypes)
 
 local foxId = HttpService:GenerateGUID(false)
 local RhinoId = HttpService:GenerateGUID(false)
@@ -10,7 +9,7 @@ local ElephantId = HttpService:GenerateGUID(false)
 local PandaId = HttpService:GenerateGUID(false)
 local HippoId = HttpService:GenerateGUID(false)
 
-local init_data: PetData.InitData = {
+local init_data: PetData.PetsDataStore = {
 	[foxId] = {
 		petProg = 0,
 		isInvoked = true,
@@ -79,7 +78,7 @@ local init_data: PetData.InitData = {
 	},
 }
 
-return function(player): PetData.InitData
+return function(player): PetData.PetsDataStore
 	-- local bestiaryHandler = Registry:GetHandler(player)
 
 	-- local newPets

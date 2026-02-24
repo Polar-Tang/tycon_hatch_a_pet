@@ -3,7 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local petInformation = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local utils = require(ReplicatedStorage.utils.utils)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
-local PetData = require(ServerScriptService.types.PetData)
+local PetData = require(ReplicatedStorage.Pets.PetTypes)
 -- OfflineRewards.lua
 local OfflineRewards = {}
 OfflineRewards.__index = OfflineRewards

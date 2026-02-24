@@ -4,11 +4,11 @@ local BaseObject = require(packages.baseobject.Shared.BaseObject)
 -- TEST IF this doesn't break
 local PetLevel: RemoteEvent = RS.RemoteEvents.PetLevel
 
-local CurrencyController = setmetatable({}, BaseObject)
-CurrencyController.__index = CurrencyController
+local EatController = setmetatable({}, BaseObject)
+EatController.__index = EatController
 
-function CurrencyController.new(data, serviceBag: any, player)
-	local self = setmetatable(BaseObject.new() :: any, CurrencyController)
+function EatController.new(data, serviceBag: any, player)
+	local self = setmetatable(BaseObject.new() :: any, EatController)
 	local character = data.pet
 
 	self._character = character
@@ -28,7 +28,7 @@ function CurrencyController.new(data, serviceBag: any, player)
 	return self
 end
 
-function CurrencyController:getAnimHandler()
+function EatController:getAnimHandler()
 	local BinderProvider = self._serviceBag:GetService(_G.BinderProvider)
 
 	-- local WeaponBinder = BinderProvider:Get("Armed")
@@ -36,7 +36,7 @@ function CurrencyController:getAnimHandler()
 	self._AnimationHandler = AnimationBinder:Get(self._character)
 end
 
-function CurrencyController:LevelUp()
+function EatController:LevelUp()
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
@@ -55,11 +55,11 @@ function CurrencyController:LevelUp()
 	end
 end
 
-function CurrencyController:_levelUp()
+function EatController:_levelUp()
 	PetLevel:FireServer(self._character)
 end
 
-function CurrencyController:StopAnim()
+function EatController:StopAnim()
 	if not self._AnimationHandler then
 		return -- LevelUp haven't be called yet
 	end
@@ -67,4 +67,4 @@ function CurrencyController:StopAnim()
 	--print("create the floating number that are at capture pet")
 end
 
-return CurrencyController
+return EatController

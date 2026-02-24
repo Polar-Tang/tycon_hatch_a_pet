@@ -1,26 +1,57 @@
-local itemType = require(script.Parent.ItemType).Item
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local PlayerInventory = {}
 -- PlayerQuestHandler.lua
 PlayerInventory.__index = PlayerInventory
-type PlayerData = {
-	player: Player,
-	cash: number,
-	items: item,
+
+export type InventoryItem = {
+	itemId: string,
+	-- add other item fields here
+	[string]: any,
 }
 
-function PlayerInventory.new(data): PlayerData
-	local cash = data.cash
-	local inventory = data.inventory
+export type PlayerData = {
+	-- Core state
+	player: Player,
+	cash: number,
 
-	if not cash or not inventory then
+	lastRegisterTime: number,
+
+	-- Internal runtime state
+	_timer: number,
+	_last_timer: number,
+	_maid: any, -- Maid
+
+	-- ===== Methods =====
+
+	getRegisterTime: (self: PlayerData) -> number,
+	setRegisterTime: (self: PlayerData) -> (),
+
+	Init: (self: PlayerData, money_cb: (number) -> () -> number) -> (),
+	Destoy: (self: PlayerData) -> (),
+}
+
+export type PlayerInventoryInit = {
+	player: Player,
+	cash: number?,
+}
+
+function PlayerInventory.new(data: PlayerInventoryInit): PlayerData
+	local cash = data.cash
+
+	if not cash then
 		warn("Player inventory intiliaziated as zero")
 	end
 	local self = setmetatable({}, PlayerInventory)
 	self.cash = cash or 0
-	self.inventory = inventory or {}
+	self.player = data.player
+
 	self.lastRegisterTime = os.time()
 
+	self._maid = Maid.new()
 	return self
 end
 
@@ -32,58 +63,47 @@ function PlayerInventory:setRegisterTime()
 	self.lastRegisterTime = os.time()
 end
 
-function PlayerInventory:AddItem(newItem, key: string): PlayerData | nil
-	--print("New item ", newItem)
-	local index = key or newItem.itemId
-	if not newItem then
-		warn("No item to add to the player's inventory")
-		return
-	end
-	self.inventory[index] = newItem
-	return self
+function PlayerInventory:Init(money_cb: () -> number)
+	self._timer = 0
+	self._last_timer = 0
+	local money_con = RunService.Heartbeat:Connect(function(dt: number)
+		self._timer += dt
+
+		if self._timer - self._last_timer >= 1 then
+			self._last_timer = self._timer
+			self:setRegisterTime()
+			local moneyGenerated = money_cb()
+			self.cash += moneyGenerated
+			print("current money ", MoneyLib.HandleMoney(self.cash))
+		end
+	end)
+
+	self._maid:GiveTask(money_con)
 end
 
-function PlayerInventory:RemoveItem(ItemId: string): PlayerData | nil
-	if not ItemId then
-		warn("No item name")
-		return
-	end
-
-	local itemToEliminate = self.inventory[ItemId]
-	if not itemToEliminate then
-		warn("The item to eliminate was not found")
-		return
-	end
-	self.inventory[ItemId] = nil
-	return self
+function PlayerInventory:Destoy()
+	self._maid:DoCleaning()
 end
 
-function PlayerInventory:IncreaseMoney(amount): IntValue
-	-- print("self.cash ", self.cash)
+function PlayerInventory:IncreaseMoney(amount): number
 	self.cash = self.cash + amount
+	game.ReplicatedStorage.RemoteEvents.Amount:FireClient(self.player, {
+		amount = self.cash,
+	})
 	return self.cash
 end
 
 function PlayerInventory:DecreaseMoney(amount): IntValue?
-	self.cash = self.cash - amount
-	if self.cash < 0 then
+	local newMoney = self.cash - amount
+	if newMoney < 0 then
 		warn("The player's money is negative")
 		return
 	end
-	print("player cash ", self.cash)
+	self.cash = newMoney
+	game.ReplicatedStorage.RemoteEvents.Amount:FireClient(self.player, {
+		amount = self.cash,
+	})
 	return self.cash
-end
-function PlayerInventory:findItem(itemId)
-	print("self.inventory ", self.inventory)
-	return self.inventory[itemId]
-end
-
-function PlayerInventory:InvokePet(pet: Model)
-	self.invokedPet = pet
-end
-
-function PlayerInventory:SaveBackPack(backpack)
-	self.playerBackpack = backpack
 end
 
 local PlayerInventoryHandler = {}

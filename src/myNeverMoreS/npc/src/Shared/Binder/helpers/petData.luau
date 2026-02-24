@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local module = {}
 
 --[[
@@ -70,7 +73,7 @@ local common_stats = {
 	["base"] = 6,
 }
 
-local function merge<T, U>(a: T, b: U): T & U
+local function merge<T, U>(a: T, b: U)
 	local result = {}
 
 	for k, v in pairs(b) do
@@ -81,7 +84,7 @@ local function merge<T, U>(a: T, b: U): T & U
 		result[k] = v
 	end
 
-	return result :: T & U
+	return result :: PetTypes.petInitFrontend
 end
 
 module["Fox"] = merge({
@@ -123,7 +126,7 @@ module["Hippo"] = merge({
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
 }, common_stats)
 
-module["Rhino"] = merge({
+local rhino: PetTypes.petInitFrontend = merge({
 	-- ["eat_interval"] = 6,
 	-- ["eat_duration"] = 5,
 	-- ["range"] = 30,
@@ -135,5 +138,6 @@ module["Rhino"] = merge({
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
 	YOffset = 0.994,
 }, common_stats)
+module["Rhino"] = rhino
 --
 return module

@@ -1,3 +1,5 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 return {
 	["Fox"] = {
 		petProg = 0,
@@ -10,6 +12,7 @@ return {
 			["Melee"] = 1,
 			["Stamina"] = 1,
 		},
+		rarity = "common",
 	},
 
 	["Hippo"] = {
@@ -23,6 +26,7 @@ return {
 			["Melee"] = 1,
 			["Stamina"] = 1,
 		},
+		rarity = "common",
 	},
 	["Rhino"] = {
 		petProg = 0,
@@ -35,6 +39,7 @@ return {
 			["Melee"] = 1,
 			["Stamina"] = 1,
 		},
+		rarity = "common",
 	},
 	["Elephant"] = {
 		petProg = 0,
@@ -47,6 +52,7 @@ return {
 			["Melee"] = 1,
 			["Stamina"] = 1,
 		},
+		rarity = "common",
 	},
 	["Panda"] = {
 		petProg = 0,
@@ -59,5 +65,6 @@ return {
 			["Melee"] = 1,
 			["Stamina"] = 1,
 		},
+		rarity = "common",
 	},
-}
+} :: PetTypes.Petsinformation

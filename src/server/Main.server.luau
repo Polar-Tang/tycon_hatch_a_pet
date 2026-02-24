@@ -2,7 +2,6 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 do
 	--||Nevermore Shit||--
@@ -38,8 +37,6 @@ local _ = require(script.Parent.ShopKeepers.npcMediator)
 local ds = DataStoreService:GetDataStore(Env.DB_URI)
 
 local MAX_PLAYERS = 6
-
-local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 
 -- 🔥 CRITICAL: Server shutdown handler
 game:BindToClose(function()
@@ -91,17 +88,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 local Events = ReplicatedStorage.RemoteEvents
-local Amount: RemoteEvent = Events.Amount
--- TODO AND BUG: this is accepting any amount of cash, it needs some king of id for the pet and check if the pet can generate that amount of money
-Amount.OnServerEvent:Connect(function(player: Player, data)
-	local base = data.base
-	local player_inventory = PlayerInventory:GetHandler(player)
-	player_inventory:IncreaseMoney(base)
-	Amount:FireClient(player, {
-		amount = base,
-	})
-	------print("Main loaded")
-end)
+
 local PetClicked: RemoteEvent = Events.PetClicked
 
 -- Handle the remote event

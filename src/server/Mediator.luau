@@ -42,7 +42,9 @@ function module.PlayerAdded(player, playerData)
 	Registry:InitPlayer(player, playerData.pets)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
+		player = player,
 	})
+	local bestiaryList = Registry:GetHandler(player)
 	local inventory = PlayerInventory:GetHandler(player)
 
 	if playerData.lastConnection then
@@ -57,6 +59,10 @@ function module.PlayerAdded(player, playerData)
 		OfflineRewards.CalculateXP(player, offlineTime)
 	end
 
+	inventory:Init(function()
+		local pets = bestiaryList.pets
+		return MoneyCalculator.calculateEarnings(pets, 1)
+	end)
 	-- CurrencyController:InitPlayer(player)
 	-- local petsInitialized = initPets(player)
 
@@ -64,10 +70,7 @@ function module.PlayerAdded(player, playerData)
 	PetNew:FireClient(player, {
 		allPets = playerData.pets,
 	})
-	local Amount = ReplicatedStorage.RemoteEvents.Amount
-	Amount:FireClient(player, {
-		amount = inventory.cash,
-	})
+
 	character.DescendantAdded:Connect(onDescendantAdded)
 end
 
@@ -75,8 +78,8 @@ function module.PlayerRemoving(player)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local bestiaryHandler = Registry:GetHandler(player)
 	local newData = {}
-	local newMoney = MoneyCalculator.collectPendingMoney(player)
-	local allTheCash = playerInventory.cash + newMoney
+
+	local allTheCash = playerInventory.cash
 	-- print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
 	print("PETS ", bestiaryHandler.pets)
@@ -85,6 +88,7 @@ function module.PlayerRemoving(player)
 
 	newData.lastConnection = os.time()
 
+	playerInventory:Destoy()
 	print("========== SAVING DATA ==========")
 	print("Player:", player.Name)
 	print("Timestamp being saved:", newData.lastConnection)

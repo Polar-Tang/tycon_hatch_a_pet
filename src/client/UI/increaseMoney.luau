@@ -1,7 +1,10 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local bottomLeft = require(StarterPlayer.StarterPlayerScripts.facade.bottomLeft)
+local utils = require(ReplicatedStorage.utils.utils)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -29,18 +32,15 @@ RunService.Heartbeat:Connect(function(dt: number)
 			if not petData then
 				continue
 			end
-			if petData.petStats.Melee <= 0 then
-				Melee = 1
-			end
 			local Stamina = petData.petStats.Stamina
 			if petData.petStats.Stamina <= 0 then
 				Stamina = 1
 			end
 
-			local base = (Stamina ^ 1.8) * 2
+			local base = utils.MoneyCalc(Stamina)
 			total += base
 		end
-		screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(math.round(total))
+		bottomLeft.SetMoney(total)
 	end
 end)
 
@@ -51,5 +51,5 @@ return function(amount)
 		screenGui.BottomLeft.FriendBoost.Visible = true
 	end
 	total = amount
-	screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(amount)
+	bottomLeft.SetMoney(total)
 end

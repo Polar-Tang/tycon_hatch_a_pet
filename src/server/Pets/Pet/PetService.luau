@@ -6,13 +6,15 @@ local ServerStorage = game:GetService("ServerStorage")
 local PetInformation = require(script.Parent.PetInformation)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local PromiseUtils = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.PromiseUtils)
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local utils = require(ReplicatedStorage.utils.utils)
-local PetData = require(ServerScriptService.types.PetData)
+local t = require(ReplicatedStorage.Nevermore.QuentyStudio.t)
 
 local PetService = {}
 PetService.__index = PetService
 
-function PetService.fromDataToWorld(Owner: Player, petInfo: PetData.PetData, position: Vector3?)
+function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, position: Vector3?)
 	local userId = tostring(Owner.UserId)
 	local pet: Model = ServerStorage.Pets[petInfo.petName]:Clone()
 	assert(pet.PrimaryPart, "model " .. pet.Name .. " has no primary part")
@@ -57,8 +59,26 @@ function PetService.fixPetY(plot, petName): Vector3
 	return fixedPoint
 end
 
-function PetService.createPet(Owner: Player, petName, position: Vector3?)
-	assert(petName and typeof(petName) == "string")
+function PetService.createPet(Owner: Player, maybePetName: string, position: Vector3?)
+	local tPetName = function(name)
+		for _, petName in ipairs(PetTypes.allPetNames) do
+			print("petName ", petName)
+			if name ~= petName then
+				continue
+			else
+				return true
+			end
+		end
+		return false
+	end
+
+	local petName = "Fox" :: PetTypes.petNames
+	if tPetName(maybePetName) then
+		petName = maybePetName
+	else
+		warn(maybePetName, " is not a valide name")
+		return
+	end
 
 	local bestiaryHandler = Registry:GetHandler(Owner)
 	local newPet = table.clone(PetInformation[petName])
@@ -74,6 +94,14 @@ function PetService.createPet(Owner: Player, petName, position: Vector3?)
 	local dataToReplica = {}
 	dataToReplica.newPet = table.clone(newPet)
 	ReplicatedStorage.RemoteEvents.PetNew:FireClient(Owner, dataToReplica)
+end
+
+function PetService.destroyPet(Owner: Player, petName: string)
+	local petModel = workspace:FindFirstChild(petName)
+	if not petModel then
+		return
+	end
+	petModel:Destroy()
 end
 
 return PetService
