@@ -1,0 +1,6 @@
+Hey! what's up. The following task may be **boss fight essentials**, but before we begin there are two requirements though. Basically, there are bosses in different locations that can only be accessed through a UI or some kind of player interaction: **requirement #1 we need to define how players access bosses**.  So when the player accepts to fight the boss the game teleport them to that location and the fight begins. **requirement #2 attack animations**  it's not necessary to have a custom attack animation for all the pets, but there must be at least one that can be played for each pet during combat.
+This task is essential for completing the game and creating new objects like consumables that burst the pet to fight the boss, etc.
+That's task is essential for the game to be completed but here are some other tasks that helps the game to succedd:
+- AFK world (The player gets rewarded while is in the game)
+- Daily rewards (something like an object)
+- Invite Rewards (you gain rewards by inviting friends)

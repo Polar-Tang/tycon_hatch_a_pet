@@ -3496,3 +3496,4 @@
 [2m18:17:32[0m [36mRBX[0m [FLog::QtUIThread] Task `LegacyRunInUIThreadWithQtContext-` scheduled after UI thread event loop has stopped
 [2m18:17:32[0m [36mRBX[0m [FLog::QtUIThread] Task `LegacyRunInUIThreadWithQtContext-` scheduled after UI thread event loop has stopped
 [2m18:17:32[0m [36mRBX[0m [FLog::AppMemUsageStatus] 1044687361
+[2m18:17:35[0m [92mINF[0m Goodbye!
