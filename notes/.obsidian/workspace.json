@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "68bac5ad64c50a1e",
+    "type": "split",
+    "children": [
+      {
+        "id": "d22f9d1d7c24c263",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2d545b403a47a4d9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "shooter confesions/todo.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "todo"
+            }
+          },
+          {
+            "id": "52172656b84014a1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "shooter confesions/direction?.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "direction?"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "978212aea09878bb",
+    "type": "split",
+    "children": [
+      {
+        "id": "2d3cb48858b7a1aa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8f1c3d063e6c0958",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "80055295090e46ab",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "ca8469788dde72f7",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "564fbd946a24f30b",
+    "type": "split",
+    "children": [
+      {
+        "id": "6230543efb74c993",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "eaa3024d284ea07e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "shooter confesions/todo.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for todo"
+            }
+          },
+          {
+            "id": "1c352a440f61ab23",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "shooter confesions/todo.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from todo"
+            }
+          },
+          {
+            "id": "bab93c905f37111b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "3447f9f866941be4",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "4b32f94f577b5efa",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "shooter confesions/todo.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of todo"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "2d545b403a47a4d9",
+  "lastOpenFiles": [
+    "shooter confesions/todo.md",
+    "shooter confesions/direction?.md",
+    "driving_confesions/orientation.md",
+    "driving_confesions/car structure.md",
+    "driving_confesions/Calculating the torque.md",
+    "m1 start final phase.md",
+    "mAXIMUN CALL STACK EXCEED.md",
+    "shooter confesions",
+    "driving_confesions/images/Pasted image 20260305162859.png",
+    "driving_confesions/images",
+    "Compehend the phisics engine.md",
+    "hastch system scheme.md",
+    "notes.md",
+    "petlvl_task2.md",
+    "README.md",
+    "thing thing thing too many things.md",
+    "todo.md",
+    "Untitled.md",
+    "Untitled 1.md",
+    "update (finnish last task).md",
+    "wtf StarterPlayerScript.md"
+  ]
+}
