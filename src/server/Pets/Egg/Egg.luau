@@ -51,6 +51,8 @@ function Egg:Spawn(position: Vector3)
 	self.position = position
 
 	-- Do no why the egg is placed weird
+	-- local YFixed = Vector3.new(position.X, position.Y + 1.030  - 0.672, position.Z)
+
 	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
 	assert(self.model)
 

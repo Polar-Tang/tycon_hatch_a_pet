@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local module = {}
 
@@ -140,4 +139,4 @@ local rhino: PetTypes.petInitFrontend = merge({
 }, common_stats)
 module["Rhino"] = rhino
 --
-return module
+return module :: { [PetTypes.petNames]: PetTypes.petInitFrontend }

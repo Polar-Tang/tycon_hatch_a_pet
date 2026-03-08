@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "shooter confesions/todo.md",
+                "file": "shooter confesions/First steps.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "todo"
+              "title": "First steps"
             }
           },
           {
@@ -27,15 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "shooter confesions/direction?.md",
+                "file": "shooter confesions/todo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "direction?"
+              "title": "todo"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -198,20 +199,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "2d545b403a47a4d9",
+  "active": "52172656b84014a1",
   "lastOpenFiles": [
+    "shooter confesions/First steps.md",
     "shooter confesions/todo.md",
-    "shooter confesions/direction?.md",
-    "driving_confesions/orientation.md",
     "driving_confesions/car structure.md",
     "driving_confesions/Calculating the torque.md",
-    "m1 start final phase.md",
-    "mAXIMUN CALL STACK EXCEED.md",
-    "shooter confesions",
-    "driving_confesions/images/Pasted image 20260305162859.png",
-    "driving_confesions/images",
+    "driving_confesions/orientation.md",
     "Compehend the phisics engine.md",
     "hastch system scheme.md",
+    "m1 start final phase.md",
+    "mAXIMUN CALL STACK EXCEED.md",
     "notes.md",
     "petlvl_task2.md",
     "README.md",
@@ -219,7 +217,10 @@
     "todo.md",
     "Untitled.md",
     "Untitled 1.md",
-    "update (finnish last task).md",
-    "wtf StarterPlayerScript.md"
+    "wtf StarterPlayerScript.md",
+    "shooter confesions",
+    "driving_confesions/images/Pasted image 20260305162859.png",
+    "driving_confesions/images",
+    "update (finnish last task).md"
   ]
 }

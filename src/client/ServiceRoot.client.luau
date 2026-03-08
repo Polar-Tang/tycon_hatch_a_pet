@@ -8,6 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 local NeverMorePackages = ReplicatedStorage.Nevermore
 local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
 local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
+local Constants = require(ReplicatedStorage.utils.Constants)
 
 local ServiceBag = Nevermore("ServiceBag")
 local serviceBag = ServiceBag.new()
@@ -20,10 +21,13 @@ _G.FistBag = serviceBag
 local Binder = Nevermore("Binder")
 local AnimationHandler = Nevermore("AnimationHandler")
 local StateMachine = Nevermore("StateMachine")
-
+local NPCFighterClient = Nevermore("NPCFighterClient")
+local PetFollower = Nevermore("PetFollower")
 local Binders = {
 	["AnimationHandler"] = AnimationHandler,
 	["NPC"] = StateMachine,
+	[Constants.combatBet] = NPCFighterClient,
+	[Constants.PetFollower] = PetFollower,
 }
 ---------- USE BINDER PORVIDER ----------
 local BinderProvider = Nevermore("BinderProvider")
@@ -42,6 +46,8 @@ local BinderProviderStarted = serviceBag:GetService(AllBinders)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
 
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
@@ -144,3 +150,40 @@ local function getInputType(): EnumItem
 end
 
 game.ReplicatedStorage.RemoteEvents.RemoteSync:FireServer({ loaded = "all", inputType = getInputType() })
+
+do
+	local numberKeyCodes = {
+		[Enum.KeyCode.One] = 1,
+		[Enum.KeyCode.Two] = 2,
+		[Enum.KeyCode.Three] = 3,
+		[Enum.KeyCode.Four] = 4,
+		[Enum.KeyCode.Five] = 5,
+		[Enum.KeyCode.Six] = 6,
+		[Enum.KeyCode.Seven] = 7,
+		[Enum.KeyCode.Eight] = 8,
+		[Enum.KeyCode.Nine] = 9,
+	}
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then
+			return
+		end
+		if numberKeyCodes[input.KeyCode] then
+			local petRegistry = _G["pets_registry"]
+			if not petRegistry then
+				return
+			end
+			local petIds = Table.keys(_G["pets_registry"])
+			if not petIds or next(petIds) == nil then
+				return
+			end
+			local petIndex = numberKeyCodes[input.KeyCode]
+			local petId = petIds[petIndex]
+
+			local dataFight: NpcFighterTypes.combatInstanceData = {
+				petId = petId,
+				bossName = "Ghidra",
+			}
+			game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireServer(dataFight)
+		end
+	end)
+end

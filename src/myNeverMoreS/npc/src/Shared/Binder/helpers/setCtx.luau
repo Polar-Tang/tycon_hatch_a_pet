@@ -48,7 +48,7 @@ local function createProximityPrompt(parent)
 	proximityPrompt.Parent = parent
 
 	-- Handle triggered event
-	proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
+	return proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
 		-- Fire to server with the pet/NPC that was interacted with
 		petClickedEvent:FireServer(parent)
 	end)
@@ -96,13 +96,13 @@ return function(parent, serviceBag: any, player, maid)
 	setCollider(parent)
 
 	if isOwnerLocal then
-		createProximityPrompt(parent)
+		maid:GiveTask(createProximityPrompt(parent))
 
 		-- TODO: pets_registry is a table of player.UserId = petData
 		repeat
 			task.wait()
 		until _G["pets_registry"] and _G["pets_registry"][parent.Name]
-		local petInfo = _G["pets_registry"][parent.Name] -- This will be need a better way
+		local petInfo = _G["pets_registry"][parent.Name]
 
 		local billboardService = BillboardService.new(parent, maid, petInfo)
 		billboardService:resizes()
