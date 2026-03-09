@@ -177,7 +177,6 @@ BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes
 	end
 
 	local point_name = Constants.teleportPointSuffix .. bossName
-	print("point ", point_name)
 	local teleportpoint: { BasePart } = point_name
 
 	CollectionService:GetTagged(teleportpoint)
