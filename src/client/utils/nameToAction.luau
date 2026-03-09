@@ -88,6 +88,9 @@ module["Egg Shop Keeper"] = {
 		gearShop.createItem(ItemData["White_Egg"], function()
 			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
 		end)
+		gearShop.createItem(ItemData["Red_Egg"], function()
+			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("red")
+		end)
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(egg)

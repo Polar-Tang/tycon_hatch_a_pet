@@ -15,6 +15,7 @@ Egg.__index = Egg
 -- pet pools per egg color
 local PetPools: { [EggColor]: { string } } = {
 	white = { "Elephant", "Fox", "Panda", "Rhino", "Hippo" },
+	red = { "Dog", "Cat", "Lion" },
 }
 
 -- constructor
@@ -33,7 +34,7 @@ end
 
 -- clone egg model
 function Egg:CloneModel(): Model
-	local template = EggsFolder:FindFirstChild(self.color)
+	local template = EggsFolder:FindFirstChild(string.lower(self.color))
 	assert(template, `Egg model for color {self.color} not found`)
 
 	local clone = template:Clone()

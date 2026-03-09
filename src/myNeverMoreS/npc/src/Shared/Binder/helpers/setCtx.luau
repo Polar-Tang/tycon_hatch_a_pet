@@ -66,7 +66,7 @@ local setCollider = function(parent)
 end
 
 local getStats = function(parent, maid, isOwnerLocal)
-	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
+	local root = parent.PrimaryPart or parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 	-- global

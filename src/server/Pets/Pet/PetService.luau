@@ -10,6 +10,7 @@ local PromiseUtils = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.P
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local utils = require(ReplicatedStorage.utils.utils)
 local t = require(ReplicatedStorage.Nevermore.QuentyStudio.t)
+local testPart = require(ReplicatedStorage.test.testPart)
 
 local PetService = {}
 PetService.__index = PetService
@@ -29,10 +30,11 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	pet.Name = petInfo.petId
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
-
-	pet.PrimaryPart.Position = position or PetService.fixPetY(plot, petInfo.petName)
-
+	print("position ", position)
+	local endPos = position or PlotService:GetRandPosition(plot) --PetService.fixPetY(plot, petInfo.petName)
+	pet:PivotTo(CFrame.new(endPos))
 	pet.Parent = workspace
+
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
 
@@ -50,7 +52,7 @@ function PetService.fixPetYFromPLayer(player: Player, petName: string): Vector3
 end
 
 function PetService.fixPetY(plot, petName): Vector3
-	local pet: Model = ServerStorage.Pets[petName]:Clone()
+	local pet: Model = ServerStorage.Pets[petName]
 	assert(pet.PrimaryPart)
 	local originalY = pet.PrimaryPart.Position.Y
 

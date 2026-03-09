@@ -72,6 +72,7 @@ function BestiaryList.getPetRarity(self: BestiaryList, petId: string): PetTypes.
 	if not pet then
 		return
 	end
+	print("pet ", pet.rarity)
 	return pet.rarity
 end
 

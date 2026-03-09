@@ -5,7 +5,7 @@ local Roact = require(ReplicatedStorage.Roact)
 
 local ultiBar = Roact.Component:extend("ultiBar")
 
-local PERCENTAGE = 60
+local PERCENTAGE = 10
 
 function ultiBar:init()
 	self.initialized = false

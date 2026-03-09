@@ -54,7 +54,7 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	
+
 	return self:PlainMove(targetPosition)
 end
 
@@ -87,6 +87,10 @@ function MovementController:PlainMove(targetPosition)
 	local timeToReach = distance / self.velocity
 
 	self._currentMovePromise = Promise.new(function(resolve, reject)
+		if self.isMoving then
+			reject()
+			return
+		end
 		-- CLEAN
 		self._maid:DoCleaning()
 
@@ -117,6 +121,8 @@ function MovementController:PlainMove(targetPosition)
 			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
 			{ CFrame = lookThatShit }
 		)
+		rotateTween:Play()
+
 		-- TODO: add this task to maid
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
 		local rotationCOmplete = rotateTween.Completed:Once(function(playbackState)
@@ -134,6 +140,7 @@ function MovementController:PlainMove(targetPosition)
 					self._moveConn:Disconnect()
 					self._moveConn = nil
 					resolve(timeToReach)
+					print("Position ", self._root.Position)
 					self._AnimationHandler:LoadAnimation(false, "walk")
 					self.isMoving = false
 					return
@@ -142,10 +149,11 @@ function MovementController:PlainMove(targetPosition)
 				local newPos = startPos + dir * self.velocity * elapsed
 				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
 			end)
+			print("Position ", self._root.Position)
+
 			self._maid:GiveTask(self._moveConn)
 		end)
 		self._maid:GiveTask(rotationCOmplete)
-		rotateTween:Play()
 	end)
 	return timeToReach
 end
