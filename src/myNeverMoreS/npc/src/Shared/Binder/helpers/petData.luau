@@ -150,7 +150,7 @@ module["Cat"] = merge({
 
 	["speed"] = 1,
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
-	YOffset = 0.726,
+	YOffset = 0.726+0.543+0.725,
 }, common_stats)
 
 module["Dog"] = merge({
@@ -158,7 +158,7 @@ module["Dog"] = merge({
 	["rarity"] = "uncommon",
 
 	["speed"] = 1.2,
-	YOffset = 0.726,
+	YOffset = 0.726+0.322,
 
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
 }, common_stats)

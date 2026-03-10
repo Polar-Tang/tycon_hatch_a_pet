@@ -6,12 +6,26 @@ local ServerStorage = game:GetService("ServerStorage")
 local PetInformation = require(script.Parent.PetInformation)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
-local PromiseUtils = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.PromiseUtils)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local utils = require(ReplicatedStorage.utils.utils)
-local t = require(ReplicatedStorage.Nevermore.QuentyStudio.t)
-local testPart = require(ReplicatedStorage.test.testPart)
+--[[
+FrontLeftLeg
+FrontRightLeg
 
+LeftLowM
+LeftUpM
+Nose
+RightLowM
+RightUpM
+
+second test
+Union
+Union
+
+BackLeftLeg
+BackRightLeg
+
+]]
 local PetService = {}
 PetService.__index = PetService
 
@@ -31,9 +45,12 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	print("position ", position)
-	local endPos = position or PlotService:GetRandPosition(plot) --PetService.fixPetY(plot, petInfo.petName)
-	pet:PivotTo(CFrame.new(endPos))
+	local endPos = position or PlotService:GetRandPosition(plot)
+	
 	pet.Parent = workspace
+	-- pet.PrimaryPart.Position = endPos
+	-- pet:MoveTo(endPos)
+	pet:PivotTo(CFrame.new(endPos) * (CFrame.Angles(0,0,0))) -- TRIES TO SEE WHAT HAPPEN IF THE PET MODEL HAS NO ORIENTATION
 
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")

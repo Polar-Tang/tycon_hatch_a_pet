@@ -138,7 +138,7 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 
 	local lastLevel = petData.petLvl
 	-- NEED to figure out how to create the XP based in the npc
-	local newPetData = bestiaryHandler:increaseXP(petId, 50)
+	local newPetData = bestiaryHandler:increaseXP(petId, 100)
 	if not newPetData then
 		return
 	end

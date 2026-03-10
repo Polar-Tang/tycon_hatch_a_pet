@@ -87,10 +87,7 @@ function MovementController:PlainMove(targetPosition)
 	local timeToReach = distance / self.velocity
 
 	self._currentMovePromise = Promise.new(function(resolve, reject)
-		if self.isMoving then
-			reject()
-			return
-		end
+		
 		-- CLEAN
 		self._maid:DoCleaning()
 
@@ -149,7 +146,6 @@ function MovementController:PlainMove(targetPosition)
 				local newPos = startPos + dir * self.velocity * elapsed
 				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
 			end)
-			print("Position ", self._root.Position)
 
 			self._maid:GiveTask(self._moveConn)
 		end)

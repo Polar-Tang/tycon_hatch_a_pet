@@ -7,7 +7,6 @@ Animation handler @v_03
 	implements Lazy load on registered animations
 
 ]]
-local RS = game:GetService("ReplicatedStorage")
 local require = require(script.Parent.loader).load(script)
 
 local Maid = require("Maid")
@@ -84,10 +83,9 @@ function AnimationHandler:LoadAnimation(state: boolean, animaName: string, isPre
 	local animaTionTrack: AnimationTrack = current_desc.AnimationTrack
 
 	if state and not animaTionTrack then
-		local animaTionTrack: AnimationTrack =
-			self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
-		animaTionTrack:Play()
-		self.animationDescriptors[animaName].AnimationTracker = animaTionTrack
+		local newanimaTionTrack = self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
+		newanimaTionTrack:Play()
+		self.animationDescriptors[animaName].AnimationTracker = newanimaTionTrack
 		return animaTionTrack
 	elseif state and animaTionTrack then
 		animaTionTrack:Play()
@@ -128,6 +126,13 @@ function AnimationHandler:_initDescriptior(animaName: string)
 	self.animationDescriptors[animaName] = descriptor
 end
 
+function AnimationHandler:_getAnimatior()
+	local model: Model = self.Char
+	local animatiorContainer = model:WaitForChild("AnimationController")
+	
+	return animatiorContainer
+end
+
 -- Declare the firast animation track and set ptreload to true in the descriptor
 function AnimationHandler:_ensurePreload(animaName)
 	if self.animationDescriptors[animaName].preloaded then
@@ -136,23 +141,17 @@ function AnimationHandler:_ensurePreload(animaName)
 	self:_initDescriptior(animaName)
 
 	if not self.animator then
-		local animatiorContainer
-		local humanoid = self.Char:FindFirstChild("Humanoid")
-		if not humanoid then
-			animatiorContainer = self.Char:FindFirstChild("AnimationController")
-		elseif humanoid then
-			animatiorContainer = humanoid
-		end
-		assert(animatiorContainer, "no ANimationCOntroller or humanoid in ", self.Char)
-		self.animator = animatiorContainer.Animator
-		self:_Check()
+		
+		local animatorContainer = self:_getAnimatior()
+		
+		self.animator = animatorContainer.Animator
 	end
 
 	-- Load the animation and declare it
 	do
 		local animaTionTrack: AnimationTrack =
 			self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
-		animaTionTrack:Play(0)
+		animaTionTrack:Play()
 		animaTionTrack:Stop()
 		self.animationDescriptors[animaName].AnimationTrack = animaTionTrack
 	end
