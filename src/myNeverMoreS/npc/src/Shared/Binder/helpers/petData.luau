@@ -120,6 +120,8 @@ module["Elephant"] = merge({
 	-- ["range"] = 30,
 	["velocity"] = 4,
 	["speed"] = 3,
+	YOffset = 1.3,
+
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
 	-- ["base"] = 8,
@@ -140,7 +142,11 @@ module["Lion"] = merge({
 	["velocity"] = 6,
 
 	["speed"] = 1,
-	YOffset = 1.862,
+	YOffset = -1.821,
+	calcYOffset = function(Yoff)
+		return 1.821
+	end,
+	-- 
 	["adorneeOffset"] = Vector3.new(0, 6, 0),
 }, common_stats)
 
@@ -150,7 +156,7 @@ module["Cat"] = merge({
 
 	["speed"] = 1,
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
-	YOffset = 0.726+0.543+0.725,
+	YOffset = 0.726+0.725-0.208 -- +0.543+0.725,
 }, common_stats)
 
 module["Dog"] = merge({
@@ -158,7 +164,8 @@ module["Dog"] = merge({
 	["rarity"] = "uncommon",
 
 	["speed"] = 1.2,
-	YOffset = 0.726+0.322,
+	YOffset = -0.488, -- lvl 9
+	--lvl38 0.543
 
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
 }, common_stats)
@@ -169,6 +176,7 @@ local rhino: PetTypes.petInitFrontend = merge({
 	-- ["range"] = 30,
 	["velocity"] = 4,
 	["speed"] = 3,
+	["rarity"] = "common",
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
 	-- ["base"] = 6,

@@ -49,8 +49,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	
 	pet.Parent = workspace
 	-- pet.PrimaryPart.Position = endPos
-	-- pet:MoveTo(endPos)
-	pet:PivotTo(CFrame.new(endPos) * (CFrame.Angles(0,0,0))) -- TRIES TO SEE WHAT HAPPEN IF THE PET MODEL HAS NO ORIENTATION
+	pet:MoveTo(endPos)
 
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
@@ -58,6 +57,11 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	CollectionService:AddTag(pet, "plot_" .. plot:FindFirstChild("PlotId").Value)
 	CollectionService:AddTag(pet, "pets_" .. userId)
 	utils.ScaleToLvl(pet, petInfo.petLvl)
+end
+
+function PetService.getPlayerPets(player: Player): {Model}
+	local tag = "pets_" .. player.UserId
+	return CollectionService:GetTagged(tag)
 end
 
 function PetService.fixPetYFromPLayer(player: Player, petName: string): Vector3

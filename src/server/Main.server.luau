@@ -27,7 +27,6 @@ do
 	_G.ServiceBag = serviceBag
 end
 
-local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -66,12 +65,7 @@ Players.PlayerRemoving:Connect(function(player)
 		warn("UserId:", player.UserId)
 		warn("====================================")
 	end
-	local plot = FenceBoundsService.GetPlotByUserId(player.UserId)
-	FenceBoundsService:MarkOffline(plot)
-	-- TODO : 	In Game Settings → Basic Settings: Set Max Players = 8
-	if #Players:GetPlayers() > MAX_PLAYERS then
-		player:Kick("This server is full (6/6).")
-	end
+
 
 	-- Small wait to ensure --prints appear before connection ends
 end)
@@ -119,7 +113,6 @@ PetClicked.OnServerEvent:Connect(function(player, petModel)
 end)
 
 local PetLevel: RemoteEvent = Events.PetLevel
-local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
 PetLevel.OnServerEvent:Connect(function(player, petModel)
 	local bestiaryHandler = Registry:GetHandler(player)
@@ -146,7 +139,7 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 	local data = { lvl = newPetData.petLvl, prog = newPetData.petProg }
 	if lastLevel ~= newPetData.petLvl then
 		data.isLvlUp = true
-		ScaleToLvl(petModel, newPetData.petLvl)
+		
 
 		if petId == bestiaryHandler.petClicked then
 			PetClicked:FireClient(player, newPetData)

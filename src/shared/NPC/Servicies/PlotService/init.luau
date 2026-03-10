@@ -10,11 +10,11 @@ local plotCount = 0
 
 -- Utility
 local function isFree(plot)
-	return not plot:FindFirstChild("IsOnline").Value
+	return not plot:WaitForChild("IsOnline").Value
 end
 
 local function isCached(plot)
-	return not plot:FindFirstChild("IsOnline").Value and plot:FindFirstChild("OwnerUserId") ~= nil
+	return not plot:WaitForChild("IsOnline").Value and plot:WaitForChild("OwnerUserId") ~= nil
 end
 
 -- MAIN ENTRY POINT
@@ -48,17 +48,21 @@ function FenceBoundsService:GetAvailablePlot()
 	return nil
 end
 
+function FenceBoundsService:EvitPlayerPlot(player)
+	
+end
+
 function FenceBoundsService:AssignPlot(plot, player)
-	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
+	local userId: StringValue = plot:WaitForChild("OwnerUserId")
 	userId.Value = player.UserId
 
-	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
+	local isOn: BoolValue = plot:WaitForChild("IsOnline")
 	isOn.Value = true
 
 	plot:SetAttribute("CachedAt", nil)
 	CollectionService:AddTag(plot, "plot_" .. player.UserId)
 
-	local plotId = plot:FindFirstChild("PlotId")
+	local plotId = plot:WaitForChild("PlotId")
 	if plotId.Value == 0 then
 		plotCount = plotCount + 1
 		plotId.Value = plotCount
@@ -67,16 +71,16 @@ function FenceBoundsService:AssignPlot(plot, player)
 end
 
 function FenceBoundsService:MarkOffline(plot)
-	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
+	local isOn: BoolValue = plot:WaitForChild("IsOnline")
 	isOn.Value = false
 	plot:SetAttribute("CachedAt", os.time())
 end
 
 function FenceBoundsService:_resetPlot(plot)
-	local userId: StringValue = plot:FindFirstChild("OwnerUserId")
+	local userId: StringValue = plot:WaitForChild("OwnerUserId")
 	userId.Value = ""
 
-	local isOn: BoolValue = plot:FindFirstChild("IsOnline")
+	local isOn: BoolValue = plot:WaitForChild("IsOnline")
 	isOn.Value = false
 
 	plot:SetAttribute("CachedAt", nil)
@@ -84,7 +88,9 @@ end
 
 function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
 	for _, plot in pairs(plots) do
-		if plot:FindFirstChild("OwnerUserId").value == Id then
+		local ownerShit = plot:WaitForChild("OwnerUserId")
+		if ownerShit.Value and tostring(ownerShit.Value) == tostring(Id) then
+			print("plot found ", plot)
 			return plot
 		end
 	end

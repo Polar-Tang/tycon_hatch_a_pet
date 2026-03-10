@@ -49,6 +49,9 @@ function TargetingController:getRandomNearbyPosition(radius: number?): Vector3?
 
 	local plot = assert(CollectionService:GetTagged("plot_" .. owner)[1], "player not initialized")
 
+	-- if self.calcYOffset then
+	-- 	self.YOffset = self.calcYOffset(self.YOffset)
+	-- end
 	local boundedPos = FenceBoundsService:GetRandPosition(plot, self.YOffset)
 
 	return boundedPos

@@ -122,7 +122,11 @@ function MovementController:PlainMove(targetPosition)
 
 		-- TODO: add this task to maid
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
-		local rotationCOmplete = rotateTween.Completed:Once(function(playbackState)
+		if self.Model:GetAttribute("petName") == "Lion" then 
+			print("rotateTween ",rotateTween)
+			print("self._root ", self._root)
+		end
+		local rotationCOmplete = rotateTween.Completed:Connect(function(playbackState)
 			self.isMoving = true
 
 			-- Walking anim
@@ -144,7 +148,8 @@ function MovementController:PlainMove(targetPosition)
 				end
 
 				local newPos = startPos + dir * self.velocity * elapsed
-				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
+				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
+				self.Model:MoveTo(newPos)
 			end)
 
 			self._maid:GiveTask(self._moveConn)

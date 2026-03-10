@@ -52,10 +52,10 @@ function Egg:Spawn(position: Vector3)
 	self.position = position
 
 	-- Do no why the egg is placed weird
-	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
+	
 	assert(self.model)
 
-	self.model:PivotTo(CFrame.new(YFixed))
+	self.model:MoveTo(position)
 	self.model.Parent = workspace
 	npcUtils.createBillboard(self.model, {
 		componentName = "ProgresBar",
