@@ -1,5 +1,5 @@
 local module = {}
 
-module.GroundY = 2.5
+module.GroundY = 22.887
 
 return module
