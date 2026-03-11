@@ -6,6 +6,7 @@ local TweenService = game:GetService("TweenService")
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
+local Constants = require(ReplicatedStorage.utils.Constants)
 local utils = require(ReplicatedStorage.utils.utils)
 
 local MovementController = {}
@@ -113,7 +114,7 @@ function MovementController:PlainMove(targetPosition)
 		end
 
 		-- ✅ Create cancellable delay using thread
-		local rotateTime = 0.5
+		local rotateTime = 1
 
 		local lookThatShit = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
 		local rotateTween = TweenService:Create(
@@ -122,16 +123,22 @@ function MovementController:PlainMove(targetPosition)
 			{ CFrame = lookThatShit }
 		)
 		rotateTween:Play()
+		-- momentary solution for the damn lion, Don't know why this happens to Lion
 		if self.Model:GetAttribute("petName") == "Lion" then
-			print("PlaybackState: ", rotateTween.PlaybackState)
+			local timer = 0
+			local startCFrame = self._root.CFrame
+			self._rotateConn = RunService.Heartbeat:Connect(function(dt)
+				timer += dt
+				local t = math.clamp(timer / rotateTime, 0, 1)
+				self.Model:PivotTo(startCFrame:Lerp(lookThatShit, t))
+				if timer >= rotateTime then
+					self._rotateConn:Disconnect()
+				end
+			end)
 		end
 
-		-- TODO: add this task to maid
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
-		if self.Model:GetAttribute("petName") == "Lion" then
-			print("rotateTween ", rotateTween)
-			print("self._root ", self._root)
-		end
+
 		task.delay(rotateTime, function()
 			self.isMoving = true
 
@@ -153,10 +160,12 @@ function MovementController:PlainMove(targetPosition)
 				end
 
 				local newPos = startPos + dir * self.velocity * elapsed
-				local fixY = utils.fixPetY(self.Model, self._root)
+				local fixY = utils.fixPetY(self.Model, self._root) --+ Constants.GroundY
 				newPos = Vector3.new(newPos.X, fixY, newPos.Z)
 				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
 				self.Model:MoveTo(newPos)
+				
+				--3.084
 			end)
 
 			self._maid:GiveTask(self._moveConn)
