@@ -7,6 +7,16 @@ utils.ScaleToLvl = function(npc: Model, LVL: number)
 	npc:ScaleTo(scale)
 end
 
+utils.fixPetY = function(model: Model, root: BasePart)
+	local cf, size = model:GetBoundingBox()
+
+	local bottomY = cf.Position.Y - size.Y / 2
+	local rootY = root.Position.Y
+
+	local groundOffset = rootY - bottomY
+	return groundOffset
+end
+
 utils.MoneyCalc = function(stamina)
 	local staminaGT1 = stamina
 	if stamina == 0 then

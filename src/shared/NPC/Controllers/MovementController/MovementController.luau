@@ -6,6 +6,7 @@ local TweenService = game:GetService("TweenService")
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
+local utils = require(ReplicatedStorage.utils.utils)
 
 local MovementController = {}
 MovementController.__index = MovementController
@@ -75,11 +76,14 @@ function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
+	local fixY = utils.fixPetY(self.Model, self._root)
 
+	targetPosition = Vector3.new(targetPosition.X, fixY, targetPosition.Z)
 	-- Cancel previous movement
 	if self._currentMovePromise then
 		self._currentMovePromise:Destroy()
 	end
+
 	local startPos = self._root.Position
 	local delta = targetPosition - startPos
 	local dir = delta.Unit
@@ -87,7 +91,6 @@ function MovementController:PlainMove(targetPosition)
 	local timeToReach = distance / self.velocity
 
 	self._currentMovePromise = Promise.new(function(resolve, reject)
-		
 		-- CLEAN
 		self._maid:DoCleaning()
 
@@ -119,14 +122,17 @@ function MovementController:PlainMove(targetPosition)
 			{ CFrame = lookThatShit }
 		)
 		rotateTween:Play()
+		if self.Model:GetAttribute("petName") == "Lion" then
+			print("PlaybackState: ", rotateTween.PlaybackState)
+		end
 
 		-- TODO: add this task to maid
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
-		if self.Model:GetAttribute("petName") == "Lion" then 
-			print("rotateTween ",rotateTween)
+		if self.Model:GetAttribute("petName") == "Lion" then
+			print("rotateTween ", rotateTween)
 			print("self._root ", self._root)
 		end
-		local rotationCOmplete = rotateTween.Completed:Connect(function(playbackState)
+		task.delay(rotateTime, function()
 			self.isMoving = true
 
 			-- Walking anim
@@ -141,20 +147,20 @@ function MovementController:PlainMove(targetPosition)
 					self._moveConn:Disconnect()
 					self._moveConn = nil
 					resolve(timeToReach)
-					print("Position ", self._root.Position)
 					self._AnimationHandler:LoadAnimation(false, "walk")
 					self.isMoving = false
 					return
 				end
 
 				local newPos = startPos + dir * self.velocity * elapsed
-				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
+				local fixY = utils.fixPetY(self.Model, self._root)
+				newPos = Vector3.new(newPos.X, fixY, newPos.Z)
+				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
 				self.Model:MoveTo(newPos)
 			end)
 
 			self._maid:GiveTask(self._moveConn)
 		end)
-		self._maid:GiveTask(rotationCOmplete)
 	end)
 	return timeToReach
 end

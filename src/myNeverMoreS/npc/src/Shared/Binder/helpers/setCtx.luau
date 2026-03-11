@@ -33,7 +33,6 @@ local setUpAtt = function(parent, petInfo)
 	parent:SetAttribute("Stamina", stats.Stamina)
 	
 	parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
-		print("newValue ", newValue)
 		local thisValue = parent:GetAttribute("Level")
 		ScaleToLvl(parent, thisValue)
 		
@@ -72,7 +71,7 @@ local setCollider = function(parent)
 end
 
 local getStats = function(parent, maid, isOwnerLocal)
-	local root = parent.PrimaryPart or parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
+	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 	-- global

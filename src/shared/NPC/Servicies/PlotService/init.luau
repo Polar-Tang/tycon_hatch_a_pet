@@ -1,8 +1,10 @@
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- PlotService.lua
 local FenceBoundsService = {}
 FenceBoundsService.__index = FenceBoundsService
 
+local Constants = require(ReplicatedStorage.utils.Constants)
 local FenceBounds = require(script.FenceBounds)
 
 local plots = CollectionService:GetTagged("plots")
@@ -133,7 +135,7 @@ function FenceBoundsService:GetRandPosition(plot: BasePart, YOffset): Vector3
 
 	local x = math.random(minX, maxX)
 	local z = math.random(minZ, maxZ)
-	return Vector3.new(x, YOffset and YOffset + fencePos.Y or fencePos.Y, z)
+	return Vector3.new(x, Constants.GroundY, z)
 end
 
 return FenceBoundsService :: FenceBounds.FenceBoundsService

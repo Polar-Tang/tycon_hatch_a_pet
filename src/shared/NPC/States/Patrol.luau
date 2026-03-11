@@ -18,7 +18,8 @@ function Patrol:OnEnter(data)
 	if not goal then
 		return
 	end
-	data.patrol_duration = data.MovementController:MoveTo(goal) + 1
+	-- TODO: need to use an eat duration that last the same that the animation
+	data.patrol_duration = data.MovementController:MoveTo(goal) + 3
 end
 
 function Patrol:OnLeave(data)

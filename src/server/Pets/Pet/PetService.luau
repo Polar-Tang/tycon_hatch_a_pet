@@ -8,24 +8,7 @@ local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local utils = require(ReplicatedStorage.utils.utils)
---[[
-FrontLeftLeg
-FrontRightLeg
 
-LeftLowM
-LeftUpM
-Nose
-RightLowM
-RightUpM
-
-second test
-Union
-Union
-
-BackLeftLeg
-BackRightLeg
-
-]]
 local PetService = {}
 PetService.__index = PetService
 
@@ -44,7 +27,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	pet.Name = petInfo.petId
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
-	print("position ", position)
+	
 	local endPos = position or PlotService:GetRandPosition(plot)
 	
 	pet.Parent = workspace
