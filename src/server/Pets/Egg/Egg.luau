@@ -39,7 +39,6 @@ function Egg:CloneModel(): Model
 
 	local clone = template:Clone()
 	self.model = clone
-
 	return clone
 end
 
@@ -55,7 +54,10 @@ function Egg:Spawn(position: Vector3)
 	
 	assert(self.model)
 
-	self.model:MoveTo(position)
+	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
+	assert(self.model)
+
+	self.model:PivotTo(CFrame.new(YFixed))
 	self.model.Parent = workspace
 	npcUtils.createBillboard(self.model, {
 		componentName = "ProgresBar",
@@ -85,9 +87,8 @@ function Egg:Hatch()
 		print("wtf?")
 		return
 	end
-	local position = PetService.fixPetYFromPLayer(self.player, petName)
-	local newPos = Vector3.new(self.position.X, position.Y, self.position.Z)
-	PetService.createPet(self.player, petName, newPos)
+	
+	PetService.createPet(self.player, petName, self.position)
 	-- destroy egg model
 	if self.model then
 		self.model:Destroy()

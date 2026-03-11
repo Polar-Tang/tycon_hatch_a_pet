@@ -73,10 +73,29 @@ function MovementController:Stop()
 	end
 	-- Fire an event to report the last position to the server
 end
+
+function MovementController:_getLowestPart()
+	local lowest = 0
+	if self._lowestPart then
+		return self._lowestPart
+	end
+	for _, part in self.Model:GetDescendants() do
+		if part:IsA("BasePart") then
+			local y = part.Position.Y - part.Size.Y / 2
+			if y < lowest then
+				lowest = y
+			end
+		end
+	end
+	self._lowestPart = lowest
+	return lowest
+end
+
 function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
+	-- local fixY = self:_getLowestPart()
 	local fixY = utils.fixPetY(self.Model, self._root)
 
 	targetPosition = Vector3.new(targetPosition.X, fixY, targetPosition.Z)
@@ -117,25 +136,26 @@ function MovementController:PlainMove(targetPosition)
 		local rotateTime = 1
 
 		local lookThatShit = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
-		local rotateTween = TweenService:Create(
-			self._root,
-			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-			{ CFrame = lookThatShit }
-		)
-		rotateTween:Play()
+		-- local rotateTween = TweenService:Create(
+		-- 	self._root,
+		-- 	TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+		-- 	{ CFrame = lookThatShit }
+		-- )
+		-- rotateTween:Play()
 		-- momentary solution for the damn lion, Don't know why this happens to Lion
-		if self.Model:GetAttribute("petName") == "Lion" then
-			local timer = 0
-			local startCFrame = self._root.CFrame
-			self._rotateConn = RunService.Heartbeat:Connect(function(dt)
-				timer += dt
-				local t = math.clamp(timer / rotateTime, 0, 1)
-				self.Model:PivotTo(startCFrame:Lerp(lookThatShit, t))
-				if timer >= rotateTime then
-					self._rotateConn:Disconnect()
-				end
-			end)
-		end
+		-- if self.Model:GetAttribute("petName") ~= "Cat" or self.Model:GetAttribute("petName") ~= "Dog" then
+
+		local timer = 0
+		local startCFrame = self._root.CFrame
+		self._rotateConn = RunService.Heartbeat:Connect(function(dt)
+			timer += dt
+			local t = math.clamp(timer / rotateTime, 0, 1)
+			self.Model:PivotTo(startCFrame:Lerp(lookThatShit, t))
+			if timer >= rotateTime then
+				self._rotateConn:Disconnect()
+			end
+		end)
+		-- end
 
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
 
@@ -162,9 +182,9 @@ function MovementController:PlainMove(targetPosition)
 				local newPos = startPos + dir * self.velocity * elapsed
 				local fixY = utils.fixPetY(self.Model, self._root) --+ Constants.GroundY
 				newPos = Vector3.new(newPos.X, fixY, newPos.Z)
-				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
-				self.Model:MoveTo(newPos)
-				
+				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
+				-- self.Model:MoveTo(newPos)
+
 				--3.084
 			end)
 

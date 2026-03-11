@@ -7,6 +7,7 @@ local PetInformation = require(script.Parent.PetInformation)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+-- local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
 
 local PetService = {}
@@ -27,12 +28,20 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	pet.Name = petInfo.petId
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
-	
 	local endPos = position or PlotService:GetRandPosition(plot)
 	
 	pet.Parent = workspace
 	-- pet.PrimaryPart.Position = endPos
-	pet:MoveTo(endPos)
+	if position then 
+		local bottomY = pet.PrimaryPart.Position.Y - pet.PrimaryPart.Size.Y/2
+		position= Vector3.new(position.X, bottomY, position.Z)
+		
+		-- testPart({Position = position})
+		pet:PivotTo(CFrame.new(endPos))
+
+	else
+		pet:MoveTo(endPos)
+	end
 
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
