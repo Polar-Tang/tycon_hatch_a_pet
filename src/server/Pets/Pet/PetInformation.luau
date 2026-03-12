@@ -3,7 +3,7 @@ local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 return {
 	["Fox"] = {
 		petProg = 0,
-		isInvoked = true,
+		isInvoked = false,
 		avaiblePoints = 0,
 		petName = "Fox",
 		petLvl = 1,
@@ -17,7 +17,7 @@ return {
 
 	["Hippo"] = {
 		petProg = 0,
-		isInvoked = true,
+		isInvoked = false,
 		avaiblePoints = 0,
 		petName = "Hippo",
 		petLvl = 1,
@@ -30,7 +30,7 @@ return {
 	},
 	["Rhino"] = {
 		petProg = 0,
-		isInvoked = true,
+		isInvoked = false,
 		avaiblePoints = 0,
 		petName = "Rhino",
 		petLvl = 1,
@@ -43,7 +43,7 @@ return {
 	},
 	["Elephant"] = {
 		petProg = 0,
-		isInvoked = true,
+		isInvoked = false,
 		avaiblePoints = 0,
 		petName = "Elephant",
 		petLvl = 1,
@@ -56,7 +56,7 @@ return {
 	},
 	["Panda"] = {
 		petProg = 0,
-		isInvoked = true,
+		isInvoked = false,
 		avaiblePoints = 0,
 		petName = "Panda",
 		petLvl = 1,
@@ -66,5 +66,44 @@ return {
 			["Stamina"] = 1,
 		},
 		rarity = "common",
+	},
+	["Lion"] = {
+		petProg = 0,
+		isInvoked = false,
+		avaiblePoints = 0,
+		petName = "Lion",
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = "uncommon",
+	},
+	["Cat"] = {
+		petProg = 0,
+		isInvoked = false,
+		avaiblePoints = 0,
+		petName = "Cat",
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = "uncommon",
+	},
+	["Dog"] = {
+		petProg = 0,
+		isInvoked = false,
+		avaiblePoints = 0,
+		petName = "Dog",
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = "uncommon",
 	},
 } :: PetTypes.Petsinformation

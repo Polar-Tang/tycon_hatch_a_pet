@@ -6,10 +6,9 @@ local ServerStorage = game:GetService("ServerStorage")
 local PetInformation = require(script.Parent.PetInformation)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
-local PromiseUtils = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.PromiseUtils)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+-- local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
-local t = require(ReplicatedStorage.Nevermore.QuentyStudio.t)
 
 local PetService = {}
 PetService.__index = PetService
@@ -29,16 +28,32 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	pet.Name = petInfo.petId
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
-
-	pet.PrimaryPart.Position = position or PetService.fixPetY(plot, petInfo.petName)
-
+	local endPos = position or PlotService:GetRandPosition(plot)
+	
 	pet.Parent = workspace
+	-- pet.PrimaryPart.Position = endPos
+	if position then 
+		local bottomY = pet.PrimaryPart.Position.Y - pet.PrimaryPart.Size.Y/2
+		position= Vector3.new(position.X, bottomY, position.Z)
+		
+		-- testPart({Position = position})
+		pet:PivotTo(CFrame.new(endPos))
+
+	else
+		pet:MoveTo(endPos)
+	end
+
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
 
 	CollectionService:AddTag(pet, "plot_" .. plot:FindFirstChild("PlotId").Value)
 	CollectionService:AddTag(pet, "pets_" .. userId)
 	utils.ScaleToLvl(pet, petInfo.petLvl)
+end
+
+function PetService.getPlayerPets(player: Player): {Model}
+	local tag = "pets_" .. player.UserId
+	return CollectionService:GetTagged(tag)
 end
 
 function PetService.fixPetYFromPLayer(player: Player, petName: string): Vector3
@@ -50,7 +65,7 @@ function PetService.fixPetYFromPLayer(player: Player, petName: string): Vector3
 end
 
 function PetService.fixPetY(plot, petName): Vector3
-	local pet: Model = ServerStorage.Pets[petName]:Clone()
+	local pet: Model = ServerStorage.Pets[petName]
 	assert(pet.PrimaryPart)
 	local originalY = pet.PrimaryPart.Position.Y
 

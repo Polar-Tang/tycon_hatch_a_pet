@@ -1,8 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local StarterPlayer = game:GetService("StarterPlayer")
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
-local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local PlayerInventory = {}
 -- PlayerQuestHandler.lua
 PlayerInventory.__index = PlayerInventory
@@ -74,7 +72,6 @@ function PlayerInventory:Init(money_cb: () -> number)
 			self:setRegisterTime()
 			local moneyGenerated = money_cb()
 			self.cash += moneyGenerated
-			print("current money ", MoneyLib.HandleMoney(self.cash))
 		end
 	end)
 

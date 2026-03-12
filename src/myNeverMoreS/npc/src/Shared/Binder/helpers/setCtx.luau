@@ -11,6 +11,7 @@ local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnima
 local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
 local petStats = require(script.Parent.petData)
+local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
 -- EVENTS
 local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
@@ -21,10 +22,7 @@ local function onDescendantAdded(descendant)
 	if descendant:IsA("BasePart") then
 		descendant.CanCollide = true
 		descendant.CollisionGroup = "Npcs"
-
-		if descendant.Name == "Rootpart" then
-			descendant.Anchored = true
-		end
+		
 	end
 end
 
@@ -33,6 +31,13 @@ local setUpAtt = function(parent, petInfo)
 	parent:SetAttribute("Melee", utils.MeleeCalc(stats.Melee))
 	parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
 	parent:SetAttribute("Stamina", stats.Stamina)
+	
+	parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
+		local thisValue = parent:GetAttribute("Level")
+		ScaleToLvl(parent, thisValue)
+		
+	end)
+
 end
 
 local function createProximityPrompt(parent)
@@ -81,6 +86,7 @@ local getStats = function(parent, maid, isOwnerLocal)
 	petData.root = root
 	petData.isOwnerLocal = isOwnerLocal
 	petData.YOffset = current_pet_stats.YOffset
+	petData.calcYOffset = current_pet_stats.calcYOffset
 	-- global
 
 	return petData

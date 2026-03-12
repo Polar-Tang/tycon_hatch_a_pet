@@ -1,10 +1,19 @@
 local utils = {}
 utils.ScaleToLvl = function(npc: Model, LVL: number)
 	local baseScale = 1
-	local growthPerLevel = 0.0134 -- 0.0134 * 150 = 2.01
+	local growthPerLevel = 0.007 -- 0.0134 * 150 = 2.01
 
 	local scale = baseScale + growthPerLevel * (LVL - 1)
 	npc:ScaleTo(scale)
+end
+
+utils.fixPetY = function(model: Model, root: BasePart)
+	-- local cf, size = model:GetBoundingBox()
+
+	local rootY = root.Position.Y
+
+	local groundOffset = rootY - root.Size.Y/2
+	return root.Position.Y
 end
 
 utils.MoneyCalc = function(stamina)

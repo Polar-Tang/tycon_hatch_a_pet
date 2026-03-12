@@ -39,7 +39,7 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, color: string)
 	-- if not CurrencyService:CanAfford(player, color) then return end
 
 	-- create egg domain object
-	local egg = Egg.new(player, plot, our_egg_color, 60)
+	local egg = Egg.new(player, plot, our_egg_color, 10)
 
 	-- random position inside plot
 	local randPos = PlotService:GetRandPosition(plot)

@@ -6,6 +6,8 @@ local TweenService = game:GetService("TweenService")
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
+local Constants = require(ReplicatedStorage.utils.Constants)
+local utils = require(ReplicatedStorage.utils.utils)
 
 local MovementController = {}
 MovementController.__index = MovementController
@@ -54,7 +56,7 @@ function MovementController:MoveTo(targetPosition)
 		self:Stop()
 	end
 	self._lastTarget = targetPosition
-	
+
 	return self:PlainMove(targetPosition)
 end
 
@@ -71,15 +73,37 @@ function MovementController:Stop()
 	end
 	-- Fire an event to report the last position to the server
 end
+
+function MovementController:_getLowestPart()
+	local lowest = 0
+	if self._lowestPart then
+		return self._lowestPart
+	end
+	for _, part in self.Model:GetDescendants() do
+		if part:IsA("BasePart") then
+			local y = part.Position.Y - part.Size.Y / 2
+			if y < lowest then
+				lowest = y
+			end
+		end
+	end
+	self._lowestPart = lowest
+	return lowest
+end
+
 function MovementController:PlainMove(targetPosition)
 	if not self._AnimationHandler then
 		self:getAnimHandler()
 	end
+	-- local fixY = self:_getLowestPart()
+	local fixY = utils.fixPetY(self.Model, self._root)
 
+	targetPosition = Vector3.new(targetPosition.X, fixY, targetPosition.Z)
 	-- Cancel previous movement
 	if self._currentMovePromise then
 		self._currentMovePromise:Destroy()
 	end
+
 	local startPos = self._root.Position
 	local delta = targetPosition - startPos
 	local dir = delta.Unit
@@ -109,17 +133,33 @@ function MovementController:PlainMove(targetPosition)
 		end
 
 		-- ✅ Create cancellable delay using thread
-		local rotateTime = 0.5
+		local rotateTime = 1
 
 		local lookThatShit = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
-		local rotateTween = TweenService:Create(
-			self._root,
-			TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-			{ CFrame = lookThatShit }
-		)
-		-- TODO: add this task to maid
+		-- local rotateTween = TweenService:Create(
+		-- 	self._root,
+		-- 	TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+		-- 	{ CFrame = lookThatShit }
+		-- )
+		-- rotateTween:Play()
+		-- momentary solution for the damn lion, Don't know why this happens to Lion
+		-- if self.Model:GetAttribute("petName") ~= "Cat" or self.Model:GetAttribute("petName") ~= "Dog" then
+
+		local timer = 0
+		local startCFrame = self._root.CFrame
+		self._rotateConn = RunService.Heartbeat:Connect(function(dt)
+			timer += dt
+			local t = math.clamp(timer / rotateTime, 0, 1)
+			self.Model:PivotTo(startCFrame:Lerp(lookThatShit, t))
+			if timer >= rotateTime then
+				self._rotateConn:Disconnect()
+			end
+		end)
+		-- end
+
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
-		local rotationCOmplete = rotateTween.Completed:Once(function(playbackState)
+
+		task.delay(rotateTime, function()
 			self.isMoving = true
 
 			-- Walking anim
@@ -140,12 +180,16 @@ function MovementController:PlainMove(targetPosition)
 				end
 
 				local newPos = startPos + dir * self.velocity * elapsed
-				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0))
+				local fixY = utils.fixPetY(self.Model, self._root) --+ Constants.GroundY
+				newPos = Vector3.new(newPos.X, fixY, newPos.Z)
+				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
+				-- self.Model:MoveTo(newPos)
+
+				--3.084
 			end)
+
 			self._maid:GiveTask(self._moveConn)
 		end)
-		self._maid:GiveTask(rotationCOmplete)
-		rotateTween:Play()
 	end)
 	return timeToReach
 end

@@ -15,6 +15,7 @@ Egg.__index = Egg
 -- pet pools per egg color
 local PetPools: { [EggColor]: { string } } = {
 	white = { "Elephant", "Fox", "Panda", "Rhino", "Hippo" },
+	red = { "Dog", "Cat", "Lion" },
 }
 
 -- constructor
@@ -33,12 +34,11 @@ end
 
 -- clone egg model
 function Egg:CloneModel(): Model
-	local template = EggsFolder:FindFirstChild(self.color)
+	local template = EggsFolder:FindFirstChild(string.lower(self.color))
 	assert(template, `Egg model for color {self.color} not found`)
 
 	local clone = template:Clone()
 	self.model = clone
-
 	return clone
 end
 
@@ -51,7 +51,6 @@ function Egg:Spawn(position: Vector3)
 	self.position = position
 
 	-- Do no why the egg is placed weird
-	-- local YFixed = Vector3.new(position.X, position.Y + 1.030  - 0.672, position.Z)
 
 	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
 	assert(self.model)
@@ -86,9 +85,8 @@ function Egg:Hatch()
 		print("wtf?")
 		return
 	end
-	local position = PetService.fixPetYFromPLayer(self.player, petName)
-	local newPos = Vector3.new(self.position.X, position.Y, self.position.Z)
-	PetService.createPet(self.player, petName, newPos)
+
+	PetService.createPet(self.player, petName, self.position)
 	-- destroy egg model
 	if self.model then
 		self.model:Destroy()

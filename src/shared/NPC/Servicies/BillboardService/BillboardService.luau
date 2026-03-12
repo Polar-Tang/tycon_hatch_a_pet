@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local utils = require(ReplicatedStorage.utils.utils)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
@@ -16,7 +17,9 @@ function module.new(parent, maid, petInfo)
 
 	-- resizes billboard
 
-	billboard.Frame.NpcName.Text = parent:GetAttribute("petName")
+	local petName = parent:GetAttribute("petName")
+	billboard.Frame.NpcName.Text = petName
+	billboard.Frame.Rarity.Text = string.upper(petStats[petName].rarity)
 	billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
 	billboard.Adornee = parent.PrimaryPart
 	billboard.Parent = parent.PrimaryPart

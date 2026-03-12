@@ -29,4 +29,23 @@ module["Rhino"] = {
 	["walk"] = "rbxassetid://109389774238135",
 	["idle"] = "rbxassetid://86820327844180",
 }
+
+module["Cat"] = {
+	["eat"] = "rbxassetid://105889827986301",
+	["walk"] = "rbxassetid://80528433732164",
+	["idle"] = "rbxassetid://109694587497289",
+}
+
+module["Lion"] = {
+	["eat"] = "rbxassetid://80281743747692",
+	["walk"] = "rbxassetid://114885227066716",
+	["idle"] = "rbxassetid://90177109462742",
+}
+
+module["Dog"] = {
+	["eat"] = "rbxassetid://111169291358952",
+	["walk"] = "rbxassetid://136883351342281",
+	["idle"] = "rbxassetid://99215432527693",
+}
+
 return module

@@ -9,4 +9,6 @@ module.spawnPoitSuffix = "boss_point_"
 module.PetFollower = "PetFollower"
 module.animationHandler = "AnimationHandler"
 
+module.GroundY = 22.887
+
 return module

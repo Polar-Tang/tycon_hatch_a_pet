@@ -11,6 +11,7 @@ The eat interval + eat duration >= eat_interval
 
 -- completly OP
 module["Fox"] =  {
+["rarity"] = "common",
 	["eat_interval"] = 2,
 	["eat_duration"] = 3,
 	["range"] = 30,
@@ -24,6 +25,7 @@ module["Fox"] =  {
 },
 
 module["Panda"] = {
+["rarity"] = "common",
 	["eat_interval"] = 5,
 	["eat_duration"] = 4,
 	["patrol_interval"] = 6,
@@ -37,6 +39,7 @@ module["Panda"] = {
 }
 
 module["Hippo"] = {
+["rarity"] = "common",
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
 	["range"] = 30,
@@ -49,6 +52,7 @@ module["Hippo"] = {
 }
 
 module["Rhino"] = {
+["rarity"] = "common",
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
 	["range"] = 30,
@@ -87,6 +91,7 @@ local function merge<T, U>(a: T, b: U)
 end
 
 module["Fox"] = merge({
+	["rarity"] = "common",
 	["velocity"] = 4,
 	["speed"] = 2,
 	adorneeOffset = Vector3.new(0, 4, 0),
@@ -94,6 +99,7 @@ module["Fox"] = merge({
 }, common_stats)
 
 module["Panda"] = merge({
+	["rarity"] = "common",
 	-- ["eat_interval"] = 5,
 	-- ["eat_duration"] = 4,
 	-- ["patrol_interval"] = 6,
@@ -107,11 +113,14 @@ module["Panda"] = merge({
 }, common_stats)
 
 module["Elephant"] = merge({
+	["rarity"] = "common",
 	-- ["eat_interval"] = 6,
 	-- ["eat_duration"] = 3,
 	-- ["range"] = 30,
 	["velocity"] = 4,
 	["speed"] = 3,
+	YOffset = 1.3,
+
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
 	-- ["base"] = 8,
@@ -119,10 +128,45 @@ module["Elephant"] = merge({
 }, common_stats)
 
 module["Hippo"] = merge({
+	["rarity"] = "common",
 	["velocity"] = 8,
 
 	["speed"] = 2,
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
+}, common_stats)
+
+module["Lion"] = merge({
+	["rarity"] = "uncommon",
+
+	["velocity"] = 6,
+
+	["speed"] = 1,
+	YOffset = -1.821,
+	calcYOffset = function(Yoff)
+		return 1.821
+	end,
+	-- 
+	["adorneeOffset"] = Vector3.new(0, 6, 0),
+}, common_stats)
+
+module["Cat"] = merge({
+	["velocity"] = 6,
+	["rarity"] = "uncommon",
+
+	["speed"] = 1,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.726+0.725-0.208 -- +0.543+0.725,
+}, common_stats)
+
+module["Dog"] = merge({
+	["velocity"] = 8,
+	["rarity"] = "uncommon",
+
+	["speed"] = 1.2,
+	YOffset = -0.488, -- lvl 9
+	--lvl38 0.543
+
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
 }, common_stats)
 
 local rhino: PetTypes.petInitFrontend = merge({
@@ -131,6 +175,7 @@ local rhino: PetTypes.petInitFrontend = merge({
 	-- ["range"] = 30,
 	["velocity"] = 4,
 	["speed"] = 3,
+	["rarity"] = "common",
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
 	-- ["base"] = 6,
