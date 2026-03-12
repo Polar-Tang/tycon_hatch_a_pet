@@ -1,7 +1,8 @@
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packages = RS.Nevermore.Quenty
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
+
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
 
 local DeadController = setmetatable({}, BaseObject)

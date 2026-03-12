@@ -58,20 +58,17 @@ function Combat:OnHeartbeat(data, deltatime)
 			print("enemy maxHealth ", data.enemy.MaxHealth)
 			print("-------------------------------------------------------")
 		end
-
-		-- TODO: How do i insert other service using
-		data._animHandler:LoadAnimation(true, "Attack")
-		-- TODO Fire server, server does some validations and do HumanoidTakeDamage
-		local hitFx = function()
-			Attacks:FireServer(data.player, data)
-		end
-
-		-- TODO: How do i insert other service using
-		data._animHandler:OnSignal({
-			callback = hitFx,
-			animationName = "Attack",
-			animationEventName = "Hit",
-		})
+		--[[
+			data._animHandler:LoadAnimation(true, "Attack")
+			local hitFx = function() end
+	
+			data._animHandler:OnSignal({
+				callback = hitFx,
+				animationName = "Attack",
+				animationEventName = "Hit",
+			})
+		]]
+		Attacks:FireServer(data.player, data)
 	end
 end
 return Combat

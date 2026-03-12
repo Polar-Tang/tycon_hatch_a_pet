@@ -29,16 +29,15 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	local endPos = position or PlotService:GetRandPosition(plot)
-	
+
 	pet.Parent = workspace
 	-- pet.PrimaryPart.Position = endPos
-	if position then 
-		local bottomY = pet.PrimaryPart.Position.Y - pet.PrimaryPart.Size.Y/2
-		position= Vector3.new(position.X, bottomY, position.Z)
-		
+	if position then
+		local bottomY = pet.PrimaryPart.Position.Y - pet.PrimaryPart.Size.Y / 2
+		position = Vector3.new(position.X, bottomY, position.Z)
+
 		-- testPart({Position = position})
 		pet:PivotTo(CFrame.new(endPos))
-
 	else
 		pet:MoveTo(endPos)
 	end
@@ -51,7 +50,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	utils.ScaleToLvl(pet, petInfo.petLvl)
 end
 
-function PetService.getPlayerPets(player: Player): {Model}
+function PetService.getPlayerPets(player: Player): { Model }
 	local tag = "pets_" .. player.UserId
 	return CollectionService:GetTagged(tag)
 end
@@ -65,7 +64,7 @@ function PetService.fixPetYFromPLayer(player: Player, petName: string): Vector3
 end
 
 function PetService.fixPetY(plot, petName): Vector3
-	local pet: Model = ServerStorage.Pets[petName]
+	local pet: Model = ServerStorage.Pets[petName]:Clone()
 	assert(pet.PrimaryPart)
 	local originalY = pet.PrimaryPart.Position.Y
 
@@ -99,13 +98,11 @@ function PetService.createPet(Owner: Player, maybePetName: string, position: Vec
 	local newPet = table.clone(PetInformation[petName])
 	assert(newPet, "Pet '" .. petName .. "' is not registered")
 	local petId = HttpService:GenerateGUID(false)
-	print(petId, "petId")
 	newPet.petId = petId
 	newPet.petStats = utils.GenerateRandStats(5)
 
 	bestiaryHandler:listNewPet(petId, newPet)
 	PetService.fromDataToWorld(Owner, newPet, position)
-	print("FUCKING PETS ", bestiaryHandler.pets)
 	local dataToReplica = {}
 	dataToReplica.newPet = table.clone(newPet)
 	ReplicatedStorage.RemoteEvents.PetNew:FireClient(Owner, dataToReplica)

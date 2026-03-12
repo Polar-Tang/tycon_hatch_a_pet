@@ -3,16 +3,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local packages = RS.Nevermore.Quenty
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
 
-local FollowerController = setmetatable({}, BaseObject)
-FollowerController.__index = FollowerController
+local MovementController = setmetatable({}, BaseObject)
+MovementController.__index = MovementController
 
-function FollowerController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
-	local self = setmetatable(data, FollowerController)
+function MovementController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
+	local self = setmetatable(data, MovementController)
 	self._currentMovePromise = nil
 	self.velocity = 10
 	local petName = self.pet:GetAttribute("petName")
@@ -22,7 +22,7 @@ function FollowerController.new(data: NpcFighterTypes.controllerdataInint, servi
 	return self
 end
 
-function FollowerController._getAtt(self: NpcFighterTypes.FollowerController): Attachment
+function MovementController._getAtt(self: NpcFighterTypes.MovementController): Attachment
 	local attachmentAlignPos = self.pet:FindFirstChild("attachmentDash")
 	if not attachmentAlignPos then
 		attachmentAlignPos = Instance.new("Attachment")
@@ -34,8 +34,9 @@ function FollowerController._getAtt(self: NpcFighterTypes.FollowerController): A
 	return attachmentAlignPos
 end
 
-function FollowerController.MoveTo(self: NpcFighterTypes.FollowerController, targetPosition: Vector3)
+function MovementController.MoveTo(self: NpcFighterTypes.MovementController, targetPosition: Vector3)
 	self.animationHandler:LoadAnimation(true, "walk")
+	-- TODO : MIGRATE THIS TO USE HUMANOID:MOVETO
 	-- Cancel previous movement
 	if self._currentMovePromise then
 		self._currentMovePromise:Destroy()
@@ -91,9 +92,9 @@ function FollowerController.MoveTo(self: NpcFighterTypes.FollowerController, tar
 	end)
 end
 
-function FollowerController.DestroyNPC(self: NpcFighterTypes.FollowerController)
+function MovementController.DestroyNPC(self: NpcFighterTypes.MovementController)
 	self.maid:DoCleaning()
 	self.pet:Destroy()
 end
 
-return FollowerController
+return MovementController

@@ -15,9 +15,14 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
+local CombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
+
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Constants = require(ReplicatedStorage.utils.Constants)
+
+-- FOLDER
+local combatInstanceRegistryFolder = ReplicatedStorage.Pets.Fights
 
 -- CONTROLLERS
 local Controllers = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.Machine.Controllers
@@ -28,19 +33,6 @@ local DeadController = require(Controllers.DeadController)
 local CombatControllerClient = {}
 
 do
-	local function onDescendantAdded(descendant)
-		-- Set collision group for any part descendant
-
-		if descendant:IsA("BasePart") then
-			descendant.CanCollide = true
-			descendant.CollisionGroup = "Npcs"
-
-			if descendant.Name == "Rootpart" then
-				descendant.Anchored = true
-			end
-		end
-	end
-
 	local function createProximityPrompt(parent)
 		-- Create ProximityPrompt
 		local proximityPrompt = Instance.new("ProximityPrompt")
@@ -56,19 +48,8 @@ do
 		-- Handle triggered event
 		return proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
 			-- Fire to server with the pet/NPC that was interacted with
-			ReplicatedStorage.RemoteEvents.NPCFighter:FireServer(parent)
+			CombatCon:Fire()
 		end)
-	end
-
-	local setCollider = function(parent)
-		for _, descendant in parent:GetDescendants() do
-			if descendant:IsA("Model") then
-				for _, descendant in parent:GetDescendants() do
-					onDescendantAdded(descendant)
-				end
-			end
-			onDescendantAdded(descendant)
-		end
 	end
 
 	local setCOntroler = function(
@@ -111,8 +92,6 @@ do
 		parent:PivotTo(bossSpot.CFrame)
 		parent.Parent = workspace
 
-		setCollider(parent)
-
 		-- Check if the path of Nevermore.src.client is right for perfect isolation, if the print is true i will need to move the entire folder to a player scriupts
 		do
 			print(player.UserId)
@@ -125,7 +104,7 @@ do
 
 		maid:GiveTask(createProximityPrompt(parent))
 
-		-- TODO: may need billdboard serrvice or not
+		-- TODO: Should we use a health billboard for the pets
 		-- local billboardService = BillboardService.new(parent, maid, petInfo)
 		-- billboardService:resizes()
 		-- petData.billboardService = billboardService
@@ -157,10 +136,9 @@ do
 		local nearPlayerPoint = playerCharacter.PrimaryPart.Position
 			+ (playerCharacter.PrimaryPart.CFrame.RightVector * 3)
 		local nearCF = CFrame.new(nearPlayerPoint)
+			* playerCharacter.PrimaryPart.CFrame:ToObjectSpace(playerCharacter.PrimaryPart.CFrame)
 		parent:PivotTo(nearCF)
 		parent.Parent = workspace
-
-		setCollider(parent)
 
 		-- Check if the path of Nevermore.src.client is right for perfect isolation, if the print is true i will need to move the entire folder to a player scriupts
 		do
@@ -218,5 +196,24 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 end
 
 function CombatControllerClient.initFighters(data: NpcFighterTypes.FightInfo) end
+
+function CombatControllerClient.getPlayerSessionFolder(player: Player)
+	return combatInstanceRegistryFolder:WaitForChild(tostring(player.UserId))
+end
+
+function CombatControllerClient.getHealth(player: Player, nameInstance: NpcFighterTypes.healthBarId): IntValue?
+	if not nameInstance or typeof(nameInstance) ~= "string" then
+		print("invalid name instance ", nameInstance)
+		return nil
+	end
+	if not (nameInstance == "PlayerBoss" or nameInstance == "PlayerPet") then
+		print("invalid name instance name " .. nameInstance)
+		return nil
+	end
+	return combatInstanceRegistryFolder
+		:WaitForChild(tostring(player.UserId))
+		:WaitForChild(nameInstance)
+		:WaitForChild("Health")
+end
 
 return CombatControllerClient

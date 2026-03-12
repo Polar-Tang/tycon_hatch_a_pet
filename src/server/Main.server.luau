@@ -2,9 +2,10 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
+--||Nevermore Shit||--
 do
-	--||Nevermore Shit||--
 	----------------------------- getting servicebag and loader -----------------------------
 
 	local NeverMorePackages = ReplicatedStorage.Nevermore
@@ -66,9 +67,36 @@ Players.PlayerRemoving:Connect(function(player)
 		warn("====================================")
 	end
 
-
 	-- Small wait to ensure --prints appear before connection ends
 end)
+
+-- set collisions group couse i don't feel like doing this manually from roblox studio
+do
+	local function onDescendantAdded(descendant)
+		-- Set collision group for any part descendant
+
+		if descendant:IsA("BasePart") then
+			descendant.CanCollide = true
+			descendant.CollisionGroup = "Npcs"
+		end
+	end
+	local setCollider = function(parent)
+		for _, descendant in parent:GetDescendants() do
+			if descendant:IsA("Model") then
+				for _, descendant in parent:GetDescendants() do
+					onDescendantAdded(descendant)
+				end
+			end
+			onDescendantAdded(descendant)
+		end
+	end
+
+	local petsFolder: Folder = ServerStorage.Pets
+	local pets = petsFolder:GetDescendants()
+	for _, pet in pets do
+		setCollider(pet)
+	end
+end
 
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
@@ -139,7 +167,6 @@ PetLevel.OnServerEvent:Connect(function(player, petModel)
 	local data = { lvl = newPetData.petLvl, prog = newPetData.petProg }
 	if lastLevel ~= newPetData.petLvl then
 		data.isLvlUp = true
-		
 
 		if petId == bestiaryHandler.petClicked then
 			PetClicked:FireClient(player, newPetData)

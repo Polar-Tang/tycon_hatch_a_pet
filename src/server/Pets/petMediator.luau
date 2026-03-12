@@ -7,7 +7,7 @@ local PetService = require(ServerScriptService.Pets.Pet.PetService)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local PetTypesContract = require(ReplicatedStorage.Pets.PetTypesContract)
 local Constants = require(ReplicatedStorage.utils.Constants)
@@ -103,45 +103,11 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 )
 
 ReplicatedStorage.RemoteEvents.NPCFighter.OnServerEvent:Connect(function(a0: Player, ...)
-	local playerPet = CollectionService:GetTagged("FollowerPet_" .. a0.UserId)
-	if not playerPet then
-		return
-	end
-
-	-- Get the binder
-	local playerPet: Model = playerPet.state.Data.model
-	local petPlayerModule = require(playerPet:WaitForChild("PetState"))
-	local PetPlayerState = petPlayerModule.state
-
-	PetPlayerState:ChangeData("enemyHumanoid", npc:WaitForChild("Humanoid"))
-	PetPlayerState:ChangeData("enemy", npc)
-	PetPlayerState:ChangeState("Combat")
-
-	local npcState = require(npc:WaitForChild("NPCState"))
-
-	local petElement = PetPlayerState.Data.petElement
-	local damageBase = PetPlayerState.Data.dmgBase
-	local NPCLevel = npcState.Data.level
-	print("pet state ", PetPlayerState)
-	PetPlayerState:ChangeData("enemyElement", petElement)
-	PetPlayerState:ChangeData("enemyLevel", NPCLevel)
-
-	npcState:ChangeData("PetPlayerState", PetPlayerState)
-	npcState:ChangeData("level", npc:GetAttribute("level"))
-	npcState:ChangeData("enemyHH", PetPlayerState.Data.healthController)
-	PetPlayerState:ChangeData("enemyModel", npc)
-
-	local enemyElement = PetPlayerState.Data.petElement
-	local damageMatchup = ElementalDamage(damageBase, petElement, enemyElement)
-	npcState:ChangeData("dmgBase", damageMatchup)
-	-- IDK where this is triggered but its triggered somewhere else
-	--npcState:ChangeState("PromptCombat")
-	local enemyDMG = ElementalDamage(damageBase, enemyElement, petElement)
-	PetPlayerState:ChangeData("matchupDMG", enemyDMG)
+	print("IDK ")
 end)
 
 -- This is the event triggered on boss teleport, it confirms player can go to the instance, register it, teleport the player to the instance and tell the client to create all the npcs that just lives in the client
-local CombatController = ServerScriptService.Pets.Pet.Combat.CombatController
+local CombatController = require(ServerScriptService.Pets.Pet.Combat.CombatController)
 local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
 BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes.combatInstanceData)
 	print("data ", data)
@@ -185,6 +151,77 @@ BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes
 end)
 
 -- This is the event that confirms the pét player can do the damage, all the health values should be instances that lives in the Replicated storage and the server handles it while the client only renders it
-ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(a0: Player, ...) end)
+ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Player, data)
+	-- data is the state context coming from the client; it contains
+	-- `npc` (the model performing the attack) and `enemy` among other
+	-- fields.  we only care about the attacker name to know which
+	-- health to decrement.
+
+	local folderSession = CombatController.getPlayerSessionFolder(player)
+	if not folderSession then
+		warn("no combat session for player", player)
+		return
+	end
+
+	local petFolder = folderSession:FindFirstChild("PlayerPet")
+	local bossFolder = folderSession:FindFirstChild("PlayerBoss")
+	if not petFolder or not bossFolder then
+		warn("missing pet/boss folders in session for ", player)
+		return
+	end
+
+	local petIdVal = petFolder:FindFirstChild("Id")
+	local bossIdVal = bossFolder:FindFirstChild("Id")
+	if not petIdVal or not bossIdVal then
+		warn("session ids not registered")
+		return
+	end
+
+	local attackerName = data and data.npc and data.npc.Name
+	if not attackerName then
+		return
+	end
+
+	local targetHealth: IntValue
+	local damage = 0
+
+	if attackerName == petIdVal.Value then
+		-- player's pet dealt damage to boss
+		targetHealth = bossFolder:FindFirstChild("Health")
+
+		-- rate limit the application of damage: don't allow hits more
+		-- frequently than every 2 seconds on the same health value.
+		local last = targetHealth:GetAttribute("LastAttack") or 0
+		local now = os.time()
+		if now - last <= 2 then
+			print("invalid interval time have passed")
+			return
+		end
+		targetHealth:SetAttribute("LastAttack", now)
+
+		-- compute pet damage from stats stored in registry
+		local bestiaryHandler = Registry:GetHandler(player)
+		local pets_stats = bestiaryHandler:getPetStats(petIdVal.Value)
+		if pets_stats then
+			damage = utils.MeleeCalc(pets_stats.Melee)
+		else
+			damage = 1
+		end
+	elseif attackerName == bossIdVal.Value then
+		-- boss hit the pet; use a hard coded value for now
+		targetHealth = petFolder:FindFirstChild("Health")
+		damage = 50
+	else
+		-- attacker not part of this session
+		return
+	end
+
+	if not targetHealth then
+		return
+	end
+
+	-- subtract and clamp to zero
+	targetHealth.Value = math.max(targetHealth.Value - damage, 0)
+end)
 
 return {}

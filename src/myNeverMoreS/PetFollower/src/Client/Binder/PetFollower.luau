@@ -1,24 +1,18 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local NPCBase = require(ReplicatedStorage.Nevermore.Custom.NPCBase.src.Client.NPCBase)
 local CombatControllerClient =
 	require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatControllerClient)
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
-local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local healthBarListener = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.healthBarListener)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 
 local StatesFolder = ReplicatedStorage.NPC.States
-local PetFollower = {}
+local PetFollower = setmetatable({}, NPCBase)
 PetFollower.__index = PetFollower
 PetFollower.ClassName = "PetFollower"
 
 function PetFollower.new(char: Model, serviceBag)
-	local self = setmetatable({}, PetFollower)
-
-	self.char = char
-	self.state = nil
-	self._initialized = false
-	self._players = {}
-	self.serviceBag = serviceBag
-	self.maid = Maid.new()
+	local self = setmetatable(NPCBase.new(char, serviceBag), PetFollower)
 
 	return self
 end
@@ -34,15 +28,11 @@ function PetFollower:Init(player, initData: NpcFighterTypes.petStats)
 	)
 	self.state = state
 	self._initialized = true
+
+	-- pet follower should listen to the pet health bar, not the boss
+	healthBarListener(player, self.char, "PlayerPet")
+
 	return self
 end
 
-function PetFollower:Destroy()
-	print("State machine cleaned")
-	-- TODO: test this
-	self.maid:DoCleaning()
-	if self.state then
-		self.state:Destroy()
-	end
-end
 return PetFollower

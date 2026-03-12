@@ -2,7 +2,7 @@ local ReplicatedSorage = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local StateMachine = require(ReplicatedSorage.StateMachine)
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 
 local State = StateMachine.State
 local Following = State.new("Following")
@@ -19,7 +19,7 @@ function Following:OnEnter(data)
 	--wait(1)
 end
 
-function Following:OnHeartbeat(data: NpcFighterTypes.bossStateCtx, deltaTime)
+function Following:OnHeartbeat(data: NpcFighterTypes.petStateCtx, deltaTime)
 	self.timer += deltaTime
 	if self.timer - self.lastTime >= 1 then
 		local timerPhto = self.timer
@@ -27,7 +27,10 @@ function Following:OnHeartbeat(data: NpcFighterTypes.bossStateCtx, deltaTime)
 
 		local playerPos = data.TargetController:Update()
 		if playerPos then
-			data.FollowerController:MoveTo(playerPos)
+			data.TargetController:GetWaypoints(playerPos):Then(function(data): ...any
+				print(data, " this is the path")
+				data.MovementController:MoveTo(playerPos)
+			end)
 		end
 		--local newHealth = data.model.Health.Value + math.round(data.MaxHealth*1/64)
 		--healthChangeEvent:Fire(newHealth)

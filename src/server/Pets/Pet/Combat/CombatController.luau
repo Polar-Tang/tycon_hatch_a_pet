@@ -1,5 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local combatInstanceRegistryFolder = ReplicatedStorage.Pets.Fights
 
 local CombotCotroller = {}
@@ -24,7 +24,9 @@ CombotCotroller.initFightSession = function(player: Player, Folder, data: NpcFig
 	-- Create the player folder
 	do
 		local player_per = data.player_pet
-		local petPlayer = Instance.new("Folder", combatInstanceRegistryFolder)
+		-- health values should live inside the session folder so clients can
+		-- easily address them via CombatController.getPlayerSessionFolder
+		local petPlayer = Instance.new("Folder", Folder)
 		petPlayer.Name = "PlayerPet"
 
 		local petPlayerId = Instance.new("StringValue", petPlayer)
@@ -32,6 +34,8 @@ CombotCotroller.initFightSession = function(player: Player, Folder, data: NpcFig
 		petPlayerId.Name = "Id"
 
 		local petPlayerHealth = Instance.new("IntValue", petPlayer)
+		-- uses max health for rendering in the UI
+		petPlayerHealth:SetAttribute("MaxHealth", data.player_pet.healthVal)
 		petPlayerHealth.Value = player_per.healthVal
 		petPlayerHealth.Name = "Health"
 	end
@@ -39,7 +43,7 @@ CombotCotroller.initFightSession = function(player: Player, Folder, data: NpcFig
 	-- Create the player boss
 	do
 		local player_boss = data.player_boss
-		local petBoss = Instance.new("Folder", combatInstanceRegistryFolder)
+		local petBoss = Instance.new("Folder", Folder)
 		petBoss.Name = "PlayerBoss"
 
 		local petBossId = Instance.new("StringValue", petBoss)
@@ -47,6 +51,8 @@ CombotCotroller.initFightSession = function(player: Player, Folder, data: NpcFig
 		petBossId.Name = "Id"
 
 		local petBossHealth = Instance.new("IntValue", petBoss)
+		-- uses max health for rendering in the UI
+		petBossHealth:SetAttribute("MaxHealth", data.player_boss.healthVal)
 		petBossHealth.Value = player_boss.healthVal
 		petBossHealth.Name = "Health"
 	end
@@ -55,6 +61,24 @@ end
 CombotCotroller.getPlayerSessionFolder = function(player: Player)
 	local id = tostring(player.UserId)
 	return combatInstanceRegistryFolder:FindFirstChild(id)
+end
+
+-- returns the IntValue that represents the health of either the
+-- player pet or the boss.  `nameInstance` must be "PlayerPet" or
+-- "PlayerBoss".
+CombotCotroller.getHealth = function(player: Player, nameInstance: NpcFighterTypes.healthBarId)
+	if typeof(nameInstance) ~= "string" then
+		return nil
+	end
+	local folder = CombotCotroller.getPlayerSessionFolder(player)
+	if not folder then
+		return nil
+	end
+	local target = folder:FindFirstChild(nameInstance)
+	if not target then
+		return nil
+	end
+	return target:FindFirstChild("Health")
 end
 
 return CombotCotroller

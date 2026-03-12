@@ -1,0 +1,72 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Roact = require(ReplicatedStorage:WaitForChild("Roact"))
+
+local Healthbar = Roact.Component:extend("Healthbar")
+
+local fontFamily = Enum.Font.Gotham
+
+function Healthbar:render()
+	local pet = self.props.model
+	local percent = self.props.percent
+	local petLevel = self.props.petLevel
+
+	if not pet then
+		return
+	end
+	local healthBarBackgroundColor3 = Color3.fromRGB(200, 0, 0)
+	if percent > 0.5 then
+		healthBarBackgroundColor3 = Color3.fromRGB(0, 200, 0)
+	elseif percent > 0.2 then
+		healthBarBackgroundColor3 = Color3.fromRGB(255, 170, 0)
+	end
+	return Roact.createElement("BillboardGui", {
+		Name = "CustomHumanoidBar",
+		Adornee = pet:FindFirstChild("Head") or pet.PrimaryPart,
+		Size = UDim2.new(4, 0, 2, 0),
+		StudsOffset = Vector3.new(0, 3, 0),
+		AlwaysOnTop = true,
+		Parent = pet,
+		ZIndexBehavior = Enum.ZIndexBehavior.Global,
+	}, {
+
+		LevelLabel = Roact.createElement("TextLabel", {
+			Size = UDim2.new(1, 0, 0.3, 0),
+			BackgroundTransparency = 1,
+			Text = "Lvl. " .. petLevel,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			Position = UDim2.new(0, 0, 0.2, 0),
+			Font = Enum.Font.GothamBold,
+			TextScaled = true,
+		}),
+		NameBackground = Roact.createElement("Frame", {
+			Size = UDim2.new(1, 0, 0.2, 0),
+			Position = UDim2.new(0, 0, 0.5, 0),
+			BackgroundColor3 = Color3.fromRGB(30, 30, 60),
+			BackgroundTransparency = 0.2,
+		}, {
+			NameLabel = Roact.createElement("TextLabel", {
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+				Text = pet.Name,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				Font = fontFamily,
+				TextScaled = true,
+			}),
+		}),
+		HealthBackground = Roact.createElement("Frame", {
+			Size = UDim2.new(1, 0, 0.3, 0),
+			Position = UDim2.new(0, 0, 0.7, 0),
+			BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+			BackgroundTransparency = 0.1,
+		}, {
+			HealthBar = Roact.createElement("Frame", {
+				Name = "HealthBar",
+				Size = UDim2.new(percent, 0, 1, 0),
+				BackgroundColor3 = healthBarBackgroundColor3,
+				BorderSizePixel = 0,
+			}),
+		}),
+	})
+end
+
+return Healthbar
