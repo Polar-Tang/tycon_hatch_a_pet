@@ -10,7 +10,6 @@ local function InitNpc(model: Model, animId: string, npcId: string)
 	cheerAnimation.AnimationId = animId
 	local anim_track: AnimationTrack = animator:LoadAnimation(cheerAnimation)
 	anim_track:Play()
-	print("IS THIS set up BEFORE THE triggering frontend?")
 
 	npcUtils.createProximityPrompt(model, {
 		npcId = npcId,

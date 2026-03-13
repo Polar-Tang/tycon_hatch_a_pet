@@ -12,6 +12,8 @@ The eat interval + eat duration >= eat_interval
 -- completly OP
 module["Fox"] =  {
 ["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	["eat_interval"] = 2,
 	["eat_duration"] = 3,
 	["range"] = 30,
@@ -26,6 +28,8 @@ module["Fox"] =  {
 
 module["Panda"] = {
 ["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	["eat_interval"] = 5,
 	["eat_duration"] = 4,
 	["patrol_interval"] = 6,
@@ -40,6 +44,8 @@ module["Panda"] = {
 
 module["Hippo"] = {
 ["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
 	["range"] = 30,
@@ -53,6 +59,8 @@ module["Hippo"] = {
 
 module["Rhino"] = {
 ["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
 	["range"] = 30,
@@ -92,6 +100,8 @@ end
 
 module["Fox"] = merge({
 	["rarity"] = "common",
+	CameraDistanceFactor = 0.8,
+
 	["velocity"] = 4,
 	["speed"] = 2,
 	adorneeOffset = Vector3.new(0, 4, 0),
@@ -100,6 +110,8 @@ module["Fox"] = merge({
 
 module["Panda"] = merge({
 	["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	-- ["eat_interval"] = 5,
 	-- ["eat_duration"] = 4,
 	-- ["patrol_interval"] = 6,
@@ -114,6 +126,8 @@ module["Panda"] = merge({
 
 module["Elephant"] = merge({
 	["rarity"] = "common",
+	CameraDistanceFactor = 1.1,
+
 	-- ["eat_interval"] = 6,
 	-- ["eat_duration"] = 3,
 	-- ["range"] = 30,
@@ -129,6 +143,8 @@ module["Elephant"] = merge({
 
 module["Hippo"] = merge({
 	["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	["velocity"] = 8,
 
 	["speed"] = 2,
@@ -137,6 +153,7 @@ module["Hippo"] = merge({
 
 module["Lion"] = merge({
 	["rarity"] = "uncommon",
+	CameraDistanceFactor = 1.2,
 
 	["velocity"] = 6,
 
@@ -145,25 +162,30 @@ module["Lion"] = merge({
 	calcYOffset = function(Yoff)
 		return 1.821
 	end,
-	-- 
+	--
 	["adorneeOffset"] = Vector3.new(0, 6, 0),
 }, common_stats)
 
 module["Cat"] = merge({
 	["velocity"] = 6,
 	["rarity"] = "uncommon",
+	CameraDistanceFactor = 1.2,
 
 	["speed"] = 1,
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
-	YOffset = 0.726+0.725-0.208 -- +0.543+0.725,
+	CameraDistanceFactor = 1.2,
+
+	YOffset = 0.726 + 0.725 - 0.208, -- +0.543+0.725,
 }, common_stats)
 
 module["Dog"] = merge({
 	["velocity"] = 8,
 	["rarity"] = "uncommon",
+	CameraDistanceFactor = 1.2,
 
 	["speed"] = 1.2,
-	YOffset = -0.488, -- lvl 9
+	YOffset = 0.42,
+	CameraDistanceFactor = 1.2,
 	--lvl38 0.543
 
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
@@ -176,6 +198,8 @@ local rhino: PetTypes.petInitFrontend = merge({
 	["velocity"] = 4,
 	["speed"] = 3,
 	["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
 	-- ["base"] = 6,

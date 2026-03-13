@@ -50,9 +50,7 @@ function FenceBoundsService:GetAvailablePlot()
 	return nil
 end
 
-function FenceBoundsService:EvitPlayerPlot(player)
-	
-end
+function FenceBoundsService:EvitPlayerPlot(player) end
 
 function FenceBoundsService:AssignPlot(plot, player)
 	local userId: StringValue = plot:WaitForChild("OwnerUserId")
@@ -68,7 +66,6 @@ function FenceBoundsService:AssignPlot(plot, player)
 	if plotId.Value == 0 then
 		plotCount = plotCount + 1
 		plotId.Value = plotCount
-		print("plotId.Value ", plotId.Value)
 	end
 end
 
@@ -92,7 +89,6 @@ function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
 	for _, plot in pairs(plots) do
 		local ownerShit = plot:WaitForChild("OwnerUserId")
 		if ownerShit.Value and tostring(ownerShit.Value) == tostring(Id) then
-			print("plot found ", plot)
 			return plot
 		end
 	end

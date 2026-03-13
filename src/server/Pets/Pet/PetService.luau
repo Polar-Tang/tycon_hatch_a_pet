@@ -29,12 +29,13 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	local endPos = position or PlotService:GetRandPosition(plot)
+	local fixedY = pet.PrimaryPart.Position.Y
+	endPos = Vector3.new(endPos.X, fixedY, endPos.Z)
 
 	pet.Parent = workspace
 	-- pet.PrimaryPart.Position = endPos
 	if position then
-		local bottomY = pet.PrimaryPart.Position.Y - pet.PrimaryPart.Size.Y / 2
-		position = Vector3.new(position.X, bottomY, position.Z)
+		position = Vector3.new(position.X, fixedY, position.Z)
 
 		-- testPart({Position = position})
 		pet:PivotTo(CFrame.new(endPos))

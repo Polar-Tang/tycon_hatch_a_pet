@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 --||Nevermore Shit||--
 ----------------------------- getting servicebag and loader -----------------------------
@@ -8,6 +9,9 @@ local UserInputService = game:GetService("UserInputService")
 local NeverMorePackages = ReplicatedStorage.Nevermore
 local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
 local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
+local Index = require(StarterPlayer.StarterPlayerScripts.facade.Index)
+local TopButtons = require(StarterPlayer.StarterPlayerScripts.facade.TopButtons)
+local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
 local Constants = require(ReplicatedStorage.utils.Constants)
 
 local ServiceBag = Nevermore("ServiceBag")
@@ -46,7 +50,7 @@ local BinderProviderStarted = serviceBag:GetService(AllBinders)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.utils.NpcFighterTypes)
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
 
 -- Register all the animations registered with the models name
@@ -163,6 +167,13 @@ do
 		[Enum.KeyCode.Eight] = 8,
 		[Enum.KeyCode.Nine] = 9,
 	}
+
+	TopButtons.init({
+		["PlotButton"] = Index.open,
+		["EggButton"] = nameToAction["Egg Shop Keeper"].promptTrigger,
+		["UtilityButton"] = nameToAction["Kibly Shop Keeper"].promptTrigger,
+	})
+
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then
 			return

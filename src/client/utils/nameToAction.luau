@@ -11,7 +11,7 @@ local ItemsEvent = ReplicatedStorage.RemoteEvents.ItemsEvent
 local module = {}
 
 local kibly: Model = workspace:WaitForChild("ShopKeepers"):WaitForChild("Kibly Shop Keeper")
-local kibly_primaryPart = kibly.PrimaryPart
+local kibly_primaryPart = kibly.PrimaryPart or kibly:WaitForChild("HumanoidRootPart")
 local kibly_original_CF = kibly_primaryPart.CFrame
 
 module["Kibly Shop Keeper"] = {
@@ -59,7 +59,7 @@ module["Kibly Shop Keeper"] = {
 
 local egg = workspace:WaitForChild("ShopKeepers"):WaitForChild("Egg Shop Keeper")
 
-local egg_primaryPart = egg.PrimaryPart
+local egg_primaryPart = egg.PrimaryPart or egg:WaitForChild("HumanoidRootPart")
 local egg_original_CF = egg_primaryPart.CFrame
 
 module["Egg Shop Keeper"] = {

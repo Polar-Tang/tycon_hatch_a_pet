@@ -12,7 +12,7 @@ utils.fixPetY = function(model: Model, root: BasePart)
 
 	local rootY = root.Position.Y
 
-	local groundOffset = rootY - root.Size.Y/2
+	local groundOffset = rootY - root.Size.Y / 2
 	return root.Position.Y
 end
 

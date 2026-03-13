@@ -78,23 +78,48 @@ do
 		if descendant:IsA("BasePart") then
 			descendant.CanCollide = true
 			descendant.CollisionGroup = "Npcs"
+			-- descendant.Anchored = true
+			if descendant.Name == "Rootpart" then
+				descendant.Anchored = true
+			end
 		end
 	end
-	local setCollider = function(parent)
+	local setCollider = function(parent, cb)
 		for _, descendant in parent:GetDescendants() do
 			if descendant:IsA("Model") then
 				for _, descendant in parent:GetDescendants() do
-					onDescendantAdded(descendant)
+					cb(descendant)
 				end
 			end
-			onDescendantAdded(descendant)
+			cb(descendant)
 		end
 	end
 
 	local petsFolder: Folder = ServerStorage.Pets
 	local pets = petsFolder:GetDescendants()
 	for _, pet in pets do
-		setCollider(pet)
+		setCollider(pet, onDescendantAdded)
+	end
+
+	local function fullOptimized(descendant)
+		-- Set collision group for any part descendant
+
+		if descendant:IsA("BasePart") then
+			local descendantPar: BasePart = descendant
+			descendantPar.CanCollide = false
+			descendantPar.CanQuery = false
+			descendantPar.CanTouch = false
+			descendantPar.CanTouch = false
+			descendantPar.AudioCanCollide = false
+			descendantPar.CastShadow = false
+			descendantPar.Anchored = true
+		end
+	end
+
+	local petsClientFolder = ReplicatedStorage.Pets.Templates
+	local petsClient = petsClientFolder:GetDescendants()
+	for _, pet in petsClient do
+		setCollider(pet, fullOptimized)
 	end
 end
 

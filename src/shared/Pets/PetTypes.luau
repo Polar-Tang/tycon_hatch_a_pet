@@ -19,6 +19,7 @@ export type PetData = {
 	petId: string,
 	petStats: petStats,
 	rarity: rarity,
+	CameraDistanceFactor: number,
 }
 
 export type PetsDataStore = { [string]: PetData }
@@ -36,6 +37,8 @@ export type petInitFrontend = {
 	speed: number,
 	adorneeOffset: Vector3?,
 	YOffset: number?,
+	rarity: rarity,
+	CameraDistanceFactor: number,
 }
 
 export type petsInitFrontend = { petNames: petInitFrontend }

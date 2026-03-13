@@ -16,28 +16,16 @@ local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 -- EVENTS
 local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
 
-local function onDescendantAdded(descendant)
-	-- Set collision group for any part descendant
-
-	if descendant:IsA("BasePart") then
-		descendant.CanCollide = true
-		descendant.CollisionGroup = "Npcs"
-		
-	end
-end
-
 local setUpAtt = function(parent, petInfo)
 	local stats = petInfo.petStats
 	parent:SetAttribute("Melee", utils.MeleeCalc(stats.Melee))
 	parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
 	parent:SetAttribute("Stamina", stats.Stamina)
-	
+
 	parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
 		local thisValue = parent:GetAttribute("Level")
 		ScaleToLvl(parent, thisValue)
-		
 	end)
-
 end
 
 local function createProximityPrompt(parent)
@@ -57,17 +45,6 @@ local function createProximityPrompt(parent)
 		-- Fire to server with the pet/NPC that was interacted with
 		petClickedEvent:FireServer(parent)
 	end)
-end
-
-local setCollider = function(parent)
-	for _, descendant in parent:GetDescendants() do
-		if descendant:IsA("Model") then
-			for _, descendant in parent:GetDescendants() do
-				onDescendantAdded(descendant)
-			end
-		end
-		onDescendantAdded(descendant)
-	end
 end
 
 local getStats = function(parent, maid, isOwnerLocal)
@@ -99,7 +76,6 @@ return function(parent, serviceBag: any, player, maid)
 	local isOwnerLocal = tostring(player_owner) == tostring(player.UserId)
 
 	local petData = getStats(parent, maid, isOwnerLocal)
-	setCollider(parent)
 
 	if isOwnerLocal then
 		maid:GiveTask(createProximityPrompt(parent))

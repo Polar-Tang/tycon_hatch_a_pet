@@ -99,6 +99,7 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 
 		local inventory = PlayerInventory:GetHandler(player)
 		inventory:IncreaseMoney(price)
+		ReplicatedStorage.RemoteEvents.PetNew:FireClient(player, petLists.pets)
 	end
 )
 
