@@ -6,10 +6,6 @@ local State = StateMachine.State
 
 local Idle = State.new("Idle")
 
-Idle.Transitions = {
-	require(script.Parent.Parent.Transition.Died),
-}
-
 function Idle:OnEnter(data) end
 
 function Idle:OnHeartbeat(data, deltatime)

@@ -17,4 +17,5 @@ function Dead:OnEnter(data: NpcFighterTypes.bossStateCtx)
 		data.DeadController:DestroyNPC()
 	end)
 end
+
 return Dead

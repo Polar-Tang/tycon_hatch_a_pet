@@ -155,24 +155,14 @@ end
 game.ReplicatedStorage.RemoteEvents.RemoteSync:FireServer({ loaded = "all", inputType = getInputType() })
 
 do
-	local numberKeyCodes = {
-		[Enum.KeyCode.One] = 1,
-		[Enum.KeyCode.Two] = 2,
-		[Enum.KeyCode.Three] = 3,
-		[Enum.KeyCode.Four] = 4,
-		[Enum.KeyCode.Five] = 5,
-		[Enum.KeyCode.Six] = 6,
-		[Enum.KeyCode.Seven] = 7,
-		[Enum.KeyCode.Eight] = 8,
-		[Enum.KeyCode.Nine] = 9,
-	}
-
 	-- SHOULD TELEPORT TO THE UBICATION JUST LIKE GROW GARDEN
 	-- TopButtons.init({
 	-- 	["PlotButton"] = Index.open,
 	-- 	["EggButton"] = nameToAction["Egg Shop Keeper"].promptTrigger,
 	-- 	["UtilityButton"] = nameToAction["Kibly Shop Keeper"].promptTrigger,
 	-- })
+	local _ = require(StarterPlayer.StarterPlayerScripts.UI.petMediatorClient)
+
 	IndexButton.getIndexButton().Activated:Connect(function(a0: InputObject, a1: number)
 		if Index.isOpen() then
 			Index.close()
@@ -180,30 +170,6 @@ do
 		else
 			Index.open()
 			IndexButton.rotate(0)
-		end
-	end)
-
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then
-			return
-		end
-		if numberKeyCodes[input.KeyCode] then
-			local petRegistry = _G["pets_registry"]
-			if not petRegistry then
-				return
-			end
-			local petIds = Table.keys(_G["pets_registry"])
-			if not petIds or next(petIds) == nil then
-				return
-			end
-			local petIndex = numberKeyCodes[input.KeyCode]
-			local petId = petIds[petIndex]
-
-			local dataFight: NpcFighterTypes.combatInstanceData = {
-				petId = petId,
-				bossName = "Ghidra",
-			}
-			game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireServer(dataFight)
 		end
 	end)
 end

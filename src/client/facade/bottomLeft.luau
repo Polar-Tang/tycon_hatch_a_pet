@@ -9,7 +9,8 @@ local screenGui = PlayerGui:WaitForChild("ScreenGui")
 local bottomLeft = {}
 
 bottomLeft.SetMoney = function(total: number)
-	screenGui.BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(math.round(total))
+	local BottomLeft = screenGui:WaitForChild("BottomLeft")
+	BottomLeft.CashAmount.Text = MoneyLib.HandleMoney(math.round(total))
 end
 
 return bottomLeft

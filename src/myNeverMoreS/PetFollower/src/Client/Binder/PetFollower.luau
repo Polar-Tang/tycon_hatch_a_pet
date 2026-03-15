@@ -6,7 +6,7 @@ local healthBarListener = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 
-local StatesFolder = ReplicatedStorage.NPC.States
+local StatesFolder = ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.States
 local PetFollower = setmetatable({}, NPCBase)
 PetFollower.__index = PetFollower
 PetFollower.ClassName = "PetFollower"

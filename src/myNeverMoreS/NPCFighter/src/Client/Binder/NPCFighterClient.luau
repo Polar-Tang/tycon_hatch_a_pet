@@ -4,12 +4,11 @@ local CombatControllerClient =
 	require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatControllerClient)
 local healthBarListener = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.healthBarListener)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
-local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 
 local CombatCon = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
 
-local StatesFolder = ReplicatedStorage.NPC.States
+local StatesFolder = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.Machine.States
 local NPCFighterClient = setmetatable({}, NPCBase)
 NPCFighterClient.__index = NPCFighterClient
 NPCFighterClient.ClassName = "NPCFighterClient"

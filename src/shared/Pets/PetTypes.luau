@@ -39,6 +39,8 @@ export type petInitFrontend = {
 	YOffset: number?,
 	rarity: rarity,
 	CameraDistanceFactor: number,
+	radPivot: number?,
+	ZradPivot: number?,
 }
 
 export type petsInitFrontend = { petNames: petInitFrontend }

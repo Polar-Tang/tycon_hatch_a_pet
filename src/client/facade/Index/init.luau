@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local petTemplates = ReplicatedStorage.Pets.Templates
 
+local FightButton = require(script.FightButton)
 local petBosses = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petBosses)
 local petDetails = require(script.Parent.petDetails)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
@@ -10,6 +11,7 @@ local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local stringUtils = require(ReplicatedStorage.utils.stringUtils)
+local slotButtonHandler = require(script.slotButtonHandler)
 
 local player = Players.LocalPlayer
 
@@ -20,6 +22,9 @@ local screen = PlayerGui:WaitForChild("ScreenGui")
 local Index = {}
 
 local global_maid = Maid.new()
+local slots_maid = Maid.new()
+global_maid:GiveTask(slots_maid)
+
 local slotNum = 0
 local currentUiStroke
 
@@ -39,7 +44,7 @@ function Index.open()
 		bossesButton.Activated:Connect(function(a0: InputObject, a1: number)
 			Index.cleanSlots()
 			for _, pet in pairs(petBosses) do
-				Index.createSlot(pet)
+				Index.createSlot(pet, true)
 			end
 		end)
 		local petsButton: ImageButton = screen.Index.SideButtons.Pets
@@ -60,17 +65,20 @@ function Index.createPets()
 end
 
 function Index.cleanSlots()
-	global_maid:DoCleaning()
+	slots_maid:DoCleaning()
 end
 
 function Index.close()
 	slotNum = 0
 	screen.Index.Visible = false
+	Index.cleanSlots()
 	global_maid:DoCleaning()
 	petDetails.close()
+	_G["petToFight"] = nil
+	_G["bossToFight"] = nil
 end
 
-function Index.createViewport(parentSLot, petName: string)
+function Index.createViewport(parentSLot, petName: PetTypes.petNames)
 	-- local parentSLot = screen.Index.Slots.Scroller.Slot
 
 	local createPivot = function()
@@ -145,7 +153,7 @@ function Index.createViewport(parentSLot, petName: string)
 	parentSLot.PlaceHolder:Destroy()
 end
 
-function Index.createSlot(data: PetTypes.PetData)
+function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 	slotNum += 1
 	local local_maid = Maid.new()
 	local new_slot = screen.Index.Slots.Scroller.Slot:Clone()
@@ -183,10 +191,13 @@ function Index.createSlot(data: PetTypes.PetData)
 
 	local rariry_camelCase = stringUtils.toUpperCamelCase(data.rarity)
 
-	if data == _G["petToFight"] then
+	if not isBoss and data == _G["petToFight"] then
 		petDetails.open()
 		petDetails.setPetData(data)
 		createUIStroke(rariry_camelCase)
+	end
+	if isBoss and data == _G["bossToFight"] then
+		FightButton.open()
 	end
 
 	new_slot.Rarity.Text = rariry_camelCase
@@ -202,19 +213,14 @@ function Index.createSlot(data: PetTypes.PetData)
 
 	Index.createViewport(new_slot, data.petName)
 	local buy = new_slot.Button
-	local con = buy.Activated:Connect(function(a0: InputObject, a1: number)
-		_G["petToFight"] = data
-		petDetails.open()
-		petDetails.setPetData(data)
-		createUIStroke(rariry_camelCase)
-	end)
+	local con = slotButtonHandler.setupButtonActivated(buy, data, isBoss or false, createUIStroke, rariry_camelCase)
 
 	new_slot.Parent = screen.Index.Slots.Scroller
 	new_slot.Visible = true
 
 	local_maid:GiveTask(new_slot)
 	local_maid:GiveTask(con)
-	global_maid:GiveTask(local_maid)
+	slots_maid:GiveTask(local_maid)
 end
 
 function Index.isOpen()

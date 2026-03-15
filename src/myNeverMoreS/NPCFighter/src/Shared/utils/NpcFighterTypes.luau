@@ -81,6 +81,7 @@ export type FightInfo = {
 export type DeadController = {
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> DeadController,
 	CreateWhirpol: (DeadController) -> (),
+	DestroyNPC: (self: DeadController) -> (),
 } & controllerdataInint
 
 export type TargetController = {
@@ -110,6 +111,7 @@ export type MovementController = {
 export type bossStateCtx = {
 	maid: Maid.Maid,
 	pet: Model,
+	Health: IntValue,
 
 	timer: number,
 	lastTriggerTime: number,

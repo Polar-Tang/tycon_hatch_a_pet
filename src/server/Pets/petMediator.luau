@@ -111,7 +111,6 @@ end)
 local CombatController = require(ServerScriptService.Pets.Pet.Combat.CombatController)
 local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
 BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes.combatInstanceData)
-	print("data ", data)
 	local petId = data.petId
 	local bossName = data.bossName
 
@@ -139,16 +138,16 @@ BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes
 			player_pet = petInformation,
 			player_boss = bossInformation,
 		}
-		CombatController.initFightSession(a0, folderSession, fightInfo)
+		print("fightInfo ", fightInfo)
+		CombatController.initFightSession(a0, folderSession, fightInfo) --tag:telepor_point_croakan
 		BossRemoteEvent:FireClient(a0, fightInfo)
 	end
 
-	local point_name = Constants.teleportPointSuffix .. bossName
-	local teleportpoint: { BasePart } = point_name
+	local point_name = Constants.teleportPointSuffix .. string.lower(bossName)
+	local teleportpoint: BasePart = workspace:WaitForChild(point_name)
 
-	CollectionService:GetTagged(teleportpoint)
 	local character: Model = a0.Character or a0.CharacterAdded:Wait()
-	character:PivotTo(teleportpoint[1].CFrame)
+	character:PivotTo(teleportpoint.CFrame)
 end)
 
 -- This is the event that confirms the pét player can do the damage, all the health values should be instances that lives in the Replicated storage and the server handles it while the client only renders it

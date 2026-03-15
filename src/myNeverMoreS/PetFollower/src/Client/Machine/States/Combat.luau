@@ -7,17 +7,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Events = ReplicatedStorage:WaitForChild("RemoteEvents")
 local Attacks: RemoteEvent = Events:WaitForChild("Attacks")
 
-local ServerScriptService = game:GetService("ServerScriptService")
-local StarterPlayer = game:GetService("StarterPlayer")
-local Helpers = ServerScriptService:WaitForChild("Helpers")
-
-local FadingText = require(StarterPlayer.StarterPlayerScripts.utils.FadingText)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 
 local State = StateMachine.State
 local Combat = State.new("Combat")
 
+State.Transitions = {
+	require(script.Parent.Parent.Transition.Died),
+}
 -- PLAYER PET
 local function smoothCFrame(part, targetCFrame, duration)
 	if not part then

@@ -37,3 +37,5 @@ PetFollower:GetClassAddedSignal():Connect(function(machine_binder)
 	end
 	machine_binder:Init(player, ourFightSession.player_pet)
 end)
+
+return {}

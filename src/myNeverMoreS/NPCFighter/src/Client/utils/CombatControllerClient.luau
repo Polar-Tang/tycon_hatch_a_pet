@@ -13,6 +13,7 @@
 	
 	]]
 local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
@@ -57,7 +58,8 @@ do
 		serviceBag: any,
 		player: Player,
 		maid: Maid.Maid,
-		combatInitData: NpcFighterTypes.petStats
+		combatInitData: NpcFighterTypes.petStats,
+		band: NpcFighterTypes.healthBarId
 	)
 		local playerCharacter = player.Character or player.CharacterAdded:Wait()
 
@@ -67,6 +69,7 @@ do
 		controllerdataInint.hrp = parent.PrimaryPart or parent:FindFirstChild("RootPart")
 		controllerdataInint.player = player
 		controllerdataInint.player_character = playerCharacter
+		controllerdataInint.Health = CombatControllerClient.getHealth(player, band)
 		local BinderProvider = _G.ServiceBag:GetService(_G.BinderProvider)
 		local animationHandler = BinderProvider:Get(Constants.animationHandler)
 		controllerdataInint.animationHandler = animationHandler:Get(parent)
@@ -86,7 +89,7 @@ do
 	)
 		local bossName = combatInitData.petId
 
-		local bossSpotName = Constants.spawnPoitSuffix .. bossName
+		local bossSpotName = Constants.spawnPoitSuffix .. string.lower(bossName)
 		local bossSpot: BasePart = CollectionService:GetTagged(bossSpotName)[1]
 
 		parent:PivotTo(bossSpot.CFrame)
@@ -109,7 +112,7 @@ do
 		-- billboardService:resizes()
 		-- petData.billboardService = billboardService
 		-- setUpAtt(parent, petInfo, maid, current_pet_stats)
-		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData)
+		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerBoss")
 		return {
 			maid = maid,
 			pet = parent,
@@ -124,6 +127,7 @@ do
 			DeadController = DeadController.new(controllerdataInint, serviceBag) or nil,
 		}
 	end
+
 	function CombatControllerClient.setPetCtx(
 		parent: Model,
 		serviceBag: any,
@@ -131,15 +135,6 @@ do
 		maid: Maid.Maid,
 		combatInitData: NpcFighterTypes.petStats
 	)
-		local playerCharacter = player.Character or player.CharacterAdded:Wait()
-
-		local nearPlayerPoint = playerCharacter.PrimaryPart.Position
-			+ (playerCharacter.PrimaryPart.CFrame.RightVector * 3)
-		local nearCF = CFrame.new(nearPlayerPoint)
-			* playerCharacter.PrimaryPart.CFrame:ToObjectSpace(playerCharacter.PrimaryPart.CFrame)
-		parent:PivotTo(nearCF)
-		parent.Parent = workspace
-
 		-- Check if the path of Nevermore.src.client is right for perfect isolation, if the print is true i will need to move the entire folder to a player scriupts
 		do
 			print(player.UserId)
@@ -155,7 +150,7 @@ do
 		-- billboardService:resizes()
 		-- petData.billboardService = billboardService
 		-- setUpAtt(parent, petInfo, maid, current_pet_stats)
-		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData)
+		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerPet")
 		return {
 			maid = maid,
 			pet = parent,
@@ -176,23 +171,72 @@ end
 -- Do the same with the player pet but using FindFIrstChild(petid):Clone()
 function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 	local bossName = data.player_boss.petId
-	local bossFolder: Folder = ReplicatedStorage.Bosses
+	local bossFolder: Folder = ReplicatedStorage.Pets.Templates.Bosses
 	local bossTempla = bossFolder:FindFirstChild(bossName)
 	if not bossTempla then
 		return
 	end
 
-	local ourBoss = bossTempla:Clone()
-	ourBoss:AddTag(Constants.combatBet)
-	-- ourBoss:AddTag(Constants.animationHandler)
+	--setup boss
+	do
+		local ourBoss = bossTempla:Clone()
+		local lower_name = string.lower(bossName)
+		local tag_name = "boss_point_" .. lower_name
+		local point_to_spawn_boss = workspace:WaitForChild(tag_name)
+		ourBoss:PivotTo(point_to_spawn_boss.CFrame)
 
-	local petTemplate = workspace:FindFirstChild(data.player_pet.petId):Clone()
-	if not petTemplate then
-		print("petTemplate not found")
-		return
+		ourBoss:AddTag(Constants.combatBet)
+		-- ourBoss:AddTag(Constants.animationHandler)
 	end
-	petTemplate:AddTag(Constants.combatBet)
-	petTemplate:AddTag(Constants.animationHandler)
+
+	do
+		-- Get reference pet from workspace to copy attributes and scale
+		local petToClone = workspace:FindFirstChild(data.player_pet.petId)
+		if not petToClone then
+			print("reference pet not found in workspace")
+			return
+		end
+
+		-- Find template model in ReplicatedStorage.Pets.Models
+		local modelsFolder = ReplicatedStorage:FindFirstChild("Pets"):FindFirstChild("Models")
+		if not modelsFolder then
+			print("Pets.Models folder not found")
+			return
+		end
+
+		local petTemplateModel = modelsFolder:FindFirstChild(petToClone:GetAttribute("petName"))
+		if not petTemplateModel then
+			print("pet template not found in ReplicatedStorage.Pets.Models")
+			return
+		end
+
+		-- Clone the template
+		local petTemplate = petTemplateModel:Clone()
+		if not petTemplate then
+			print("petTemplate not found")
+			return
+		end
+
+		-- Apply the same scale factor from the reference pet
+		local referenceScale = petToClone:GetScale()
+		petTemplate:ScaleTo(referenceScale)
+
+		-- Copy attributes from the reference pet
+		for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
+			petTemplate:SetAttribute(attributeName, attributeValue)
+		end
+
+		petTemplate.Parent = workspace
+
+		local playerCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+		local playerPrimaryPart = playerCharacter.PrimaryPart
+		local offset = playerPrimaryPart.CFrame.RightVector * 5
+		local nearPlayer = playerPrimaryPart.CFrame + offset
+		petTemplate:PivotTo(nearPlayer)
+
+		petTemplate:AddTag(Constants.PetFollower)
+		petTemplate:AddTag(Constants.animationHandler)
+	end
 end
 
 function CombatControllerClient.initFighters(data: NpcFighterTypes.FightInfo) end

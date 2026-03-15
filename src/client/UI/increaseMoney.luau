@@ -45,10 +45,11 @@ RunService.Heartbeat:Connect(function(dt: number)
 end)
 
 return function(amount)
-	if not screenGui.BottomLeft.Visible then
-		screenGui.BottomLeft.Visible = true
-		screenGui.BottomLeft.CashAmount.Visible = true
-		screenGui.BottomLeft.FriendBoost.Visible = true
+	local BottomLeft = screenGui:WaitForChild("BottomLeft")
+	if not BottomLeft.Visible then
+		BottomLeft.Visible = true
+		BottomLeft.CashAmount.Visible = true
+		BottomLeft.FriendBoost.Visible = true
 	end
 	total = amount
 	bottomLeft.SetMoney(total)

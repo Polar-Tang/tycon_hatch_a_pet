@@ -51,3 +51,8 @@ arcCos(Vector.new(-1,-1,-1))
 
 
 check if the petId id exists on bestiary
+
+### Ending itnroduction to fight system
+[] Figure out what height does the backpabk
+[] WTF viewport frames, probably need to use replicated first or some kind of shit that is not overwrited by rojo
+[] add an scale hover to the indexButton
