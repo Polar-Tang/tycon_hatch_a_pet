@@ -3,11 +3,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local petTemplates = ReplicatedStorage.Pets.Templates
 
+local petBosses = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petBosses)
+local petDetails = require(script.Parent.petDetails)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local stringUtils = require(ReplicatedStorage.utils.stringUtils)
+
 local player = Players.LocalPlayer
 
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -18,6 +21,7 @@ local Index = {}
 
 local global_maid = Maid.new()
 local slotNum = 0
+local currentUiStroke
 
 function Index.open()
 	screen.Index.Visible = true
@@ -30,30 +34,78 @@ function Index.open()
 		global_maid:GiveTask(closeSignal)
 	end
 
+	do
+		local bossesButton: ImageButton = screen.Index.SideButtons.Bosses
+		bossesButton.Activated:Connect(function(a0: InputObject, a1: number)
+			Index.cleanSlots()
+			for _, pet in pairs(petBosses) do
+				Index.createSlot(pet)
+			end
+		end)
+		local petsButton: ImageButton = screen.Index.SideButtons.Pets
+		petsButton.Activated:Connect(function(a0: InputObject, a1: number)
+			Index.cleanSlots()
+			Index.createPets()
+		end)
+	end
+
+	Index.createPets()
+end
+
+function Index.createPets()
 	local pets = _G["pets_registry"]
 	for _, pet in pairs(pets) do
 		Index.createSlot(pet)
 	end
 end
 
+function Index.cleanSlots()
+	global_maid:DoCleaning()
+end
+
 function Index.close()
 	slotNum = 0
 	screen.Index.Visible = false
 	global_maid:DoCleaning()
+	petDetails.close()
 end
 
-function Index.createViewport(parentSLot, data: PetTypes.PetData)
+function Index.createViewport(parentSLot, petName: string)
 	-- local parentSLot = screen.Index.Slots.Scroller.Slot
 
 	local createPivot = function()
 		local modelCFrame = CFrame.new(1, 1, 0)
+		local rad = 120
+		local zrad = 0
 
-		return modelCFrame * CFrame.Angles(0, math.rad(120), 0)
+		if petData[petName] then
+			if petData[petName].radPivot then
+				rad = petData[petName].radPivot
+			elseif petData[petName].ZradPivot then
+				zrad = petData[petName].ZradPivot
+			end
+		elseif petBosses[petName] then
+			if petBosses[petName].radPivot and petBosses[petName].ZradPivot then
+				rad = petBosses[petName].radPivot
+				zrad = petBosses[petName].ZradPivot
+			elseif petBosses[petName].radPivot then
+				rad = petBosses[petName].radPivot
+			elseif petBosses[petName].ZradPivot then
+				zrad = petBosses[petName].ZradPivot
+			end
+		end
+		return modelCFrame * CFrame.Angles(0, math.rad(rad), math.rad(zrad))
 	end
 	local cameraRotation = function(modelCFrame, modelSize)
-		local petName = data.petName :: PetTypes.petNames
+		local petName = petName :: PetTypes.petNames
 
-		local distance = math.max(modelSize.X, modelSize.Y, modelSize.Z) * petData[petName].CameraDistanceFactor
+		local distance = math.max(modelSize.X, modelSize.Y, modelSize.Z)
+			* (
+				if petData[petName]
+					then petData[petName].CameraDistanceFactor
+					elseif petBosses[petName] then petBosses[petName].CameraDistanceFactor
+					else 1.2
+			)
 
 		return CFrame.new(1, 1, 0)
 			* CFrame.new(0, 0, -distance)
@@ -80,7 +132,7 @@ function Index.createViewport(parentSLot, data: PetTypes.PetData)
 	Viewport.CurrentCamera = Camera
 
 	-- model to copy
-	local item = petTemplates:WaitForChild(data.petName)
+	local item = petTemplates:WaitForChild(petName)
 	local itemClone: Model = item:Clone()
 	itemClone.Parent = Viewport
 
@@ -100,27 +152,65 @@ function Index.createSlot(data: PetTypes.PetData)
 	new_slot.Name = "Slot" .. slotNum
 	new_slot.Txt.Text = data.petName
 
-	local rariry_camelCase = stringUtils.toUpperCamelCase(data.rarity)
-	new_slot.Rarity.Text = rariry_camelCase
-	local UIGradient = new_slot.Rarity.UIGradient
+	local createUIStroke = function(rarity)
+		if currentUiStroke then
+			currentUiStroke:Destroy()
+		end
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.new(255, 255, 255)
+		stroke.Thickness = 4
+		stroke.Parent = new_slot
 
+		local gradient = Instance.new("UIGradient")
+
+		local color_seq = ColorSequence.new(clientUtils.getRarityColorSecuence(rarity))
+		print("color seq", color_seq)
+		--[[
+		 [1] = 0 0.862745 0.862745 0.862745 0 ,
+                    [2] = 1 0.705882 0.705882 0.705882 0 
+		]]
+		gradient.Color = color_seq
+
+		gradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 0),
+		})
+		gradient.Rotation = 180
+		gradient.Offset = Vector2.new(0, 0)
+		gradient.Parent = stroke
+		currentUiStroke = stroke
+	end
+
+	local rariry_camelCase = stringUtils.toUpperCamelCase(data.rarity)
+
+	if data == _G["petToFight"] then
+		petDetails.open()
+		petDetails.setPetData(data)
+		createUIStroke(rariry_camelCase)
+	end
+
+	new_slot.Rarity.Text = rariry_camelCase
+
+	local UIGradient = new_slot.Rarity.UIGradient
 	UIGradient.Rotation = 90
 	UIGradient.Offset = Vector2.new(0, 0)
-
 	UIGradient.Color = ColorSequence.new(clientUtils.getRarityColorSecuence(rariry_camelCase))
-
 	UIGradient.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
 		NumberSequenceKeypoint.new(1, 0),
 	})
-	-- new_slot.PlaceHolder.Image = data.image
-	Index.createViewport(new_slot, data)
-	new_slot.Visible = true
-	new_slot.Parent = screen.Index.Slots.Scroller
+
+	Index.createViewport(new_slot, data.petName)
 	local buy = new_slot.Button
 	local con = buy.Activated:Connect(function(a0: InputObject, a1: number)
 		_G["petToFight"] = data
+		petDetails.open()
+		petDetails.setPetData(data)
+		createUIStroke(rariry_camelCase)
 	end)
+
+	new_slot.Parent = screen.Index.Slots.Scroller
+	new_slot.Visible = true
 
 	local_maid:GiveTask(new_slot)
 	local_maid:GiveTask(con)

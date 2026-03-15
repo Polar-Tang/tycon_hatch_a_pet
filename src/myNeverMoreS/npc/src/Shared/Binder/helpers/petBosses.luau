@@ -98,112 +98,32 @@ local function merge<T, U>(a: T, b: U)
 	return result :: PetTypes.petInitFrontend
 end
 
-module["Fox"] = merge({
-	["rarity"] = "common",
-	CameraDistanceFactor = 0.8,
-
-	["velocity"] = 4,
-	["speed"] = 2,
-	adorneeOffset = Vector3.new(0, 4, 0),
-	YOffset = 0.5,
-}, common_stats)
-
-module["Panda"] = merge({
-	["rarity"] = "common",
+module["Croakan"] = merge({
+	petName = "Croakan",
+	["rarity"] = "mythic",
 	CameraDistanceFactor = 1.2,
-
-	-- ["eat_interval"] = 5,
-	-- ["eat_duration"] = 4,
-	-- ["patrol_interval"] = 6,
-	-- ["patrol_duration"] = 500,
-	-- ["range"] = 30,
-	["velocity"] = 8,
-	["speed"] = 1.25,
-	-- ["base"] = 4, -- money generation
-	["adorneeOffset"] = Vector3.new(0, 5, 0),
-	YOffset = 0.925,
+	radPivot = 300,
+	ZradPivot = 90,
 }, common_stats)
 
-module["Elephant"] = merge({
-	["rarity"] = "common",
+module["Ghidra"] = merge({
+	petName = "Ghidra",
+	["rarity"] = "mythic",
 	CameraDistanceFactor = 1.1,
-
-	-- ["eat_interval"] = 6,
-	-- ["eat_duration"] = 3,
-	-- ["range"] = 30,
-	["velocity"] = 4,
-	["speed"] = 3,
-	YOffset = 1.3,
-
-	-- ["patrol_interval"] = 8,
-	-- ["patrol_duration"] = 500,
-	-- ["base"] = 8,
-	["adorneeOffset"] = Vector3.new(0, 9, 0),
 }, common_stats)
 
-module["Hippo"] = merge({
-	["rarity"] = "common",
+module["Goaterberus"] = merge({
+	petName = "Goaterberus",
+	["rarity"] = "mythic",
 	CameraDistanceFactor = 1.2,
-
-	["velocity"] = 8,
-
-	["speed"] = 2,
-	["adorneeOffset"] = Vector3.new(0, 9, 0),
-}, common_stats)
-
-module["Lion"] = merge({
-	["rarity"] = "uncommon",
-	CameraDistanceFactor = 1.2,
-
-	["velocity"] = 6,
-
-	["speed"] = 1,
-	YOffset = -1.821,
-	calcYOffset = function(Yoff)
-		return 1.821
-	end,
-	--
-	["adorneeOffset"] = Vector3.new(0, 6, 0),
-}, common_stats)
-
-module["Cat"] = merge({
-	["velocity"] = 6,
-	["rarity"] = "uncommon",
-	CameraDistanceFactor = 1.2,
-
-	["speed"] = 1,
-	["adorneeOffset"] = Vector3.new(0, 5, 0),
-
-	YOffset = 0.726 + 0.725 - 0.208, -- +0.543+0.725,
-}, common_stats)
-
-module["Dog"] = merge({
-	["velocity"] = 8,
-	["rarity"] = "uncommon",
-	CameraDistanceFactor = 1.2,
-
-	["speed"] = 1.2,
-	YOffset = 0.42,
-	--lvl38 0.543
-
-	["adorneeOffset"] = Vector3.new(0, 5, 0),
 }, common_stats)
 
 local rhino: PetTypes.petInitFrontend = merge({
-	-- ["eat_interval"] = 6,
-	-- ["eat_duration"] = 5,
-	-- ["range"] = 30,
-	["velocity"] = 4,
-	["speed"] = 3,
-	["rarity"] = "common",
-	CameraDistanceFactor = 1.2,
-
-	-- ["patrol_interval"] = 8,
-	-- ["patrol_duration"] = 500,
-	-- ["base"] = 6,
-	["adorneeOffset"] = Vector3.new(0, 9, 0),
-	YOffset = 0.994,
+	["rarity"] = "mythic",
+	CameraDistanceFactor = 0.9,
+	["petName"] = "X-Rhino",
+	radPivot = 45,
 }, common_stats)
-module["Rhino"] = rhino
+module["X-Rhino"] = rhino
 --
 return module :: { [PetTypes.petNames]: PetTypes.petInitFrontend }

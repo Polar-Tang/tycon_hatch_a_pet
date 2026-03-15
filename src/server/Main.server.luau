@@ -80,7 +80,7 @@ do
 			descendant.CollisionGroup = "Npcs"
 			-- descendant.Anchored = true
 			if descendant.Name == "Rootpart" then
-				descendant.Anchored = true
+				-- descendant.Anchored = true
 			end
 		end
 	end

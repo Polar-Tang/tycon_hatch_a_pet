@@ -10,8 +10,7 @@ local NeverMorePackages = ReplicatedStorage.Nevermore
 local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
 local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
 local Index = require(StarterPlayer.StarterPlayerScripts.facade.Index)
-local TopButtons = require(StarterPlayer.StarterPlayerScripts.facade.TopButtons)
-local nameToAction = require(StarterPlayer.StarterPlayerScripts.utils.nameToAction)
+local IndexButton = require(StarterPlayer.StarterPlayerScripts.facade.IndexButton)
 local Constants = require(ReplicatedStorage.utils.Constants)
 
 local ServiceBag = Nevermore("ServiceBag")
@@ -168,11 +167,21 @@ do
 		[Enum.KeyCode.Nine] = 9,
 	}
 
-	TopButtons.init({
-		["PlotButton"] = Index.open,
-		["EggButton"] = nameToAction["Egg Shop Keeper"].promptTrigger,
-		["UtilityButton"] = nameToAction["Kibly Shop Keeper"].promptTrigger,
-	})
+	-- SHOULD TELEPORT TO THE UBICATION JUST LIKE GROW GARDEN
+	-- TopButtons.init({
+	-- 	["PlotButton"] = Index.open,
+	-- 	["EggButton"] = nameToAction["Egg Shop Keeper"].promptTrigger,
+	-- 	["UtilityButton"] = nameToAction["Kibly Shop Keeper"].promptTrigger,
+	-- })
+	IndexButton.getIndexButton().Activated:Connect(function(a0: InputObject, a1: number)
+		if Index.isOpen() then
+			Index.close()
+			IndexButton.rotate(180)
+		else
+			Index.open()
+			IndexButton.rotate(0)
+		end
+	end)
 
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then
