@@ -85,24 +85,31 @@ export type DeadController = {
 } & controllerdataInint
 
 export type TargetController = {
-	new: (data: controllerdataInint, serviceBag: any, player: Player) -> TargetController,
-	Update: (self: TargetController) -> Vector3?,
-	getNearbyTo: (self: TargetController, targetPart: BasePart, radius: number?) -> Vector3,
-	GetWaypoints: (self: TargetController, goal: Vector3) -> Promise.Promise<Path>,
+	_player_hrp: BasePart,
+	_lastGoalPos: Vector3,
 
-	_playerLastPos: Vector3,
+	new: (data: controllerdataInint, serviceBag: any, player: Player) -> TargetController,
+	GetGoal: (self: TargetController) -> Vector3?,
+	CalculatePath: (self: TargetController, goal: Vector3) -> Promise.Promise<Path>,
+	_getGoalPos: (self: TargetController) -> Vector3,
 } & controllerdataInint
 
 export type MovementController = {
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> MovementController,
-	MoveTo: (self: MovementController, Vector3) -> (),
+	MoveTo: (self: MovementController, Path) -> (),
 	_getAtt: (self: MovementController) -> Attachment,
+	ForgotPath: (self: MovementController) -> (),
+	Stop: (self: MovementController) -> (),
+	_lookTo: (self: MovementController, targetPosition: Vector3) -> Promise.Promise<>,
+	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: () -> ()) -> (),
+	getAnimHandler: (self: MovementController) -> any,
 
 	_playerLastPos: Vector3,
-	_currentMovePromise: Promise.Promise<>,
+	_currentMovePromise: Promise.Promise<>?,
 	velocity: number,
 	isMoving: boolean,
 	speed: number,
+	elapsed: number,
 
 	_moveConn: RBXScriptConnection?,
 } & controllerdataInint
@@ -122,7 +129,6 @@ export type bossStateCtx = {
 export type petStateCtx = {
 	maid: Maid.Maid,
 	pet: Model,
-
 	--- ON combat --
 	enemy: Model,
 	enemy_hrp: BasePart,

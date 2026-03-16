@@ -59,4 +59,15 @@ module.getRarityColorSecuence = function(rarity: PetTypes.rarity)
 	return rarityGradient[rarity] or rarityGradient["Common"]
 end
 
+module.petGoal = function(playerCharacter: Model, range: number): Vector3
+	local player_hrp = playerCharacter.PrimaryPart
+	local offset = player_hrp.CFrame.RightVector * range
+	local nearPlayer = player_hrp.CFrame + offset
+	local _bottomY = player_hrp.Position.Y - (playerCharacter:GetExtentsSize().Y / 2)
+
+	-- Avoid Y offset
+	nearPlayer = Vector3.new(nearPlayer.X, _bottomY, nearPlayer.Z)
+	return nearPlayer
+end
+
 return module

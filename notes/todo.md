@@ -53,6 +53,9 @@ arcCos(Vector.new(-1,-1,-1))
 check if the petId id exists on bestiary
 
 ### Ending itnroduction to fight system
+[] need to define distance in target controller, as the multiplier to right vector and the cap to return a newPos at :Update
+
 [] Figure out what height does the backpabk
 [] WTF viewport frames, probably need to use replicated first or some kind of shit that is not overwrited by rojo
 [] add an scale hover to the indexButton
+[] add it offset too

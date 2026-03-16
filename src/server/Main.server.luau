@@ -1,6 +1,7 @@
 --||Services||--
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
@@ -116,7 +117,7 @@ do
 		end
 	end
 
-	local petsClientFolder = ReplicatedStorage.Pets.Templates
+	local petsClientFolder = ReplicatedFirst.PetsTemplates
 	local petsClient = petsClientFolder:GetDescendants()
 	for _, pet in petsClient do
 		setCollider(pet, fullOptimized)

@@ -14,9 +14,16 @@
 	]]
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
+local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
+local MovementController =
+	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.MovementController)
+local TargetController =
+	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.TargetController)
 local CombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
@@ -163,6 +170,8 @@ do
 			-------- Controlles --------
 
 			DeadController = DeadController.new(controllerdataInint, serviceBag) or nil,
+			TargetController = TargetController.new(controllerdataInint, serviceBag, player),
+			MovementController = MovementController.new(controllerdataInint, serviceBag, player),
 		}
 	end
 end
@@ -171,7 +180,7 @@ end
 -- Do the same with the player pet but using FindFIrstChild(petid):Clone()
 function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 	local bossName = data.player_boss.petId
-	local bossFolder: Folder = ReplicatedStorage.Pets.Templates.Bosses
+	local bossFolder: Folder = ReplicatedFirst.PetsTemplates.Bosses
 	local bossTempla = bossFolder:FindFirstChild(bossName)
 	if not bossTempla then
 		return
@@ -220,7 +229,8 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 		-- Apply the same scale factor from the reference pet
 		local referenceScale = petToClone:GetScale()
 		petTemplate:ScaleTo(referenceScale)
-
+		local hrp = petTemplate.PrimaryPart
+		hrp.Anchored = false
 		-- Copy attributes from the reference pet
 		for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
 			petTemplate:SetAttribute(attributeName, attributeValue)
@@ -228,10 +238,8 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 
 		petTemplate.Parent = workspace
 
-		local playerCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-		local playerPrimaryPart = playerCharacter.PrimaryPart
-		local offset = playerPrimaryPart.CFrame.RightVector * 5
-		local nearPlayer = playerPrimaryPart.CFrame + offset
+		local nearPlayer = clientUtils.petGoal(Players.LocalPlayer.Character, 3)
+		nearPlayer = CFrame.new(nearPlayer) * Players.LocalPlayer.Character.PrimaryPart.CFrame.Rotation
 		petTemplate:PivotTo(nearPlayer)
 
 		petTemplate:AddTag(Constants.PetFollower)

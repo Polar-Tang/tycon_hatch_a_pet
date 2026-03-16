@@ -1,65 +1,64 @@
 local PathfindingService = game:GetService("PathfindingService")
-local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local packages = RS.Nevermore.Quenty
+local StarterPlayer = game:GetService("StarterPlayer")
+local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
-local PathfindingUtils = require(ReplicatedStorage.Nevermore.Quenty.pathfindingutils.Shared.PathfindingUtils)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
-local BaseObject = require(packages.baseobject.Shared.BaseObject)
+local testPart = require(ReplicatedStorage.utils.testPart)
 
-local TargetController = setmetatable({}, BaseObject)
+local TargetController = {}
 TargetController.__index = TargetController
 
 function TargetController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
-	local self = setmetatable(data, TargetController)
-	self._playerLastPos = nil
+	local dataShit = table.clone(data)
+	local self = setmetatable(dataShit, TargetController)
+	local playerChar = self.player_character
+
+	local player_hrp = playerChar and playerChar.PrimaryPart
+	self._player_hrp = player_hrp
+	self._lastGoalPos = self:_getGoalPos()
 	return self
 end
 
-function TargetController.Update(self: NpcFighterTypes.TargetController): Vector3?
-	local playerChar = self.player_character
-	local playerPos = playerChar.PrimaryPart.Position
+function TargetController.GetGoal(self: NpcFighterTypes.TargetController): Vector3?
+	local currentGoal = self:_getGoalPos()
 
-	if not self._playerLastPos or self._playerLastPos ~= playerPos then
-		self._playerLastPos = playerPos
+	-- player should move at least 2 studs for the pet to GetGoal its path, this is to prevent constant path recalculations when the player is standing still or making minor movements
+	print("(self._lastGoalPos - currentGoal).Magnitude ", (self._lastGoalPos - currentGoal).Magnitude)
+	if (self._lastGoalPos - currentGoal).Magnitude > 3 then
+		self._lastGoalPos = currentGoal
 
-		return self._playerLastPos
+		return currentGoal
 	end
 	return nil
 end
 
-function TargetController.GetWaypoints(self: NpcFighterTypes.TargetController, goal): Promise.Promise<Path>
-	local Path = PathfindingService:CreatePath({
-		AgentRadius = 3,
-		AgentHeight = 6,
-		AgentCanJump = true,
-		Costs = {
-			Snow = math.huge,
-			Metal = math.huge,
-		},
-	})
-	return PathfindingUtils.promiseComputeAsync(Path, self.hrp.Position, goal)
+function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, goal: Vector3): Promise.Promise<Path>
+	local Path = PathfindingService:CreatePath()
+	local currentPos = self.hrp.Position
+
+	--testPart({ Position = currentPos, Name = "StartPos", Color3 = Color3.new(0, 1, 0) })
+
+	-- prove setting the same y to both positions to see if path is still an empty array
+	--testPart({ Position = goal, Name = "EndPos", Color3 = Color3.new(1, 0, 0) })
+	return Promise.spawn(function(resolve, reject)
+		local ok, err = pcall(function()
+			Path:ComputeAsync(currentPos, goal)
+		end)
+		if not ok then
+			reject(err or "Failed to compute path")
+			return
+		end
+		return resolve(Path)
+	end)
 end
 
--- MOVE NEARBY A GIVEN BASEPART
-function TargetController:getNearbyTo(targetPart: BasePart, radius: number?)
-	radius = radius or 5
+-- This is producing the goal position used to calculate the path from the movement controller
+function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): Vector3
+	-- get nearby to player position
+	local nearPlayer = clientUtils.petGoal(self.player_character, 3)
 
-	local targetPos = targetPart.Position
-
-	local angle = math.rad(math.random(0, 360))
-	local distance = math.random(2, radius)
-
-	local offsetX = math.cos(angle) * distance
-	local offsetZ = math.sin(angle) * distance
-
-	local destination = Vector3.new(targetPos.X + offsetX, targetPos.Y + self.YOffset, targetPos.Z + offsetZ)
-
-	return destination
-end
-
-function TargetController.DestroyNPC(self: NpcFighterTypes.TargetController)
-	self.pet:Destroy()
+	return nearPlayer
 end
 
 return TargetController

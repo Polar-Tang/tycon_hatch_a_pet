@@ -1,7 +1,8 @@
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
-local petTemplates = ReplicatedStorage.Pets.Templates
+local petTemplates = ReplicatedFirst.PetsTemplates
 
 local FightButton = require(script.FightButton)
 local petBosses = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petBosses)
