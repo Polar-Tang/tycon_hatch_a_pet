@@ -46,7 +46,9 @@ function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): V
 end
 ```
 This prevent any mismatch between the calculated goal and the actual position. So far, so good.
-Next bug: there are Y offset and the pet glitches from a position to another different. I'm not sure about the Y offset but the glitches occurs because there are many threads attempting to modify the same pet position:
+
+### Can't cancell the thread
+There are glitches from a position to another different. The glitches occurs because there are many threads attempting to modify the same pet position. I clear the main entry point that moves the pet in `/home/nautilus/Documents/games/tycon_farm/src/myNeverMoreS/PetFollower/src/Client/Machine/States/Following.luau` at line 20
 ```lua
 function Following:OnHeartbeat(data: NpcFighterTypes.petStateCtx, deltaTime)
 	data.timer += deltaTime
@@ -57,6 +59,7 @@ function Following:OnHeartbeat(data: NpcFighterTypes.petStateCtx, deltaTime)
 		local goalPos = data.TargetController:GetGoal() -- if this return a vector is because is needed to move
 		if goalPos then -- we need to move
 			data.TargetController:CalculatePath(goalPos):Then(function(path: Path): ...any
+				data.MovementController:ForgotPath()
 				-- initialize the thread which completes over time
 				data.MovementController:MoveTo(path)
 			end)
@@ -64,25 +67,29 @@ function Following:OnHeartbeat(data: NpcFighterTypes.petStateCtx, deltaTime)
 	end
 end
 ```
-if getGoal returns a value during an existing data.MovementController:MoveTo(path) there two or more threads attempting to change the pet position at the same time.
-In order to avoid multiple threads we are attempting to cancel the current one
+i though this would disconnect the `_moveToWaypoint` but the connection may still live until the timeReach completes, at the same time the promise where destroyed and a new one is creating new movement connections so now MoveTo looks like:
 ```lua
-
-			data.TargetController:CalculatePath(goalPos):Then(function(path: Path): ...any
-				data.MovementController:ForgotPath()
-				data.MovementController:MoveTo(path)
+self._currentMovePromise = Promise.new(function(resolve, reject)
+	self.maid:DoCleaning()
+	-- do stuff
+	local function moveNext()
+	local moveCon = self:_moveToWaypoint(waypoint.Position, function()
+				currentIndex += 1
+				moveNext()
 			end)
-		
+	if moveCon then
+				self.maid:GiveTask(moveCon)				
+			end
+end):Finally(function(...): ...any
+	self.maid:DoCleaning()
+end)
 ```
-This function simply destroys the current promise
-```lua
-function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
-	if self._currentMovePromise then
-		self._currentMovePromise:Destroy()
-	end
-end
-```
-but i don't know why this is making the pet dissappear
+#### Update `_lookTo`
+
+I'm working with `_rotate` to work similar to do for movement controller what auto rotate does to humanoid:MoveTo. My idea is that for every moveCon the petModel look at the current waypoint position he's going to, so `rotate(timer)` takes a timer to rotate a fraction of what should rotate  now should use PivotTo instead of MoveTo so i can handle its rotation also to avoid rotating once 
+and calls `_rotate` to smothly rotates the pet over the movent, the single trouble is that it's happening after every completition, please check that the orientation is already the goal one and if it is take the necessary measures to avoid the current frame to lerp again at startCFrame
+I need to adjust how `_rotate` should be called
+ 
 
 The calculation for the movement has an y offset
 ![[Pasted image 20260316141735.png]]

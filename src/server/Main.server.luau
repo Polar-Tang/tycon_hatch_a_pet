@@ -81,7 +81,7 @@ do
 			descendant.CollisionGroup = "Npcs"
 			-- descendant.Anchored = true
 			if descendant.Name == "Rootpart" then
-				-- descendant.Anchored = true
+				--descendant.Anchored = true
 			end
 		end
 	end
@@ -99,6 +99,11 @@ do
 	local petsFolder: Folder = ServerStorage.Pets
 	local pets = petsFolder:GetDescendants()
 	for _, pet in pets do
+		setCollider(pet, onDescendantAdded)
+	end
+	local petsFighterFolder: Folder = ReplicatedFirst.Pets
+	local petsFighters = petsFighterFolder:GetDescendants()
+	for _, pet in petsFighters do
 		setCollider(pet, onDescendantAdded)
 	end
 

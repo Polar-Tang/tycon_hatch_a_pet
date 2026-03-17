@@ -103,13 +103,18 @@ export type MovementController = {
 	_lookTo: (self: MovementController, targetPosition: Vector3) -> Promise.Promise<>,
 	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: () -> ()) -> (),
 	getAnimHandler: (self: MovementController) -> any,
+	_rotate: (self: MovementController, timer: number) -> CFrame,
+	isRotated: (self: NpcFighterTypes.MovementController) -> boolean,
 
+	startCFrame: CFrame,
+	goalRotation: CFrame,
 	_playerLastPos: Vector3,
 	_currentMovePromise: Promise.Promise<>?,
 	velocity: number,
 	isMoving: boolean,
 	speed: number,
 	elapsed: number,
+	moveConn: RBXScriptConnection?,
 
 	_moveConn: RBXScriptConnection?,
 } & controllerdataInint

@@ -59,28 +59,18 @@ function MovementController._getAtt(self: NpcFighterTypes.MovementController): A
 	return attachmentAlignPos
 end
 
-function MovementController._lookTo(self: NpcFighterTypes.MovementController, targetPosition)
-	local startPos = self.hrp.Position
+function MovementController._rotate(self: NpcFighterTypes.MovementController, timer): CFrame
+	local rotateTime = 0.1 -- use a hardcoded rotate time for now, can be changed to be based on the angle between the current forward vector and the target direction
+	local t = math.clamp(timer / rotateTime, 0, 1)
+	return self.startCFrame:Lerp(self.goalRotation, t)
+end
+
+function MovementController.isRotated(self: NpcFighterTypes.MovementController): boolean
 	local currentCFrame = self.hrp.CFrame
-	local targetCFrame = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
-
-	-- Calculate the angle difference
 	local currentLook = currentCFrame.LookVector
-	local targetLook = targetCFrame.LookVector
-	local angle = math.acos(math.clamp(currentLook:Dot(targetLook), -1, 1))
-	local rotateMaxTime = 3
-
-	-- Assuming 360° (rotateMaxTime*pi radians) takes rotateMaxTime seconds
-	local rotateTime = (angle / (rotateMaxTime * math.pi)) * 2
-
-	local tween = TweenService:Create(
-		self.hrp,
-		TweenInfo.new(rotateTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-		{ CFrame = targetCFrame }
-	)
-	tween:Play()
-
-	return tween.Completed
+	local goalLook = self.goalRotation.LookVector
+	local tan = math.acos(math.clamp(currentLook:Dot(goalLook), -1, 1))
+	return tan <= math.rad(5)
 end
 
 function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
@@ -91,6 +81,7 @@ end
 
 function MovementController.MoveTo(self: NpcFighterTypes.MovementController, path: Path)
 	self._currentMovePromise = Promise.new(function(resolve, reject)
+		self.maid:DoCleaning()
 		local waypoints = path:GetWaypoints()
 		if #waypoints == 0 then
 			resolve()
@@ -118,6 +109,11 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 
 		local currentIndex = 1
 		local function moveNext()
+			-- Ensure there a single movement connection at a time
+			if self.moveConn then
+				self.moveConn:Disconnect()
+			end
+
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
 				self.isMoving = false
@@ -126,6 +122,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			end
 
 			local waypoint = waypoints[currentIndex]
+			-- print("waypoint ", waypoint) -- start the jump functionality
 			self:_moveToWaypoint(waypoint.Position, function()
 				currentIndex += 1
 				moveNext()
@@ -147,25 +144,41 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 		onComplete()
 		return
 	end
-	testPart({ Position = targetPosition })
+
+	-- Set up rotation towards the target
+	do
+		self.startCFrame = self.hrp.CFrame
+		self.goalRotation = CFrame.lookAt(startPos, targetPosition)
+	end
+
 	local dir = delta.Unit
 	local elapsed = self.elapsed
-	local moveConn
-	moveConn = RunService.Heartbeat:Connect(function(dt)
+
+	self.moveConn = RunService.Heartbeat:Connect(function(dt)
 		elapsed += dt
 		local newPos = startPos + dir * self.velocity * elapsed
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
 		--testPart({ Position = newPos, Color3 = Color3.new(1, 0, 0) })
 
 		if elapsed >= timeToReach then
-			moveConn:Disconnect()
+			if self:isRotated() then
+				local newCF = CFrame.new(newPos) * self:_rotate(elapsed).Rotation
+				self.pet:PivotTo(newCF)
+			else
+				self.pet:MoveTo(newPos)
+			end
 
-			self.pet:MoveTo(newPos)
 			onComplete()
+
 			return
 		end
 
-		self.pet:MoveTo(newPos)
+		if self:isRotated() then
+			local newCF = CFrame.new(newPos) * self:_rotate(elapsed).Rotation
+			self.pet:PivotTo(newCF)
+		else
+			self.pet:MoveTo(newPos)
+		end
 	end)
 end
 

@@ -34,7 +34,16 @@ function TargetController.GetGoal(self: NpcFighterTypes.TargetController): Vecto
 end
 
 function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, goal: Vector3): Promise.Promise<Path>
-	local Path = PathfindingService:CreatePath()
+	local Path = PathfindingService:CreatePath({
+		AgentCanJump = true,
+		AgentRadius = 10,
+		AgentHeight = 10,
+		Costs = {
+			-- need to test in different materials
+			Snow = math.huge,
+			Metal = math.huge,
+		},
+	})
 	local currentPos = self.hrp.Position
 
 	--testPart({ Position = currentPos, Name = "StartPos", Color3 = Color3.new(0, 1, 0) })
