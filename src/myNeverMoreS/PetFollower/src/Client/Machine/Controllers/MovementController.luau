@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local packages = RS.Nevermore.Quenty
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 local testPart = require(ReplicatedStorage.utils.testPart)
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
@@ -19,6 +20,7 @@ function MovementController.new(data: NpcFighterTypes.controllerdataInint, servi
 	local petName = self.pet:GetAttribute("petName")
 
 	self.speed = assert(petData[petName], "invalid petName").speed
+	self.moveConnsMaid = Maid.new()
 
 	return self
 end
@@ -94,7 +96,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		-- local rotationComplete = self:_lookTo(finalWaypoint.Position)
 
 		-- rotationComplete:Once(function()
-		self.elapsed = 0
 		local animHandler = self:getAnimHandler()
 		animHandler:LoadAnimation(true, "walk")
 		self.isMoving = true
@@ -102,9 +103,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		local currentIndex = 1
 		local function moveNext()
 			-- Ensure there a single movement connection at a time
-			if self.moveConn then
-				self.moveConn:Disconnect()
-			end
+			self.moveConnsMaid:DoCleaning()
 
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
@@ -114,10 +113,17 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			end
 
 			local waypoint = waypoints[currentIndex]
-			self:_moveToWaypoint(waypoint, function()
-				currentIndex += 1
-				moveNext()
-			end)
+			if waypoint.Action == Enum.PathWaypointAction.Jump then
+				self:_jumpToWaypoint(waypoint.Position, function()
+					currentIndex += 1
+					moveNext()
+				end)
+			elseif waypoint.Action == Enum.PathWaypointAction.Walk then
+				self:_moveToWaypoint(waypoint.Position, function()
+					currentIndex += 1
+					moveNext()
+				end)
+			end
 		end
 		moveNext()
 		-- end)
@@ -141,27 +147,47 @@ function MovementController._isRotated(self: NpcFighterTypes.MovementController)
 	return YDiff < math.rad(1)
 end
 
-function MovementController._walkToWaypoint(
-	self: NpcFighterTypes.MovementController,
-	targetPosition: Vector3,
-	onComplete
-)
-	-- This function is now handled by the MoveTo function and the Heartbeat connection it creates, so we can remove this implementation
-end
+-- constsants
+local GRAVITY = Vector3.new(0, -workspace.Gravity, 0)
+local T = 0.5 -- use a fixed time for the ball to reach the target
 
 function MovementController._jumpToWaypoint(
 	self: NpcFighterTypes.MovementController,
 	targetPosition: Vector3,
 	onComplete
 )
+	local startPosition = self.hrp.Position
+	do
+		self.startCFrame = self.hrp.CFrame
+		self.goalRotation = CFrame.lookAt(startPosition, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
+
+		testPart({ CFrame = self.startCFrame })
+	end
+
+	--V1 = P1 - P0 - 0.5*G*T^2/T
+	local initialVelocity = (targetPosition - startPosition - 0.5 * GRAVITY * T ^ 2) / T
+	local t = 0
+	local moveConn = RunService.Heartbeat:Connect(function(deltaTime)
+		t += deltaTime
+
+		print(deltaTime)
+		-- Determine rotation: apply rotation lerp until rotateTime is reached, then use final rotation
+		local isRotated = self:_isRotated()
+		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
+
+		if t >= T then
+			onComplete()
+		end
+
+		--// s = s0 + v0*t + 0.5*a*t^2
+		local newPos = startPosition + (initialVelocity * t) + 0.5 * GRAVITY * (t ^ 2)
+
+		self.pet:PivotTo(CFrame.new(newPos) * rotation)
+	end)
+	self.moveConnsMaid:GiveTask(moveConn)
 end
 
-function MovementController._moveToWaypoint(
-	self: NpcFighterTypes.MovementController,
-	waypoint: PathWaypoint,
-	onComplete
-)
-	local targetPosition = waypoint.Position
+function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementController, targetPosition, onComplete)
 	local startPos = self.hrp.Position
 	local delta = targetPosition - startPos
 	local distance = delta.Magnitude
@@ -183,8 +209,10 @@ function MovementController._moveToWaypoint(
 	local dir = delta.Unit
 	local t = 0 -- Time elapsed since starting movement towards the waypoint
 
-	self.moveConn = RunService.Heartbeat:Connect(function(dt)
+	local moveConn = RunService.Heartbeat:Connect(function(dt)
 		t += dt
+		print(dt)
+
 		local newPos = startPos + dir * self.velocity * t
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
 
@@ -193,9 +221,6 @@ function MovementController._moveToWaypoint(
 		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
 
 		if t >= timeToReach then
-			if self.moveConn then
-				self.moveConn:Disconnect()
-			end
 			-- Do this cause path finding love to do unecesary walking
 			onComplete()
 		end
@@ -203,6 +228,7 @@ function MovementController._moveToWaypoint(
 		local newCF = CFrame.new(newPos) * rotation
 		self.pet:PivotTo(newCF)
 	end)
+	self.moveConnsMaid:GiveTask(moveConn)
 end
 
 function MovementController.DestroyNPC(self: NpcFighterTypes.MovementController)

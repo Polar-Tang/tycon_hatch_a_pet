@@ -105,7 +105,7 @@ export type MovementController = {
 	getAnimHandler: (self: MovementController) -> any,
 	_rotate: (self: MovementController, timer: number) -> CFrame,
 	_isRotated: (self: MovementController) -> boolean,
-
+	_jumpToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: () -> ()) -> (),
 	startCFrame: CFrame,
 	goalRotation: CFrame,
 	_playerLastPos: Vector3,
@@ -115,6 +115,7 @@ export type MovementController = {
 	speed: number,
 
 	moveConn: RBXScriptConnection?,
+	moveConnsMaid: Maid.Maid,
 	elapsed: number,
 	t: number,
 

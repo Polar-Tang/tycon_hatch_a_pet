@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@quenty/binder": "^14.27.0",
+    "@quenty/kinematics": "^2.4.3",
     "@quenty/maid": "^3.5.1",
     "@quenty/pathfindingutils": "^10.12.6",
     "@quenty/servicebag": "^11.13.4",

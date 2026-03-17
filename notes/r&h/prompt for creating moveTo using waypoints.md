@@ -116,9 +116,22 @@ end
 also to avoid rotating once 
 and calls `_rotate` to smothly rotates the pet over the movent, the single trouble is that it's happening after every completition, please check that the orientation is already the goal one and if it is take the necessary measures to avoid the current frame to lerp again at startCFrame
 I need to adjust how `_rotate` should be called
- 
+### Multiple move cons `[bug]`
+You may wondering why i do remove self.moveConn and start using maid, that's because i print deltatime and i confirmed they run more than once in some frame, then the variable self.movecon is redefined and some other moveCon may be cleaned, leaving connections without disconnect, to completly avoid that we handle local moveConn and give the task to maid, if there's a single connection per time maid:DoCleaning would cleanly remove it, so that's issue help to not forget any connection without disconnect. That's solved, but there's another issue i didn't aware of: these two conditions happen at the same frame
+```lua
+local moveConn = RunService.Heartbeat:Connect(function(deltaTime)
+	if t >= T then
+		self.moveConnsMaid:DoCleaning()
+		onComplete()
+	end
+-- start the new shit
+```
+my hypothesis is that now with this new modification first will happen the `DoCleanning` and then `onComplete`, starting the new connection, as result the last connection (should be one) will be cleaned and its ensured to don't forget any connection
 ### Simulated jump
-Fist let's check if the waypoint tells you something like (waypoint.HastToJump)
+This mechanism is working great, but there's a problem where the calculation got the movement has Y offset, that's where waypoint.Action == Enum.PathWaypointAction.Jump. `_moveToWaypoint`
+
+-[.] Fist let's check if the waypoint tells you something like (waypoint.HastToJump)
+-[.] Create the `_jumpToWaypoint` method
 
 ### Path find service sucks!
 The calculation for the movement has an y offset
