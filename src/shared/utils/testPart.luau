@@ -1,10 +1,11 @@
 type args = {
 	Size: Vector3?,
 	Color3: Color3?,
-	Position: Vector3,
+	Position: Vector3?,
 	Duration: number?,
 	Nate: boolean?,
 	Name: string?,
+	CFrame: CFrame?,
 }
 
 return function(data: args)
@@ -14,7 +15,13 @@ return function(data: args)
 	testPart.Material = Enum.Material.Neon
 	testPart.CanCollide = false
 	testPart.Anchored = true
-	testPart.Position = data.Position
+	if data.Position then
+		testPart.Position = data.Position
+	end
+	if data.CFrame then
+		testPart.CFrame = data.CFrame
+	end
+
 	testPart.Parent = workspace
 	if data.Nate then
 		testPart.Name = data.Name

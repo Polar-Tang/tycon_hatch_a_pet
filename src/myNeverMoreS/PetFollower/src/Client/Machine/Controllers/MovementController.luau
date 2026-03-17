@@ -58,11 +58,11 @@ function MovementController._getAtt(self: NpcFighterTypes.MovementController): A
 	end
 	return attachmentAlignPos
 end
+local rotateTime = 0.5 -- use a hardcoded rotate time for now, can be changed to be based on the angle between the current forward vector and the target direction
 
 function MovementController._rotate(self: NpcFighterTypes.MovementController, timer): CFrame
-	local rotateTime = 0.5 -- use a hardcoded rotate time for now, can be changed to be based on the angle between the current forward vector and the target direction
 	local t = math.clamp(timer / rotateTime, 0, 1)
-	return self.hrp.CFrame:Lerp(self.goalRotation, t)
+	return self.startCFrame:Lerp(self.goalRotation, t)
 end
 
 function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
@@ -114,8 +114,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			end
 
 			local waypoint = waypoints[currentIndex]
-
-			self:_moveToWaypoint(waypoint.Position, function()
+			self:_moveToWaypoint(waypoint, function()
 				currentIndex += 1
 				moveNext()
 			end)
@@ -126,7 +125,43 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 	return self._currentMovePromise
 end
 
-function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementController, targetPosition, onComplete)
+-- Δθ=((θ2​−θ1​+π)mod2π)−π
+-- angular displacement
+local function shortestAngleDiff(a: number, b: number): number
+	return (b - a + math.pi) % (2 * math.pi) - math.pi
+end
+
+function MovementController._isRotated(self: NpcFighterTypes.MovementController): boolean
+	-- Check if orientation difference is meaningless
+	local _, O_Y, _ = self.hrp.CFrame:ToEulerAngles(Enum.RotationOrder.XYZ) -- XYZ ANGLES
+	local _, Op_Y, _ = self.goalRotation:ToEulerAngles(Enum.RotationOrder.XYZ) -- XYZ ANGLES
+
+	local YDiff = math.abs(shortestAngleDiff(O_Y, Op_Y))
+
+	return YDiff < math.rad(1)
+end
+
+function MovementController._walkToWaypoint(
+	self: NpcFighterTypes.MovementController,
+	targetPosition: Vector3,
+	onComplete
+)
+	-- This function is now handled by the MoveTo function and the Heartbeat connection it creates, so we can remove this implementation
+end
+
+function MovementController._jumpToWaypoint(
+	self: NpcFighterTypes.MovementController,
+	targetPosition: Vector3,
+	onComplete
+)
+end
+
+function MovementController._moveToWaypoint(
+	self: NpcFighterTypes.MovementController,
+	waypoint: PathWaypoint,
+	onComplete
+)
+	local targetPosition = waypoint.Position
 	local startPos = self.hrp.Position
 	local delta = targetPosition - startPos
 	local distance = delta.Magnitude
@@ -140,11 +175,11 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 	-- Set up rotation towards the target
 	do
 		self.startCFrame = self.hrp.CFrame
-		self.goalRotation = CFrame.lookAt(startPos, targetPosition)
+		self.goalRotation = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
+
+		testPart({ CFrame = self.startCFrame })
 	end
 
-	local rotateTime = 0.5
-	testPart({ Position = targetPosition })
 	local dir = delta.Unit
 	local t = 0 -- Time elapsed since starting movement towards the waypoint
 
@@ -154,20 +189,18 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
 
 		-- Determine rotation: apply rotation lerp until rotateTime is reached, then use final rotation
-		local isRotated = t >= rotateTime
-		local rotation = isRotated and self.goalRotation.Rotation --or self:_rotate(t).Rotation
+		local isRotated = self:_isRotated()
+		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
 
 		if t >= timeToReach then
 			if self.moveConn then
 				self.moveConn:Disconnect()
 			end
 			-- Do this cause path finding love to do unecesary walking
-			if (self.hrp.Position - assert(self.player_character.PrimaryPart).Position).Magnitude > 3 then
-				onComplete()
-			end
+			onComplete()
 		end
 
-		local newCF = CFrame.new(newPos) * CFrame.Angles(0, math.rad(90), 0)
+		local newCF = CFrame.new(newPos) * rotation
 		self.pet:PivotTo(newCF)
 	end)
 end

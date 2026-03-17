@@ -92,10 +92,34 @@ We need what auto rotate does to humanoid:MoveTo. My idea is that for every move
 isRotated
 ```
 
+##### Update, condition:
+```lua
+-- Δθ=((θ2​−θ1​+π)mod2π)−π
+-- angular displacement
+local function shortestAngleDiff(a: number, b: number): number
+	return (b - a + math.pi) % (2 * math.pi) - math.pi
+end
+
+function MovementController._isRotated(self: NpcFighterTypes.MovementController): boolean
+	-- Check if orientation difference is meaningless
+	local _, O_Y, _ = self.hrp.CFrame:ToEulerAngles(Enum.RotationOrder.XYZ) -- XYZ ANGLES
+	local _, Op_Y, _ = self.goalRotation:ToEulerAngles(Enum.RotationOrder.XYZ) -- XYZ ANGLES
+	print("O_Y deg", math.deg(O_Y))
+	print("Op_Y deg", math.deg(Op_Y))
+
+	local YDiff = math.abs(shortestAngleDiff(O_Y, Op_Y))
+
+	return YDiff < math.rad(5)
+end
+```
+
 also to avoid rotating once 
 and calls `_rotate` to smothly rotates the pet over the movent, the single trouble is that it's happening after every completition, please check that the orientation is already the goal one and if it is take the necessary measures to avoid the current frame to lerp again at startCFrame
 I need to adjust how `_rotate` should be called
  
+### Simulated jump
+Fist let's check if the waypoint tells you something like (waypoint.HastToJump)
 
+### Path find service sucks!
 The calculation for the movement has an y offset
 ![[Pasted image 20260316141735.png]]
