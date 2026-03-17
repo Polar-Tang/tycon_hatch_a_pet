@@ -21,7 +21,7 @@ local function onDescendantAdded(descendant)
 end
 
 function module.PlayerAdded(player, playerData)
-	----print("playerData ", playerData)
+	------print("playerData ", playerData)
 
 	if not playerData then
 		-- local petsInitialized = initPets(player)
@@ -88,7 +88,7 @@ function module.PlayerRemoving(player)
 		PetService.destroyPet(player, pet.Name)
 	end
 	local allTheCash = playerInventory.cash
-	-- print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
+	-- --print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
 
 	newData.pets = bestiaryHandler.pets
@@ -96,10 +96,10 @@ function module.PlayerRemoving(player)
 	newData.lastConnection = os.time()
 
 	playerInventory:Destoy()
-	print("========== SAVING DATA ==========")
-	print("Player:", player.Name)
-	print("Timestamp being saved:", newData.lastConnection)
-	print("=================================")
+	--print("========== SAVING DATA ==========")
+	--print("Player:", player.Name)
+	--print("Timestamp being saved:", newData.lastConnection)
+	--print("=================================")
 
 	-- CurrencyController:RemovePlayer(player)
 	return newData

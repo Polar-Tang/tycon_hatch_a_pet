@@ -88,7 +88,6 @@ end
 
 function BestiaryList:_levelUpPet(pet): PetData.PetData?
 	if pet.petLvl >= 150 then
-		warn("max level reached")
 		return
 	end
 	pet.avaiblePoints += 1
@@ -129,7 +128,7 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 	local petModel = workspace:WaitForChild(petId)
 	--print(petModel)
 	if pet.petLvl >= 150 then
-		warn("max level reached")
+		-- warn("max level reached")
 		petModel:SetAttribute("Level", pet.petLvl)
 		return
 	end

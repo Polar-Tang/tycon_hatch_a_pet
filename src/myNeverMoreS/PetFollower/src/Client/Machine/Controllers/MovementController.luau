@@ -60,17 +60,9 @@ function MovementController._getAtt(self: NpcFighterTypes.MovementController): A
 end
 
 function MovementController._rotate(self: NpcFighterTypes.MovementController, timer): CFrame
-	local rotateTime = 0.1 -- use a hardcoded rotate time for now, can be changed to be based on the angle between the current forward vector and the target direction
+	local rotateTime = 0.5 -- use a hardcoded rotate time for now, can be changed to be based on the angle between the current forward vector and the target direction
 	local t = math.clamp(timer / rotateTime, 0, 1)
-	return self.startCFrame:Lerp(self.goalRotation, t)
-end
-
-function MovementController.isRotated(self: NpcFighterTypes.MovementController): boolean
-	local currentCFrame = self.hrp.CFrame
-	local currentLook = currentCFrame.LookVector
-	local goalLook = self.goalRotation.LookVector
-	local tan = math.acos(math.clamp(currentLook:Dot(goalLook), -1, 1))
-	return tan <= math.rad(5)
+	return self.hrp.CFrame:Lerp(self.goalRotation, t)
 end
 
 function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
@@ -122,7 +114,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			end
 
 			local waypoint = waypoints[currentIndex]
-			-- print("waypoint ", waypoint) -- start the jump functionality
+
 			self:_moveToWaypoint(waypoint.Position, function()
 				currentIndex += 1
 				moveNext()
@@ -151,34 +143,32 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 		self.goalRotation = CFrame.lookAt(startPos, targetPosition)
 	end
 
+	local rotateTime = 0.5
+	testPart({ Position = targetPosition })
 	local dir = delta.Unit
-	local elapsed = self.elapsed
+	local t = 0 -- Time elapsed since starting movement towards the waypoint
 
 	self.moveConn = RunService.Heartbeat:Connect(function(dt)
-		elapsed += dt
-		local newPos = startPos + dir * self.velocity * elapsed
+		t += dt
+		local newPos = startPos + dir * self.velocity * t
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
-		--testPart({ Position = newPos, Color3 = Color3.new(1, 0, 0) })
 
-		if elapsed >= timeToReach then
-			if self:isRotated() then
-				local newCF = CFrame.new(newPos) * self:_rotate(elapsed).Rotation
-				self.pet:PivotTo(newCF)
-			else
-				self.pet:MoveTo(newPos)
+		-- Determine rotation: apply rotation lerp until rotateTime is reached, then use final rotation
+		local isRotated = t >= rotateTime
+		local rotation = isRotated and self.goalRotation.Rotation --or self:_rotate(t).Rotation
+
+		if t >= timeToReach then
+			if self.moveConn then
+				self.moveConn:Disconnect()
 			end
-
-			onComplete()
-
-			return
+			-- Do this cause path finding love to do unecesary walking
+			if (self.hrp.Position - assert(self.player_character.PrimaryPart).Position).Magnitude > 3 then
+				onComplete()
+			end
 		end
 
-		if self:isRotated() then
-			local newCF = CFrame.new(newPos) * self:_rotate(elapsed).Rotation
-			self.pet:PivotTo(newCF)
-		else
-			self.pet:MoveTo(newPos)
-		end
+		local newCF = CFrame.new(newPos) * CFrame.Angles(0, math.rad(90), 0)
+		self.pet:PivotTo(newCF)
 	end)
 end
 

@@ -18,8 +18,6 @@ end
 
 function HealthbarProvider:didMount()
 	HealthCon.Event:Connect(function(data: NpcFighterTypes.HealthNetData)
-		print("WELCOMIN TO THE TESTING")
-		print("esnure the data shape is right ", data)
 		local clone = self.state.HealthbarComponents
 		if not data.model then
 			return

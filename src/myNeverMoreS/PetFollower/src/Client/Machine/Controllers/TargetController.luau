@@ -24,7 +24,6 @@ function TargetController.GetGoal(self: NpcFighterTypes.TargetController): Vecto
 	local currentGoal = self:_getGoalPos()
 
 	-- player should move at least 2 studs for the pet to GetGoal its path, this is to prevent constant path recalculations when the player is standing still or making minor movements
-	print("(self._lastGoalPos - currentGoal).Magnitude ", (self._lastGoalPos - currentGoal).Magnitude)
 	if (self._lastGoalPos - currentGoal).Magnitude > 3 then
 		self._lastGoalPos = currentGoal
 

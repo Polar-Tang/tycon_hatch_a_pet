@@ -21,7 +21,7 @@ function FightButton.open()
 		local pet_to_fight: PetTypes.PetData = _G["petToFight"]
 
 		local bossToFight = _G["bossToFight"]
-		print("bossToFight ", bossToFight)
+		--print("bossToFight ", bossToFight)
 		local dataFight: NpcFighterTypes.combatInstanceData = {
 			petId = pet_to_fight.petId,
 			bossName = bossToFight.petName,

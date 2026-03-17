@@ -80,7 +80,6 @@ do
 		local BinderProvider = _G.ServiceBag:GetService(_G.BinderProvider)
 		local animationHandler = BinderProvider:Get(Constants.animationHandler)
 		controllerdataInint.animationHandler = animationHandler:Get(parent)
-		print("check if the pet is cloned with the same attributes")
 
 		return controllerdataInint
 	end
@@ -144,7 +143,6 @@ do
 	)
 		-- Check if the path of Nevermore.src.client is right for perfect isolation, if the print is true i will need to move the entire folder to a player scriupts
 		do
-			print(player.UserId)
 			if player.UserId == -1 then
 				testMe = true
 			elseif player.UserId == -2 then

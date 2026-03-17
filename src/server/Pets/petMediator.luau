@@ -104,7 +104,7 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 )
 
 ReplicatedStorage.RemoteEvents.NPCFighter.OnServerEvent:Connect(function(a0: Player, ...)
-	print("IDK ")
+	----print("IDK ")
 end)
 
 -- This is the event triggered on boss teleport, it confirms player can go to the instance, register it, teleport the player to the instance and tell the client to create all the npcs that just lives in the client
@@ -138,7 +138,7 @@ BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes
 			player_pet = petInformation,
 			player_boss = bossInformation,
 		}
-		print("fightInfo ", fightInfo)
+		----print("fightInfo ", fightInfo)
 		CombatController.initFightSession(a0, folderSession, fightInfo) --tag:telepor_point_croakan
 		BossRemoteEvent:FireClient(a0, fightInfo)
 	end
@@ -194,7 +194,7 @@ ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Pl
 		local last = targetHealth:GetAttribute("LastAttack") or 0
 		local now = os.time()
 		if now - last <= 2 then
-			print("invalid interval time have passed")
+			----print("invalid interval time have passed")
 			return
 		end
 		targetHealth:SetAttribute("LastAttack", now)

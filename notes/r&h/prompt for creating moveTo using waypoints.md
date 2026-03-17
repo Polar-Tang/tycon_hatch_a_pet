@@ -86,7 +86,13 @@ end)
 ```
 #### Update `_lookTo`
 
-I'm working with `_rotate` to work similar to do for movement controller what auto rotate does to humanoid:MoveTo. My idea is that for every moveCon the petModel look at the current waypoint position he's going to, so `rotate(timer)` takes a timer to rotate a fraction of what should rotate  now should use PivotTo instead of MoveTo so i can handle its rotation also to avoid rotating once 
+Please carefully analyze `_moveToWaypoint`, it's a kinematic function that never moves or tweens the pet directly to the next way point and it uses the position where the pet is when the function is called and simulate the npc movement over time, it disconnects the movement function moveConn when the time is done and calls the next `_moveToWaypoint` when the time is over, then start position has changed and start the connection again. 
+We need what auto rotate does to humanoid:MoveTo. My idea is that for every moveCon the petModel look at the current waypoint position he's going to. That's the use case for `_rotate`so `rotate(timer)` takes a timer to lerp the righ fraction over time  now should use PivotTo instead of MoveTo so we handle its rotation. The problem is that i'm attempting to  know when the pet has rotated enough with `isRotated` because rotated needs to stop becaulled once the rotation is completed otherwise it will looks bad, however i'm not sure if the condition is right
+```lua
+isRotated
+```
+
+also to avoid rotating once 
 and calls `_rotate` to smothly rotates the pet over the movent, the single trouble is that it's happening after every completition, please check that the orientation is already the goal one and if it is take the necessary measures to avoid the current frame to lerp again at startCFrame
 I need to adjust how `_rotate` should be called
  
