@@ -57,7 +57,7 @@ AnimBinder:GetClassAddedSignal():Connect(function(binder)
 	----print("animationsData ", animationsData, binder.Char)
 	local petName = binder.Char:GetAttribute("petName")
 	--print("petName ", petName)
-
+	binder:Init(binder.Char:WaitForChild(binder.Char:GetAttribute("AnimatorName")))
 	binder:registryAnims(animationsData[petName])
 	binder:PreloadAnims({ "eat", "walk", "idle" })
 	binder:LoadAnimation(true, "idle")
@@ -153,14 +153,20 @@ local function getInputType(): EnumItem
 end
 
 game.ReplicatedStorage.RemoteEvents.RemoteSync:FireServer({ loaded = "all", inputType = getInputType() })
+local TopButtons = require(StarterPlayer.StarterPlayerScripts.facade.TopButtons)
 
 do
-	-- SHOULD TELEPORT TO THE UBICATION JUST LIKE GROW GARDEN
-	-- TopButtons.init({
-	-- 	["PlotButton"] = Index.open,
-	-- 	["EggButton"] = nameToAction["Egg Shop Keeper"].promptTrigger,
-	-- 	["UtilityButton"] = nameToAction["Kibly Shop Keeper"].promptTrigger,
-	-- })
+	TopButtons.init({
+		["PlotButton"] = function()
+			game.ReplicatedStorage.RemoteEvents.TeleportRemote:FireServer("plot")
+		end,
+		["EggButton"] = function()
+			game.ReplicatedStorage.RemoteEvents.TeleportRemote:FireServer("eggShop")
+		end,
+		["UtilityButton"] = function()
+			game.ReplicatedStorage.RemoteEvents.TeleportRemote:FireServer("kiblyShop")
+		end,
+	})
 	local _ = require(StarterPlayer.StarterPlayerScripts.UI.petMediatorClient)
 
 	IndexButton.getIndexButton().Activated:Connect(function(a0: InputObject, a1: number)
@@ -172,4 +178,29 @@ do
 			IndexButton.rotate(0)
 		end
 	end)
+end
+
+-- Setup teleporting for boss fights
+do
+	local TeleportRemote = ReplicatedStorage.RemoteEvents.TeleportRemote
+
+	local function setupTeleporter(teleporter: Instance)
+		local destination = "plot"
+
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText = "Teleport"
+		prompt.ObjectText = destination
+		prompt.HoldDuration = 0
+		prompt.MaxActivationDistance = 8
+		prompt.Parent = teleporter
+
+		prompt.Triggered:Connect(function(player: Player)
+			TeleportRemote:FireServer(destination)
+		end)
+	end
+
+	-- Setup existing teleporters
+	for _, teleporter in CollectionService:GetTagged("teleporter") do
+		setupTeleporter(teleporter)
+	end
 end

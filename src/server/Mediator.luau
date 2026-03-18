@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
@@ -20,7 +21,7 @@ local function onDescendantAdded(descendant)
 	end
 end
 
-function module.PlayerAdded(player, playerData)
+function module.PlayerAdded(player: Player, playerData)
 	------print("playerData ", playerData)
 
 	if not playerData then
@@ -74,6 +75,14 @@ function module.PlayerAdded(player, playerData)
 	})
 
 	character.DescendantAdded:Connect(onDescendantAdded)
+
+	local spawnPoint = PlotService.GetSpawnPlot(player)
+	if spawnPoint then
+		character:PivotTo(spawnPoint)
+	else
+		warn("No spawn point found for player ", player.UserId)
+		player:Kick("[Error] No plot. Please connect again.")
+	end
 end
 
 function module.PlayerRemoving(player)

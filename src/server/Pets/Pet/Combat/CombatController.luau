@@ -81,4 +81,15 @@ CombotCotroller.getHealth = function(player: Player, nameInstance: NpcFighterTyp
 	return target:FindFirstChild("Health")
 end
 
+CombotCotroller.destroyFightSession = function(player: Player)
+	local folder = CombotCotroller.getPlayerSessionFolder(player)
+	if not folder then
+		print("No active fight session found for player: " .. tostring(player.UserId))
+		return
+	end
+	game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FirePlayer(player, { destroy = true })
+
+	folder:Destroy()
+end
+
 return CombotCotroller

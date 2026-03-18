@@ -6,6 +6,7 @@ export type FenceBoundsService = {
 	ClampToBounds: (self: FenceBoundsService, plot: BasePart, position: Vector3) -> Vector3,
 	GetRandPosition: (self: FenceBoundsService, plot: Model, YOffset: number?) -> Vector3,
 	GetPlotByUserId: (Id: string) -> BasePart?,
+	GetSpawnPlot: (player: Player) -> BasePart?,
 }
 
 return {}

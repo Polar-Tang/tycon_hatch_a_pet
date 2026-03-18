@@ -9,9 +9,16 @@ local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
 -- SCOPE VARIABLE
 local ourFightSession = {} :: NpcFighterTypes.FightInfo
 -- Create a boss basses in a template, tag it to initialize, using a scope variable for FightSession
-BossRemoteEvent.OnClientEvent:Connect(function(fightSessionData: NpcFighterTypes.FightInfo)
-	CombatControllerClient.createInstances(fightSessionData)
-	ourFightSession = fightSessionData
+BossRemoteEvent.OnClientEvent:Connect(function(fightSessionData: NpcFighterTypes.FightInfo & { destroy: boolean? })
+	if not fightSessionData.destroy then
+		print("BossRemoteEvent received with data: ", fightSessionData)
+		CombatControllerClient.createInstances(fightSessionData)
+		ourFightSession = fightSessionData
+	else
+		print("BossRemoteEvent received with destroy flag. Cleaning up fight session.")
+		CombatControllerClient.cleanupInstances()
+		ourFightSession = {}
+	end
 end)
 
 local BinderProvider = _G.ServiceBag:GetService(_G.BinderProvider)

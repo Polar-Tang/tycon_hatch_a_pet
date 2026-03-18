@@ -100,6 +100,7 @@ do
 
 		parent:PivotTo(bossSpot.CFrame)
 		parent.Parent = workspace
+		CollectionService:AddTag(parent, "bossAgainst" .. tostring(player.UserId))
 
 		-- Check if the path of Nevermore.src.client is right for perfect isolation, if the print is true i will need to move the entire folder to a player scriupts
 		do
@@ -156,6 +157,9 @@ do
 		-- petData.billboardService = billboardService
 		-- setUpAtt(parent, petInfo, maid, current_pet_stats)
 		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerPet")
+
+		CollectionService:AddTag(parent, "petFollower" .. tostring(player.UserId))
+
 		return {
 			maid = maid,
 			pet = parent,
@@ -171,6 +175,19 @@ do
 			TargetController = TargetController.new(controllerdataInint, serviceBag, player),
 			MovementController = MovementController.new(controllerdataInint, serviceBag, player),
 		}
+	end
+end
+
+function CombatControllerClient.cleanupInstances()
+	local player = Players.LocalPlayer.UserId
+	local petFollowers = CollectionService:GetTagged("petFollower" .. tostring(player.UserId))
+	for _, pet in ipairs(petFollowers) do
+		pet:Destroy()
+	end
+
+	local bosses = CollectionService:GetTagged("bossAgainst" .. tostring(player.UserId))
+	for _, boss in ipairs(bosses) do
+		boss:Destroy()
 	end
 end
 
@@ -226,11 +243,14 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 
 		-- Apply the same scale factor from the reference pet
 		local referenceScale = petToClone:GetScale()
-		-- petTemplate:ScaleTo(referenceScale)
+		petTemplate:ScaleTo(referenceScale)
 		local hrp = petTemplate.PrimaryPart
 		hrp.Anchored = false
 		-- Copy attributes from the reference pet
 		for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
+			if attributeName == "AnimatorName" then
+				continue
+			end
 			petTemplate:SetAttribute(attributeName, attributeValue)
 		end
 

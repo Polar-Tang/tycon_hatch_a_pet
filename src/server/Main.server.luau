@@ -86,6 +86,16 @@ do
 		end
 	end
 
+	local function onCreepyAdded(descendant)
+		-- Set collision group for any part descendant
+
+		if descendant:IsA("BasePart") then
+			descendant.CanCollide = true
+			descendant.CollisionGroup = "Npcs"
+			descendant.CFrame = descendant.CFrame * CFrame.Angles(0, math.rad(90), 0)
+		end
+	end
+
 	local setCollider = function(parent, cb)
 		for _, descendant in parent:GetDescendants() do
 			if descendant:IsA("Model") then
@@ -99,13 +109,17 @@ do
 
 	local petsFolder: Folder = ServerStorage.Pets
 	local pets = petsFolder:GetDescendants()
+
 	for _, pet in pets do
+		pet:SetAttribute("AnimatorName", "AnimationController")
 		setCollider(pet, onDescendantAdded)
 	end
 	local petsFighterFolder: Folder = ReplicatedFirst.Pets
 	local petsFighters = petsFighterFolder:GetDescendants()
+
 	for _, pet in petsFighters do
-		setCollider(pet, onDescendantAdded)
+		pet:SetAttribute("AnimatorName", "Humanoid")
+		setCollider(pet, onCreepyAdded)
 	end
 
 	local function fullOptimized(descendant)

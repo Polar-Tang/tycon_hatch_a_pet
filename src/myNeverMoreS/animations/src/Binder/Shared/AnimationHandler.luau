@@ -58,6 +58,26 @@ type AnimationDescriptors = {
 	[string]: AnimationDescriptor,
 }
 
+export type AnimationHandlerType = {
+	Char: Model,
+	animations: AnimationMap,
+	animationDescriptors: AnimationDescriptors,
+	armName: string,
+	_maid: MaidType,
+	_initialized: boolean,
+	animator: Animator,
+	Init: (self: AnimationHandlerType, animationContainer: Instance) -> (),
+	LoadAnimation: (self: AnimationHandlerType, state: boolean, animaName: string, isPreload: boolean?) -> AnimationTrack?,
+	AddAnimations: (self: AnimationHandlerType, newAnims: AnimationMap) -> (),
+	Restart: (self: AnimationHandlerType) -> (),
+	Destroy: (self: AnimationHandlerType) -> (),
+	registryAnims: (self: AnimationHandlerType, anims: AnimationMap) -> (),
+	preloadAll: (self: AnimationHandlerType) -> (),
+	OnSignal: (self: AnimationHandlerType, info: connArgs) -> (),
+	PreloadAnims: (self: AnimationHandlerType, animsName: { string }) -> (),
+	ClearAllTheAnims: (self: AnimationHandlerType) -> (),
+}
+
 function AnimationHandler.new(char, serviceBag): Options
 	local self = setmetatable({}, AnimationHandler)
 	self.Char = char
@@ -65,7 +85,20 @@ function AnimationHandler.new(char, serviceBag): Options
 	self.animationDescriptors = {}
 	self.armName = ""
 	self._maid = Maid.new()
+	self._initialized = false
 	return self
+end
+
+function AnimationHandler:Init(animationContainer: Instance)
+	assert(not self._initialized, "Already initialized")
+	if animationContainer:IsA("AnimationController") then
+		self.animator = (animationContainer :: any).Animator
+	elseif animationContainer:IsA("Humanoid") then
+		self.animator = (animationContainer :: any).Animator
+	else
+		error("animationContainer must be AnimationController or Humanoid")
+	end
+	self._initialized = true
 end
 
 --[[
@@ -75,6 +108,7 @@ If takes state true and animation name, play it, returns AnimationTrack
 If takes state true and animation name and preload true, playr and stop it inmediatly, returns nil
 ]]
 function AnimationHandler:LoadAnimation(state: boolean, animaName: string, isPreload: boolean)
+	assert(self._initialized, "Must call Init first")
 	---- START ANIM ----
 	--print("self.animationDescriptors ", self.animationDescriptors)
 	if isPreload then
@@ -128,26 +162,12 @@ function AnimationHandler:_initDescriptior(animaName: string)
 	self.animationDescriptors[animaName] = descriptor
 end
 
-function AnimationHandler:_getAnimatior()
-	local model: Model = self.Char
-	local animatiorContainer = model:WaitForChild("AnimationController")
-	
-	return animatiorContainer
-end
-
 -- Declare the firast animation track and set ptreload to true in the descriptor
 function AnimationHandler:_ensurePreload(animaName)
 	if self.animationDescriptors[animaName].preloaded then
 		return
 	end
 	self:_initDescriptior(animaName)
-
-	if not self.animator then
-		
-		local animatorContainer = self:_getAnimatior()
-		
-		self.animator = animatorContainer.Animator
-	end
 
 	-- Load the animation and declare it
 	do
@@ -169,23 +189,27 @@ function AnimationHandler:_getDescriptor(animaName): AnimationDescriptor
 end
 
 function AnimationHandler:AddAnimations(newAnims)
+	assert(self._initialized, "Must call Init first")
 	for k, v in pairs(newAnims) do
 		self.animations[k] = v
 	end
 end
 
 function AnimationHandler:Restart()
+	assert(self._initialized, "Must call Init first")
 	self._maid:DoCleaning()
 	self:ClearAllTheAnims()
 end
 
 function AnimationHandler:Destroy()
+	assert(self._initialized, "Must call Init first")
 	self._maid:DoCleaning()
 	self:ClearAllTheAnims()
 	setmetatable(self, nil)
 end
 
 function AnimationHandler:registryAnims(anims: AnimationMap)
+	assert(self._initialized, "Must call Init first")
 	self.animations = anims
 	self:_declarDescriptors()
 end
@@ -206,6 +230,7 @@ end
 
 -- Preaload all the animation at once, better don't use it on long animations list
 function AnimationHandler:preloadAll()
+	assert(self._initialized, "Must call Init first")
 	warn(debug.traceback())
 	local anims = self.animations
 	-- local descriptors = {} :: { AnimationDescriptors }
@@ -233,6 +258,7 @@ type connArgs = {
 
 -- TODO:  for a future project, chage this name to OnAnimationEvent
 function AnimationHandler:OnSignal(info: connArgs)
+	assert(self._initialized, "Must call Init first")
 	local animName = info.animationName
 	local animationEventName = info.animationEventName
 	local override = info.override
@@ -259,6 +285,7 @@ function AnimationHandler:OnSignal(info: connArgs)
 end
 
 function AnimationHandler:PreloadAnims(animsName: { string })
+	assert(self._initialized, "Must call Init first")
 	for _, name in ipairs(animsName) do
 		self:_ensurePreload(name)
 	end
@@ -274,10 +301,11 @@ function AnimationHandler:_ClearAnimation(animName)
 	end
 end
 function AnimationHandler:ClearAllTheAnims()
+	assert(self._initialized, "Must call Init first")
 	for k, v in pairs(self.animations) do
 		self:_ClearAnimation(k)
 	end
 end
-export type AnimationHandler = typeof(AnimationHandler.new({} :: Options))
+export type AnimationHandler = AnimationHandlerType
 
 return AnimationHandler

@@ -99,30 +99,15 @@ export type TargetController = {
 export type MovementController = {
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> MovementController,
 	MoveTo: (self: MovementController, Path) -> (),
-	_getAtt: (self: MovementController) -> Attachment,
 	ForgotPath: (self: MovementController) -> (),
 	Stop: (self: MovementController) -> (),
-	_lookTo: (self: MovementController, targetPosition: Vector3) -> Promise.Promise<>,
-	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: () -> ()) -> (),
+	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
 	getAnimHandler: (self: MovementController) -> any,
-	_rotate: (self: MovementController, timer: number) -> CFrame,
-	_isRotated: (self: MovementController) -> boolean,
-	_jumpToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: () -> ()) -> (),
-	startCFrame: CFrame,
-	goalRotation: CFrame,
-	_playerLastPos: Vector3,
 	_currentMovePromise: Promise.Promise<>?,
-	_movementSessionId: number,
-	velocity: number,
 	isMoving: boolean,
 	speed: number,
-
-	moveConn: RBXScriptConnection?,
-	moveConnsMaid: Maid.Maid,
-	elapsed: number,
-	t: number,
-
-	_moveConn: RBXScriptConnection?,
+	_maid: Maid.Maid,
+	humanoid: Humanoid,
 } & controllerdataInint
 
 -- pet only rotates to look at the enemy, play attacks animation, attacks and die

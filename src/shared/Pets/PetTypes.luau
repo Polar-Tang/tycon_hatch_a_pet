@@ -41,6 +41,7 @@ export type petInitFrontend = {
 	CameraDistanceFactor: number,
 	radPivot: number?,
 	ZradPivot: number?,
+	walkSpeed: number?,
 }
 
 export type petsInitFrontend = { petNames: petInitFrontend }

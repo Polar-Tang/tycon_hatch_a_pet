@@ -99,6 +99,7 @@ local function merge<T, U>(a: T, b: U)
 end
 
 module["Fox"] = merge({
+	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 0.8,
 
@@ -109,6 +110,7 @@ module["Fox"] = merge({
 }, common_stats)
 
 module["Panda"] = merge({
+	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
 
@@ -125,6 +127,7 @@ module["Panda"] = merge({
 }, common_stats)
 
 module["Elephant"] = merge({
+	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.1,
 
@@ -142,6 +145,7 @@ module["Elephant"] = merge({
 }, common_stats)
 
 module["Hippo"] = merge({
+	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
 
@@ -152,6 +156,7 @@ module["Hippo"] = merge({
 }, common_stats)
 
 module["Lion"] = merge({
+	walkSpeed = 10,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
 
@@ -167,6 +172,7 @@ module["Lion"] = merge({
 }, common_stats)
 
 module["Cat"] = merge({
+	walkSpeed = 10,
 	["velocity"] = 6,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
@@ -178,6 +184,7 @@ module["Cat"] = merge({
 }, common_stats)
 
 module["Dog"] = merge({
+	walkSpeed = 10,
 	["velocity"] = 8,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
@@ -190,6 +197,7 @@ module["Dog"] = merge({
 }, common_stats)
 
 local rhino: PetTypes.petInitFrontend = merge({
+	walkSpeed = 10,
 	-- ["eat_interval"] = 6,
 	-- ["eat_duration"] = 5,
 	-- ["range"] = 30,

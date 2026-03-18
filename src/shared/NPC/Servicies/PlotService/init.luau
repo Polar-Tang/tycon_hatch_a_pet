@@ -118,6 +118,24 @@ function FenceBoundsService:ClampToBounds(plot, position)
 	return bouncedPosition
 end
 
+function FenceBoundsService.GetSpawnPlot(player: Player): CFrame?
+	local plot = FenceBoundsService.GetPlotByUserId(tostring(player.UserId))
+	if not plot then
+		return nil
+	end
+
+	local plotNumber = plot:WaitForChild("PlotNumber").Value
+	local plotCenter = plot.Position
+
+	-- Plots 1-3 spawn to the left (-Z), plots 4-6 spawn to the right (+Z)
+	local zSign = (plotNumber <= 3) and -1 or 1
+	local spawnOffset = (plot.Size.Z / 2) + 10
+
+	local spawnPos = Vector3.new(plotCenter.X, plotCenter.Y + plot.Size.Y, plotCenter.Z + (spawnOffset * zSign))
+
+	return CFrame.lookAt(spawnPos, plotCenter)
+end
+
 function FenceBoundsService:GetRandPosition(plot: BasePart, YOffset): Vector3
 	local fencePos = Vector3.new(plot.Position.X, plot.Position.Y, plot.Position.Z)
 

@@ -150,6 +150,49 @@ BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes
 	character:PivotTo(teleportpoint.CFrame)
 end)
 
+local SpawnEggShop = workspace:WaitForChild("SpawnEggShop")
+local SpawnKiblyShop = workspace:WaitForChild("SpawnKiblyShop")
+
+local teleportDestinations = {
+	eggShop = function(_player)
+		return SpawnEggShop.CFrame
+	end,
+	kiblyShop = function(_player)
+		return SpawnKiblyShop.CFrame
+	end,
+	plot = function(player)
+		return PlotService.GetSpawnPlot(player)
+	end,
+}
+
+game.ReplicatedStorage.RemoteEvents.TeleportRemote.OnServerEvent:Connect(function(player: Player, teleportTo: string)
+	if typeof(teleportTo) ~= "string" then
+		print("Invalid teleport destination: ", teleportTo)
+		return
+	end
+
+	local resolver = teleportDestinations[teleportTo]
+
+	if not resolver then
+		print("Not a valid destination: " .. tostring(teleportTo))
+		return
+	end
+
+	local destination: CFrame? = resolver(player)
+	if not destination then
+		print("Could not resolve CFrame for: " .. tostring(teleportTo))
+		return
+	end
+
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	character:PivotTo(destination)
+	CombatController.destroyFightSession(player)
+end)
+
 -- This is the event that confirms the pét player can do the damage, all the health values should be instances that lives in the Replicated storage and the server handles it while the client only renders it
 ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Player, data)
 	-- data is the state context coming from the client; it contains

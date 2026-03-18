@@ -52,6 +52,12 @@ function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, 
 	})
 	local currentPos = self.hrp.Position
 
+	self.maid:DoCleaning()
+	local blocked = Path.Blocked:Connect(function(blockedWaypointIndex)
+		self:CalculatePath(goal)
+	end)
+	self.maid:GiveTask(blocked)
+
 	--testPart({ Position = currentPos, Name = "StartPos", Color3 = Color3.new(0, 1, 0) })
 
 	-- prove setting the same y to both positions to see if path is still an empty array

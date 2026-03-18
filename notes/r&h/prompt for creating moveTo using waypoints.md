@@ -232,3 +232,14 @@ and the model height is 2.0359370708465576
 i wonder if it's considering its own body as a navmesh
 ![[Pasted image 20260318105844.png]]
 Is there anyway for telling pathfind to ignore their own parts?
+### Solution
+
+1. Using Pathfinding Modifiers  
+    While pathfinding modifiers are especially useful for this, they are problematic in some cases. If you want to make a non-humanoid agent that can move around using the pathfinding service, their model will interfere with the navmesh, and generate on their model as if it’s a static object that other agents can navigate on. This can result in pathfinding issues, and is generally not ideal for this usecase.  
+    Another place where pathfinding modifiers are problematic is user-placed structures within a game. Specifically in my game, players can place structures virtually anywhere, and in any orientation about the Y axis. In some cases, this can cause the navmesh to generate through solid walls when the structure is placed too close to a wall, or the opposite where the pathfinding modifier gets ignored due to its orientation or otherwise, and makes an area of a map completely inaccessible to pathfinding agents. This usually is caused by the limited resolution of the navmesh generation and the complexity of structure models.
+    
+2. Turning off CanCollide  
+    This is the most straight forward way of making the navmesh ignore a part, but it is not at all ideal in cases where you want it to be ignored but maintain physics collisions. Take the example from earlier of a non-humanoid agent. Obviously an agent/character that can move around will necessitate physics collisions in order to interact with the world, and with players.
+    
+3. Humanoids  
+    A model with a humanoid child will have all its descendants ignored by the navmesh generation regardless of CanCollide, which is very useful in the case of characters that actually use humanoids, but otherwise not ideal for every other case. If you want a single part, or a static model, or whatever else that is not a humanoid to be ignored by the navmesh generation, all the extra weight of the humanoid is a waste and will undoubtedly have a performance cost if you have a lot of these inert humanoids sitting around, even with their state machines turned off.
