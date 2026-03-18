@@ -205,13 +205,13 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 		end
 
 		-- Find template model in ReplicatedStorage.Pets.Models
-		local modelsFolder = ReplicatedStorage:FindFirstChild("Pets"):FindFirstChild("Models")
+		local modelsFolder = ReplicatedFirst.Pets
 		if not modelsFolder then
 			print("Pets.Models folder not found")
 			return
 		end
 
-		local petTemplateModel = modelsFolder:FindFirstChild(petToClone:GetAttribute("petName"))
+		local petTemplateModel = ReplicatedFirst.Pets:FindFirstChild(petToClone:GetAttribute("petName"))
 		if not petTemplateModel then
 			print("pet template not found in ReplicatedStorage.Pets.Models")
 			return

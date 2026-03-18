@@ -127,6 +127,36 @@ local moveConn = RunService.Heartbeat:Connect(function(deltaTime)
 -- start the new shit
 ```
 to solve this we use task.defer on onComplete calling, however i still see print(dt) x2 sometimes and i wonder why
+
+### Compehend print(dt) x2
+Please help me to understand why this happen, rather than you reaching a solution tries to explain why this can occur based in the knowledge in this code.
+i still get print(dt) x2 if i defer all the moveNextPoint functionallity like this
+```lua
+local function moveNext()
+			-- Ensure there a single movement connection at a time
+			self.moveConnsMaid:DoCleaning()
+
+			-- Start next movement after the last one finishes
+			task.defer(function()
+			-- do their thing
+```
+I can't comprehend how this occurs print occurs x2, the only scenario possible where moveNext may be called twice is if current promise is still active but moveTo is called
+```lua
+local goalPos = data.TargetController:GetGoal()
+		if goalPos then
+			data.TargetController:CalculatePath(goalPos):Then(function(path: Path): ...any
+				data.MovementController:ForgotPath()
+				data.MovementController:MoveTo(path)
+			end)
+		end
+```
+so i need to ensure the move con is cleaned before the new one starts, to do so the moveTo should clean and the promise should be defered
+```lua
+function MovementController.MoveTo(self: NpcFighterTypes.MovementController, path: Path)
+	self.maid:DoCleaning()
+	self._currentMovePromise = Promise.defer(function(resolve, reject)
+```
+But i still get print(dt) x2 when MoveTo is called during an active MoveTo promise.
 ### Simulated jump
 This mechanism is working great, but there's a problem where the calculation got the movement has Y offset, that's where waypoint.Action == Enum.PathWaypointAction.Jump. `_moveToWaypoint`
 
@@ -155,14 +185,14 @@ local Path = PathfindingService:CreatePath({
 ```
 Please help me to understand how pathfinding does work, what the parameters are and use all this knowledge to avoid pathfinding thinking there's ground where isn't
 
-|Key|Type|Default|Description|
-|---|---|---|---|
-|**AgentRadius**|integer|2|Determines the minimum amount of horizontal space required for empty space to be considered traversable.|
-|**AgentHeight**|integer|5|Determines the minimum amount of vertical space required for empty space to be considered traversable.|
-|**AgentCanJump**|boolean|true|Determines whether jumping during pathfinding is allowed.|
-|**AgentCanClimb**|boolean|false|Determines whether climbing [TrussParts](https://create.roblox.com/docs/reference/engine/classes/TrussPart) during pathfinding is allowed.|
-|**WaypointSpacing**|number|4|Determines the spacing between intermediate waypoints in path.|
-|**Costs**|table|{}|Table of materials or defined [PathfindingModifiers](https://create.roblox.com/docs/reference/engine/classes/PathfindingModifier) and their "cost" for traversal. Useful for making the agent prefer certain materials/regions over others. See [here](https://create.roblox.com/docs/characters/pathfinding#pathfinding-modifiers) for details.|
+| Key                 | Type    | Default | Description                                                                                                                                                                                                                                                                                                                                      |
+| ------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **AgentRadius**     | integer | 2       | Determines the minimum amount of horizontal space required for empty space to be considered traversable.                                                                                                                                                                                                                                         |
+| ****AgentHeight**   | integer | 5       | Determines the minimum amount of vertical space required for empty space to be considered traversable.                                                                                                                                                                                                                                           |
+| **AgentCanJump**    | boolean | true    | Determines whether jumping during pathfinding is allowed.                                                                                                                                                                                                                                                                                        |
+| **AgentCanClimb**   | boolean | false   | Determines whether climbing [TrussParts](https://create.roblox.com/docs/reference/engine/classes/TrussPart) during pathfinding is allowed.                                                                                                                                                                                                       |
+| **WaypointSpacing** | number  | 4       | Determines the spacing between intermediate waypoints in path.                                                                                                                                                                                                                                                                                   |
+| **Costs**           | table   | {}      | Table of materials or defined [PathfindingModifiers](https://create.roblox.com/docs/reference/engine/classes/PathfindingModifier) and their "cost" for traversal. Useful for making the agent prefer certain materials/regions over others. See [here](https://create.roblox.com/docs/characters/pathfinding#pathfinding-modifiers) for details. |
 ##### Explore different engine classes
 I use your agent params and the of phantom surface stills is happening. I set up a path modifier to the ground (which i repeat is completely flat and path finding is hallucinating non-sense surfaces) and the passThrough seems to be false as default value, when i set it to the ground part pathfinding thinks all the ground cannot be traversed. 
 Reading the agent params from other sources, the say
@@ -174,3 +204,31 @@ Let's see how to get the Y height for a damn model. You have two variables, one 
  
 ```
 ![[Pasted image 20260317205400.png]]
+
+### The battle continues
+I'm really struggling trying to compehend why there's a nav mesh that shouldn't be there. This navemesh is created exaclty when the connection begins, that's my single hint i just now that exactly when the compute path begins it thinks the model has a navmesh behind it. i think it may be some kind of corruption for two connections trying to modify the model at the same time but you can see in the logic that the operations for movin the model doesn't have in the same frame, i print the deltatime and i can see from the output logs there's no deltatime print happening at the same millisecond.
+```lua
+local moveConn = RunService.Heartbeat:Connect(function(deltaTime)
+	print(deltaTime)
+```
+I also wonder if the pathfinder height is wrong and it think the agent is elevated above the ground, the he assumin is above a mesh and arrange this in the other waypoints, then as the agent height is wrong and path finding starts again, it thinks the model is above a navmesh again, that would explain why this is happening every time pathfinding starts, however i tried different height values and the navmesh at the start of pathfinding is still there:
+```lua
+local Path = PathfindingService:CreatePath({
+		AgentCanJump = true,
+		AgentRadius = self.pet:GetExtentsSize().X + 2, -- tighter for a small pet
+		AgentHeight = 0, -- try 0 or 2 everything failed
+		WaypointSpacing = 2, -- tighter spacing = smoother path on uneven ground
+		Costs = {
+			-- need to test in different materials
+			GroundPlastic = 1,
+			Snow = math.huge,
+			Metal = math.huge,
+		},
+	})
+```
+the ground is at level 24.717 and pathfinding starts like
+27.8, 27, 27.8
+and the model height is 2.0359370708465576
+i wonder if it's considering its own body as a navmesh
+![[Pasted image 20260318105844.png]]
+Is there anyway for telling pathfind to ignore their own parts?

@@ -85,6 +85,7 @@ do
 			end
 		end
 	end
+
 	local setCollider = function(parent, cb)
 		for _, descendant in parent:GetDescendants() do
 			if descendant:IsA("Model") then

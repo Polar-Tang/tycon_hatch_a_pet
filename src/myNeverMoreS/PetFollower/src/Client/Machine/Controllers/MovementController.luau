@@ -21,6 +21,7 @@ function MovementController.new(data: NpcFighterTypes.controllerdataInint, servi
 
 	self.speed = assert(petData[petName], "invalid petName").speed
 	self.moveConnsMaid = Maid.new()
+	self._movementSessionId = 0
 
 	return self
 end
@@ -73,29 +74,18 @@ function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
 	end
 end
 
+local acc = 0
 function MovementController.MoveTo(self: NpcFighterTypes.MovementController, path: Path)
-	self._currentMovePromise = Promise.new(function(resolve, reject)
-		self.maid:DoCleaning()
+	self.maid:DoCleaning()
+	acc += 1
+	self._currentMovePromise = Promise.defer(function(resolve, reject)
+		print("promise id: ", acc)
 		local waypoints = path:GetWaypoints()
 		if #waypoints == 0 then
 			resolve()
 			return
 		end
 
-		--[[
-			local finalWaypoint = waypoints[#waypoints]
-			testPart({
-				Position = finalWaypoint.Position,
-				Color3 = Color3.new(0.129412, 0.521569, 0.168627),
-				Size = Vector3.new(2, 2, 2),
-				Duration = 2,
-				Name = "FinalWaypoint",
-			})
-		
-		]]
-		-- local rotationComplete = self:_lookTo(finalWaypoint.Position)
-
-		-- rotationComplete:Once(function()
 		local animHandler = self:getAnimHandler()
 		animHandler:LoadAnimation(true, "walk")
 		self.isMoving = true
@@ -105,6 +95,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			-- Ensure there a single movement connection at a time
 			self.moveConnsMaid:DoCleaning()
 
+			-- Start next movement after the last one finishes
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
 				self.isMoving = false
@@ -119,12 +110,15 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 					moveNext()
 				end)
 			elseif waypoint.Action == Enum.PathWaypointAction.Walk then
+				testPart({ Position = waypoint.Position, Name = "accWaypoint" .. currentIndex })
+
 				self:_moveToWaypoint(waypoint.Position, function()
 					currentIndex += 1
 					moveNext()
 				end)
 			end
 		end
+		-- First moveNext may occur while another moveCon is active
 		moveNext()
 		-- end)
 	end)
@@ -188,6 +182,7 @@ function MovementController._jumpToWaypoint(
 	self.moveConnsMaid:GiveTask(moveConn)
 end
 
+local accMove = 0
 function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementController, targetPosition, onComplete)
 	local startPos = self.hrp.Position
 	local delta = targetPosition - startPos
@@ -215,13 +210,13 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 
 		local newPos = startPos + dir * self.velocity * t
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
-
+		accMove += 1
+		testPart({ Position = newPos, Name = "accMove" .. accMove })
 		-- Determine rotation: apply rotation lerp until rotateTime is reached, then use final rotation
 		local isRotated = self:_isRotated()
 		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
 
 		if t > timeToReach then
-			-- Do this cause path finding love to do unecesary walking
 			onComplete()
 			return
 		end

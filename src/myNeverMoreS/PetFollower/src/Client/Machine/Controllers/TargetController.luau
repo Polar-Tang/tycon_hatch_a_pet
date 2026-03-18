@@ -4,6 +4,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
+-- local PathFindCustom = require(ReplicatedStorage.utils.PathFindCustom)
 local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
 
@@ -40,7 +41,7 @@ function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, 
 	local Path = PathfindingService:CreatePath({
 		AgentCanJump = true,
 		AgentRadius = self.pet:GetExtentsSize().X, -- tighter for a small pet
-		AgentHeight = self.modelHeight, -- EXACT MODEL HEIGHT
+		AgentHeight = self.pet:GetExtentsSize().Y, -- try 0 because primary part has 0 height above the ground
 		WaypointSpacing = 2, -- tighter spacing = smoother path on uneven ground
 		Costs = {
 			-- need to test in different materials
@@ -63,6 +64,7 @@ function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, 
 			reject(err or "Failed to compute path")
 			return
 		end
+
 		return resolve(Path)
 	end)
 end

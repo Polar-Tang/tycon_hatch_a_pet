@@ -1,11 +1,13 @@
 --[[
-Animation handler @v_02
+Animation handler @v_04
 	The .new accepts an object as a parameter, it tolerates the model player or the player object
 	Check the animation priority before stop it
 	Got bindable events for animations
 Animation handler @v_03
 	implements Lazy load on registered animations
-
+Animation handler @v_04
+	Added Init method for animationContainer, supports AnimationController and Humanoid.Animator
+	Requires Init to be called before using other methods
 ]]
 local require = require(script.Parent.loader).load(script)
 

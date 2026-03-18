@@ -112,6 +112,7 @@ export type MovementController = {
 	goalRotation: CFrame,
 	_playerLastPos: Vector3,
 	_currentMovePromise: Promise.Promise<>?,
+	_movementSessionId: number,
 	velocity: number,
 	isMoving: boolean,
 	speed: number,

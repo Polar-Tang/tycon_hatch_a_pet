@@ -107,7 +107,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "564fbd946a24f30b",
@@ -214,11 +215,13 @@
   },
   "active": "abdc3a527187ce1f",
   "lastOpenFiles": [
-    "Pasted image 20260317205400.png",
-    "Pasted image 20260317151643.png",
-    "Pasted image 20260316141735.png",
-    "Untitled 2.md",
+    "Pasted image 20260318105844.png",
+    "r&h/images/Pasted image 20260317205400.png",
+    "r&h/images",
+    "r&h/images/Pasted image 20260317151643.png",
+    "r&h/images/Pasted image 20260316141735.png",
     "r&h/prompt for creating moveTo using waypoints.md",
+    "Untitled 2.md",
     "r&h",
     "shooter confesions/todo.md",
     "shooter confesions/First steps.md",

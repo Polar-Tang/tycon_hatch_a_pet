@@ -23,7 +23,7 @@ return function(data: args)
 	end
 
 	testPart.Parent = workspace
-	if data.Nate then
+	if data.Name then
 		testPart.Name = data.Name
 	end
 end
