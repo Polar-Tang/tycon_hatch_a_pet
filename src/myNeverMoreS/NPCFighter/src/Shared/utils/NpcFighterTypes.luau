@@ -102,12 +102,15 @@ export type MovementController = {
 	ForgotPath: (self: MovementController) -> (),
 	Stop: (self: MovementController) -> (),
 	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
+	_jumpToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
 	getAnimHandler: (self: MovementController) -> any,
+
 	_currentMovePromise: Promise.Promise<>?,
 	isMoving: boolean,
 	speed: number,
 	_maid: Maid.Maid,
 	humanoid: Humanoid,
+	maid_waypoints: Maid.Maid,
 } & controllerdataInint
 
 -- pet only rotates to look at the enemy, play attacks animation, attacks and die

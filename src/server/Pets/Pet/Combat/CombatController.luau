@@ -87,7 +87,7 @@ CombotCotroller.destroyFightSession = function(player: Player)
 		print("No active fight session found for player: " .. tostring(player.UserId))
 		return
 	end
-	game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FirePlayer(player, { destroy = true })
+	game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireClient(player, { destroy = true })
 
 	folder:Destroy()
 end

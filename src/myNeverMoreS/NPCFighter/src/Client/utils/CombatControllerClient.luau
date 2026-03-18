@@ -179,13 +179,13 @@ do
 end
 
 function CombatControllerClient.cleanupInstances()
-	local player = Players.LocalPlayer.UserId
-	local petFollowers = CollectionService:GetTagged("petFollower" .. tostring(player.UserId))
+	local userId = Players.LocalPlayer.UserId
+	local petFollowers = CollectionService:GetTagged("petFollower" .. tostring(userId))
 	for _, pet in ipairs(petFollowers) do
 		pet:Destroy()
 	end
 
-	local bosses = CollectionService:GetTagged("bossAgainst" .. tostring(player.UserId))
+	local bosses = CollectionService:GetTagged("bossAgainst" .. tostring(userId))
 	for _, boss in ipairs(bosses) do
 		boss:Destroy()
 	end
@@ -241,9 +241,24 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 			return
 		end
 
+		local MAX_SIZE_THRESHOLD = 20.0 -- studs, adjust as needed
 		-- Apply the same scale factor from the reference pet
 		local referenceScale = petToClone:GetScale()
-		petTemplate:ScaleTo(referenceScale)
+		local currentSize = petToClone:GetExtentsSize()
+
+		if currentSize.Magnitude > MAX_SIZE_THRESHOLD then
+			warn(
+				string.format(
+					"PetSystem: Extents magnitude %.2f exceeds threshold %.2f, skipping ScaleTo",
+					currentSize.Magnitude,
+					MAX_SIZE_THRESHOLD
+				)
+			)
+			local clampedScale = referenceScale * (MAX_SIZE_THRESHOLD / currentSize.Magnitude)
+			petTemplate:ScaleTo(clampedScale)
+		else
+			petTemplate:ScaleTo(referenceScale)
+		end
 		local hrp = petTemplate.PrimaryPart
 		hrp.Anchored = false
 		-- Copy attributes from the reference pet

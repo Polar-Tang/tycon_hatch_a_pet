@@ -1,5 +1,6 @@
 local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local packages = RS.Nevermore.Quenty
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
@@ -24,8 +25,43 @@ function MovementController.new(data: NpcFighterTypes.controllerdataInint, servi
 		humanoid.WalkSpeed = self.speed
 	end
 	self.humanoid = humanoid
-
+	self.maid_waypoints = Maid.new()
+	self.maid:GiveTask(self.maid_waypoints)
 	return self
+end
+
+-- constsants
+local GRAVITY = Vector3.new(0, -workspace.Gravity, 0)
+local T = 0.5 -- use a fixed time for the ball to reach the target
+
+function MovementController._jumpToWaypoint(
+	self: NpcFighterTypes.MovementController,
+	targetPosition: Vector3,
+	onComplete
+)
+	self.maid_waypoints:DoCleaning()
+
+	local startPosition = self.hrp.Position
+
+	--V1 = P1 - P0 - 0.5*G*T^2/T
+	local initialVelocity = (targetPosition - startPosition - 0.5 * GRAVITY * T ^ 2) / T
+	local t = 0
+	local moveConn
+	moveConn = RunService.Heartbeat:Connect(function(deltaTime)
+		t += deltaTime
+
+		if t > T then
+			onComplete(true)
+			moveConn:Disconnect()
+			return
+		end
+
+		--// s = s0 + v0*t + 0.5*a*t^2
+		local newPos = startPosition + (initialVelocity * t) + 0.5 * GRAVITY * (t ^ 2)
+
+		self.pet:MoveTo(newPos)
+	end)
+	self.maid:GiveTask(moveConn)
 end
 
 function MovementController.Stop(self: NpcFighterTypes.MovementController)
@@ -69,23 +105,31 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 
 		local currentIndex = 1
 		local function moveNext()
+			-- clean previous move connections and promises
+
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
 				self.isMoving = false
 				resolve()
+				self.maid_waypoints:DoCleaning()
 				return
 			end
 
 			local waypoint = waypoints[currentIndex]
-			if waypoint.Action ~= Enum.PathWaypointAction.Jump then
-				self.humanoid.Jump = true
-			end
+
 			self:_moveToWaypoint(waypoint.Position, function(reached)
 				if reached then
 					currentIndex += 1
 					moveNext()
 				else
-					reject("Failed to reach waypoint")
+					self:_jumpToWaypoint(waypoint.Position, function(reached)
+						if reached then
+							currentIndex += 1
+							moveNext()
+						else
+							reject("Failed to reach waypoint")
+						end
+					end)
 				end
 			end)
 		end
@@ -99,17 +143,41 @@ function MovementController._moveToWaypoint(
 	targetPosition: Vector3,
 	onComplete: (boolean) -> ()
 )
-	if not self.humanoid then
-		onComplete(false)
-		return
-	end
+	self.maid_waypoints:DoCleaning()
 
-	local conn = self.humanoid.MoveToFinished:Once(function(reach)
-		onComplete(reach)
+	task.defer(function()
+		local timer
+		local time_out = Promise.new(function(resolve, reject)
+			local t = 0
+
+			timer = RunService.Heartbeat:Connect(function(dt)
+				t += dt
+				if t >= 1 then
+					resolve()
+				end
+			end)
+		end)
+			:Then(function()
+				onComplete(false)
+				timer:Disconnect()
+			end)
+			:Finally(function(...): ...any
+				timer:Disconnect()
+			end)
+			:Catch(function(...): ...any
+				print("rejeccted")
+				timer:Disconnect()
+			end)
+
+		self.maid_waypoints:GiveTask(timer)
+		local conn = self.humanoid.MoveToFinished:Once(function(reach)
+			onComplete(reach)
+		end)
+		self.maid_waypoints:GivePromise(time_out)
+		self.maid_waypoints:GiveTask(conn)
+
+		self.humanoid:MoveTo(targetPosition)
 	end)
-	self._maid:GiveTask(conn)
-
-	self.humanoid:MoveTo(targetPosition)
 end
 
 function MovementController.DestroyNPC(self: NpcFighterTypes.MovementController)
