@@ -226,7 +226,7 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 
 		-- Apply the same scale factor from the reference pet
 		local referenceScale = petToClone:GetScale()
-		petTemplate:ScaleTo(referenceScale)
+		-- petTemplate:ScaleTo(referenceScale)
 		local hrp = petTemplate.PrimaryPart
 		hrp.Anchored = false
 		-- Copy attributes from the reference pet

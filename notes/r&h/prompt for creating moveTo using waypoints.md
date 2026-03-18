@@ -126,7 +126,7 @@ local moveConn = RunService.Heartbeat:Connect(function(deltaTime)
 	end
 -- start the new shit
 ```
-my hypothesis is that now with this new modification first will happen the `DoCleanning` and then `onComplete`, starting the new connection, as result the last connection (should be one) will be cleaned and its ensured to don't forget any connection
+to solve this we use task.defer on onComplete calling, however i still see print(dt) x2 sometimes and i wonder why
 ### Simulated jump
 This mechanism is working great, but there's a problem where the calculation got the movement has Y offset, that's where waypoint.Action == Enum.PathWaypointAction.Jump. `_moveToWaypoint`
 
@@ -136,3 +136,41 @@ This mechanism is working great, but there's a problem where the calculation got
 ### Path find service sucks!
 The calculation for the movement has an y offset
 ![[Pasted image 20260316141735.png]]
+(image where waypoints position are parts and shows elevations that are not Action = Jump)
+We may see that he thinks there's ground where actually isn't
+![[Pasted image 20260317151643.png]]
+(image where navigation link is visible and it draws a tiny mount in a flat ground)
+I really wonder how pathfinding determines where how's the ground, as i want to avoid creating a custom pathfinding service, i hope pathfinding works good and the error is likely in my agentParams
+```lua
+local Path = PathfindingService:CreatePath({
+		AgentCanJump = true,
+		AgentRadius = 2,
+		AgentHeight = 2,
+		Costs = {
+			-- need to test in different materials
+			Snow = math.huge,
+			Metal = math.huge,
+		},
+	})
+```
+Please help me to understand how pathfinding does work, what the parameters are and use all this knowledge to avoid pathfinding thinking there's ground where isn't
+
+|Key|Type|Default|Description|
+|---|---|---|---|
+|**AgentRadius**|integer|2|Determines the minimum amount of horizontal space required for empty space to be considered traversable.|
+|**AgentHeight**|integer|5|Determines the minimum amount of vertical space required for empty space to be considered traversable.|
+|**AgentCanJump**|boolean|true|Determines whether jumping during pathfinding is allowed.|
+|**AgentCanClimb**|boolean|false|Determines whether climbing [TrussParts](https://create.roblox.com/docs/reference/engine/classes/TrussPart) during pathfinding is allowed.|
+|**WaypointSpacing**|number|4|Determines the spacing between intermediate waypoints in path.|
+|**Costs**|table|{}|Table of materials or defined [PathfindingModifiers](https://create.roblox.com/docs/reference/engine/classes/PathfindingModifier) and their "cost" for traversal. Useful for making the agent prefer certain materials/regions over others. See [here](https://create.roblox.com/docs/characters/pathfinding#pathfinding-modifiers) for details.|
+##### Explore different engine classes
+I use your agent params and the of phantom surface stills is happening. I set up a path modifier to the ground (which i repeat is completely flat and path finding is hallucinating non-sense surfaces) and the passThrough seems to be false as default value, when i set it to the ground part pathfinding thinks all the ground cannot be traversed. 
+Reading the agent params from other sources, the say
+>Agent height, in studs. Empty space smaller than this value, like the space under stairs, will be marked as non-traversable.
+
+That makes me think that if the agentHeight is the same as groundHeight pathfinding may not hallucinate phantom surface, but agen height is actually the character height so i set the model height and i get a really good improvements in the Y positioning. But the phantom surface is still fucking things up. 
+Let's see how to get the Y height for a damn model. You have two variables, one should store the lowest part and the other one the highest. Loop through all the model desendantast to filter for these two parts. Once the loop is completed we got the lowest and highest part, now as the position is the center get the top of the highest and the bottom of the lowest by `lowest = part.Size.Y -part.Size.Y/2` and the top of the highest `highest = part.Size.Y +part.Size.Y/2`. Now the sum between the bottom of the lowest part and the top of the highest part is the height
+```
+ 
+```
+![[Pasted image 20260317205400.png]]

@@ -5,6 +5,7 @@ local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 local testPart = require(ReplicatedStorage.utils.testPart)
+local utils = require(ReplicatedStorage.utils.utils)
 
 local TargetController = {}
 TargetController.__index = TargetController
@@ -17,6 +18,9 @@ function TargetController.new(data: NpcFighterTypes.controllerdataInint, service
 	local player_hrp = playerChar and playerChar.PrimaryPart
 	self._player_hrp = player_hrp
 	self._lastGoalPos = self:_getGoalPos()
+
+	self.modelHeight = 4.5 -- utils.GetModelHeight(self.pet)
+
 	return self
 end
 
@@ -35,10 +39,12 @@ end
 function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, goal: Vector3): Promise.Promise<Path>
 	local Path = PathfindingService:CreatePath({
 		AgentCanJump = true,
-		AgentRadius = 10,
-		AgentHeight = 10,
+		AgentRadius = self.pet:GetExtentsSize().X, -- tighter for a small pet
+		AgentHeight = self.modelHeight, -- EXACT MODEL HEIGHT
+		WaypointSpacing = 2, -- tighter spacing = smoother path on uneven ground
 		Costs = {
 			-- need to test in different materials
+			GroundPlastic = 1,
 			Snow = math.huge,
 			Metal = math.huge,
 		},
