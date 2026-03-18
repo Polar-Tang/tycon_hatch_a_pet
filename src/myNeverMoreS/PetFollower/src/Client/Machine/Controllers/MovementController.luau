@@ -74,8 +74,8 @@ function MovementController.ForgotPath(self: NpcFighterTypes.MovementController)
 end
 
 function MovementController.MoveTo(self: NpcFighterTypes.MovementController, path: Path)
-	self._currentMovePromise = Promise.defer(function(resolve, reject)
-		self.maid:GiveTask(self.moveConnsMaid)
+	self._currentMovePromise = Promise.new(function(resolve, reject)
+		self.maid:DoCleaning()
 		local waypoints = path:GetWaypoints()
 		if #waypoints == 0 then
 			resolve()
@@ -103,6 +103,7 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		local currentIndex = 1
 		local function moveNext()
 			-- Ensure there a single movement connection at a time
+			self.moveConnsMaid:DoCleaning()
 
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
@@ -126,8 +127,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		end
 		moveNext()
 		-- end)
-	end):Finally(function(...): ...any
-		self.maid:DoCleaning()
 	end)
 	return self._currentMovePromise
 end
@@ -162,7 +161,7 @@ function MovementController._jumpToWaypoint(
 		self.startCFrame = self.hrp.CFrame
 		self.goalRotation = CFrame.lookAt(startPosition, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
 
-		-- testPart({ CFrame = self.startCFrame })
+		testPart({ CFrame = self.startCFrame })
 	end
 
 	--V1 = P1 - P0 - 0.5*G*T^2/T
@@ -175,9 +174,9 @@ function MovementController._jumpToWaypoint(
 		local isRotated = self:_isRotated()
 		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
 
-		if t >= T then
-			self.moveConnsMaid:DoCleaning()
-			task.defer(onComplete)
+		if t > T then
+			onComplete()
+			return
 		end
 		print(deltaTime)
 
@@ -200,13 +199,12 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 		return
 	end
 
-	-- testPart({ Position = targetPosition, Color3 = Color3.new(1, 0, 0), Name = "StartCFrame" })
 	-- Set up rotation towards the target
 	do
 		self.startCFrame = self.hrp.CFrame
 		self.goalRotation = CFrame.lookAt(startPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)
 
-		-- testPart({ CFrame = self.startCFrame, Color3 = Color3.new(0, 1, 0), Name = "StartCFrame" })
+		testPart({ CFrame = self.startCFrame })
 	end
 
 	local dir = delta.Unit
@@ -214,7 +212,6 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 
 	local moveConn = RunService.Heartbeat:Connect(function(dt)
 		t += dt
-		print(dt)
 
 		local newPos = startPos + dir * self.velocity * t
 		newPos = Vector3.new(newPos.X, targetPosition.Y, newPos.Z)
@@ -223,14 +220,12 @@ function MovementController._moveToWaypoint(self: NpcFighterTypes.MovementContro
 		local isRotated = self:_isRotated()
 		local rotation = isRotated and self.goalRotation.Rotation or self:_rotate(t).Rotation
 
-		if t >= timeToReach then
-			local finalPos = Vector3.new(targetPosition.X, targetPosition.Y, targetPosition.Z)
-			local finalCF = CFrame.new(finalPos) * self.goalRotation.Rotation
-			self.pet:PivotTo(finalCF)
-			self.moveConnsMaid:DoCleaning()
-			task.defer(onComplete)
+		if t > timeToReach then
+			-- Do this cause path finding love to do unecesary walking
+			onComplete()
 			return
 		end
+		print(dt)
 
 		local newCF = CFrame.new(newPos) * rotation
 		self.pet:PivotTo(newCF)
