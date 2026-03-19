@@ -105,6 +105,7 @@ module["Fox"] = merge({
 
 	["velocity"] = 4,
 	["speed"] = 2,
+	["animationRunSpeed"] = 2.5,
 	adorneeOffset = Vector3.new(0, 4, 0),
 	YOffset = 0.5,
 }, common_stats)
@@ -121,6 +122,7 @@ module["Panda"] = merge({
 	-- ["range"] = 30,
 	["velocity"] = 8,
 	["speed"] = 1.25,
+	["animationRunSpeed"] = 1.5,
 	-- ["base"] = 4, -- money generation
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
 	YOffset = 0.925,
@@ -137,6 +139,7 @@ module["Elephant"] = merge({
 	["velocity"] = 4,
 	["speed"] = 3,
 	YOffset = 1.3,
+	["animationRunSpeed"] = 4,
 
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,
@@ -152,6 +155,7 @@ module["Hippo"] = merge({
 	["velocity"] = 8,
 
 	["speed"] = 2,
+	["animationRunSpeed"] = 2.5,
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
 }, common_stats)
 

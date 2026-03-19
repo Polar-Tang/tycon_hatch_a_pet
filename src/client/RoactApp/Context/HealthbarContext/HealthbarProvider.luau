@@ -18,7 +18,7 @@ end
 
 function HealthbarProvider:didMount()
 	HealthCon.Event:Connect(function(data: NpcFighterTypes.HealthNetData)
-		local clone = self.state.HealthbarComponents
+		local clone = table.clone(self.state.HealthbarComponents)
 		if not data.model then
 			return
 		end
@@ -29,24 +29,27 @@ function HealthbarProvider:didMount()
 			end
 
 			if data.type == "Init" then
-				clone[data.petId] = Roact.createElement(HealthbarComponent, {
+				clone[data.petId] = {
 					model = data.model,
 					percent = data.percent,
 					petLevel = data.level,
 					health = data.health,
 					petId = data.petId,
-				})
+					componentName = "HealthBar",
+				}
 			end
 			if data.type == "Update" then
-				clone[data.petId] = Roact.createElement(HealthbarComponent, {
+				clone[data.petId] = {
 					model = data.model,
 					percent = data.percent,
 					health = data.health,
 					petLevel = data.level,
 					petId = data.petId,
-				})
+					componentName = "HealthBar",
+				}
 			end
 			self:setState({ HealthbarComponents = clone })
+			print("state ", self.state)
 		end
 	end)
 end

@@ -24,6 +24,7 @@ local MovementController =
 	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.MovementController)
 local TargetController =
 	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.TargetController)
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local CombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
@@ -46,12 +47,12 @@ do
 		local proximityPrompt = Instance.new("ProximityPrompt")
 		proximityPrompt.MaxActivationDistance = 8
 		proximityPrompt.ActionText = "Start Fight"
-		proximityPrompt.ObjectText = parent:GetAttribute("petName")
+		proximityPrompt.ObjectText = parent.Name
 		proximityPrompt.KeyboardKeyCode = Enum.KeyCode.E
 		proximityPrompt.Style = Enum.ProximityPromptStyle.Default
 		proximityPrompt.RequiresLineOfSight = false
 		proximityPrompt.Name = "Fight"
-		proximityPrompt.Parent = parent
+		proximityPrompt.Parent = parent.Union
 
 		-- Handle triggered event
 		return proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
@@ -80,6 +81,10 @@ do
 		local BinderProvider = _G.ServiceBag:GetService(_G.BinderProvider)
 		local animationHandler = BinderProvider:Get(Constants.animationHandler)
 		controllerdataInint.animationHandler = animationHandler:Get(parent)
+		local petName = parent:GetAttribute("petName")
+		if petData[petName] and petData[petName].animationRunSpeed then
+			controllerdataInint.animationRunSpeed = petData[petName].animationRunSpeed
+		end
 
 		return controllerdataInint
 	end
@@ -195,15 +200,17 @@ end
 -- Do the same with the player pet but using FindFIrstChild(petid):Clone()
 function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 	local bossName = data.player_boss.petId
-	local bossFolder: Folder = ReplicatedFirst.PetsTemplates.Bosses
+	local bossFolder: Folder = ReplicatedFirst.Pets
 	local bossTempla = bossFolder:FindFirstChild(bossName)
 	if not bossTempla then
+		print("Boss not found")
 		return
 	end
 
 	--setup boss
 	do
 		local ourBoss = bossTempla:Clone()
+		ourBoss.Parent = workspace
 		local lower_name = string.lower(bossName)
 		local tag_name = "boss_point_" .. lower_name
 		local point_to_spawn_boss = workspace:WaitForChild(tag_name)

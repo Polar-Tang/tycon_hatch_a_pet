@@ -42,6 +42,7 @@ export type petInitFrontend = {
 	radPivot: number?,
 	ZradPivot: number?,
 	walkSpeed: number?,
+	animationRunSpeed: number?,
 }
 
 export type petsInitFrontend = { petNames: petInitFrontend }

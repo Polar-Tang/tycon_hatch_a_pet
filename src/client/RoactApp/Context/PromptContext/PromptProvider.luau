@@ -61,7 +61,6 @@ end
 function PromptProvider:didMount()
 	local promptCon = game:GetService("ProximityPromptService").PromptShown
 		:Connect(function(prompty: ProximityPrompt, inputType)
-			print("IS THIS TRIGGERING BEFORE THE SERVER SETUP?")
 			local promptParent = prompty.Parent
 			if promptParent then
 				ProximityPrompt:FireServer({
@@ -69,6 +68,7 @@ function PromptProvider:didMount()
 					Parent = promptParent,
 					id = prompty.Name,
 					inputType = inputType,
+					npcName = promptParent.Name,
 				})
 			end
 		end)

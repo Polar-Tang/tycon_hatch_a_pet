@@ -86,16 +86,6 @@ do
 		end
 	end
 
-	local function onCreepyAdded(descendant)
-		-- Set collision group for any part descendant
-
-		if descendant:IsA("BasePart") then
-			descendant.CanCollide = true
-			descendant.CollisionGroup = "Npcs"
-			descendant.CFrame = descendant.CFrame * CFrame.Angles(0, math.rad(90), 0)
-		end
-	end
-
 	local setCollider = function(parent, cb)
 		for _, descendant in parent:GetDescendants() do
 			if descendant:IsA("Model") then
@@ -119,7 +109,7 @@ do
 
 	for _, pet in petsFighters do
 		pet:SetAttribute("AnimatorName", "Humanoid")
-		setCollider(pet, onCreepyAdded)
+		setCollider(pet, onDescendantAdded)
 	end
 
 	local function fullOptimized(descendant)

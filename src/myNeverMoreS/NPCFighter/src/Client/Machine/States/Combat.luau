@@ -6,19 +6,20 @@ local Attacks: RemoteEvent = Events.Attacks
 --local moveRoot = require(Helpers:WaitForChild("MoveRoot"))
 local StateMachine = require(ReplicatedStorage.StateMachine)
 local TweenService = game:GetService("TweenService")
+local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 
 local State = StateMachine.State
 
-local Combat = State.new("PromptCombat")
+local Combat = State.new("Combat")
 
 Combat.Transitions = {
 	require(script.Parent.Parent.Transition.Died),
 }
 
-function Combat:OnEnter(data)
+function Combat:OnEnter(data: NpcFighterTypes.bossStateCtx)
 	data.timer = 0
 	data.lastTriggerTime = 0
-	local npc = data.npc
+	local npc = data.enemy
 	local hrp = npc:FindFirstChild("HumanoidRootPart")
 
 	local petPosition = hrp.Position

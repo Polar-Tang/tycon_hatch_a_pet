@@ -16,23 +16,12 @@ local Combat = State.new("Combat")
 State.Transitions = {
 	require(script.Parent.Parent.Transition.Died),
 }
--- PLAYER PET
-local function smoothCFrame(part, targetCFrame, duration)
-	if not part then
-		return
-	end
-	local tweenInfo = TweenInfo.new(duration or 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local goal = { CFrame = targetCFrame }
-	local tween = TweenService:Create(part, tweenInfo, goal)
-	tween:Play()
-	return tween
-end
 
 function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
 	local rootPart = data.enemy:WaitForChild("HumanoidRootPart")
 	data.enemy_hrp = rootPart
 
-	local nerby_enemy = data.TargetController:getNearbyTo(data.enemy_hrp)
+	local nerby_enemy = data.TargetController:GetTo(data.enemy_hrp)
 	-- Humanoid autorotate should look at this enemy
 	data.MovementController:MoveTo(nerby_enemy)
 end

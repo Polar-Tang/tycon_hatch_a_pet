@@ -134,6 +134,8 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 			end)
 		end
 		moveNext()
+	end):Finally(function(...): ...any
+		self.maid:DoCleaning()
 	end)
 	return self._currentMovePromise
 end

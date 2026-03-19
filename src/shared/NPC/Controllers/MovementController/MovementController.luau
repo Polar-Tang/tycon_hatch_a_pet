@@ -164,7 +164,9 @@ function MovementController:PlainMove(targetPosition)
 
 			-- Walking anim
 			local animationTrask = self._AnimationHandler:LoadAnimation(true, "walk")
-			animationTrask:AdjustSpeed(self.speed)
+			if self.animationRunSpeed then
+				animationTrask:AdjustSpeed(self.speed)
+			end
 			local elapsed = 0
 
 			self._moveConn = RunService.Heartbeat:Connect(function(dt)

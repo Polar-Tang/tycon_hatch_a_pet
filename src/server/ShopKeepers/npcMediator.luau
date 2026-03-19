@@ -38,13 +38,18 @@ end
 -- Server
 Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
 	local npcModel = promptInfo.Parent
+	local npcName = promptInfo.npcName
 	local id = promptInfo.id
 	local prompt = promptInfo.prompt
 	local inputType = promptInfo.inputType
 
 	-- EZ anti exploits checks
 	do
-		local theNpcInfo: npcTypes.npcMap = npcMap[npcModel.Name]
+		if not npcModel then
+			print("npc model exists in only in the client")
+			return
+		end
+		local theNpcInfo: npcTypes.npcMap = npcMap[(npcModel.Name or npcName)]
 		if not theNpcInfo then
 			print("no theNpcInfo")
 			return

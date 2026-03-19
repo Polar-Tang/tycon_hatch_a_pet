@@ -83,4 +83,20 @@ function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): V
 	return nearPlayer
 end
 
+function TargetController:GetTo(basePart: BasePart, distance: number?): CFrame
+	distance = distance or 3
+
+	local targetPos = basePart.Position
+	local myPos = self.hrp.Position
+
+	-- Direction from target → NPC
+	local direction = (myPos - targetPos).Unit
+
+	-- Position in front of the target
+	local goalPos = targetPos + direction * distance
+
+	-- Face the target
+	return CFrame.lookAt(goalPos, targetPos)
+end
+
 return TargetController

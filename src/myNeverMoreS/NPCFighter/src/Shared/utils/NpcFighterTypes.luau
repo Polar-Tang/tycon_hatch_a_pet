@@ -91,6 +91,7 @@ export type TargetController = {
 	modelHeight: number,
 
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> TargetController,
+	GetTo: (self: TargetController, BasePart) -> CFrame?,
 	GetGoal: (self: TargetController) -> Vector3?,
 	CalculatePath: (self: TargetController, goal: Vector3) -> Promise.Promise<Path>,
 	_getGoalPos: (self: TargetController) -> Vector3,
