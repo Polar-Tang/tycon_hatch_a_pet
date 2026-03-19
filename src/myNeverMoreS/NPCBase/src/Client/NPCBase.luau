@@ -27,13 +27,16 @@ function NPCBase.new(char: Model, serviceBag)
 	return self
 end
 
-function NPCBase.StartCombat(self: NpcFighterTypes.NPCBase, enemy: Model)
+function NPCBase.StartCombat(self: NpcFighterTypes.NPCBase, enemy: Model, enemy_hrp: BasePart, enemy_health: IntValue)
 	if not self.state then
 		print("Binder is not initialized")
 		return
 	end
-	self.state:ChangeState("Combat")
 	self.state:ChangeData("enemy", enemy)
+	self.state:ChangeData("enemy_hrp", enemy_hrp)
+	self.state:ChangeData("enemy_health", enemy_health)
+
+	self.state:ChangeState("Combat")
 end
 
 function NPCBase:Destroy()

@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 --||Nevermore Shit||--
@@ -51,6 +52,7 @@ local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
+local testPart = require(ReplicatedStorage.utils.testPart)
 
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
@@ -203,4 +205,112 @@ do
 	for _, teleporter in CollectionService:GetTagged("teleporter") do
 		setupTeleporter(teleporter)
 	end
+end
+
+-- Do some weird tecnique for avoiding pet colliding with the camera
+--[[
+	
+do
+	local camera = workspace.CurrentCamera
+	local player_character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+	local function updatePetTransparency(pet, character)
+		local origin = camera.CFrame.Position
+		local target = character.HumanoidRootPart.Position
+
+		local params = RaycastParams.new()
+		params.FilterDescendantsInstances = { character }
+		params.FilterType = Enum.RaycastFilterType.Exclude
+
+		local result = workspace:Raycast(origin, target - origin, params)
+
+		if result and result.Instance:GetAttribute("petName") then
+			for _, part in pet:GetDescendants() do
+				if part:IsA("BasePart") then
+					part.LocalTransparencyModifier = 0.7
+				end
+			end
+		else
+			for _, part in pet:GetDescendants() do
+				if part:IsA("BasePart") then
+					part.LocalTransparencyModifier = 0
+				end
+			end
+		end
+	end
+
+	RunService.RenderStepped:Connect(function()
+		for _, pet in CollectionService:GetTagged(Constants.PetFollower) do
+			updatePetTransparency(pet, player_character)
+		end
+	end)
+end
+]]
+
+-- FADING TEXT EVENT
+do
+	local fadingText = function(rootPart: BasePart, text: string, textColor: Color3?, size: UDim2?)
+		print("text ", text)
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "CustomHumanoidBar"
+		billboard.Adornee = rootPart
+		billboard.Size = size or UDim2.new(1, 0, 1, 0)
+		billboard.StudsOffset = Vector3.new(0, 3, 0)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = rootPart
+
+		local DamageLabel = Instance.new("TextLabel")
+		DamageLabel.Name = "Label"
+		DamageLabel.Size = UDim2.new(1, 0, 1, 0)
+		DamageLabel.BackgroundTransparency = 1
+		DamageLabel.Text = tostring(text)
+		DamageLabel.TextColor3 = textColor or Color3.fromRGB(255, 255, 255)
+		DamageLabel.Position = UDim2.new(0, 0, 0, 0)
+		DamageLabel.Font = Enum.Font.GothamBold
+		DamageLabel.ZIndex = 2
+		DamageLabel.TextScaled = true
+		DamageLabel.Parent = billboard
+		-- Animation: float up and fade out
+		task.spawn(function()
+			local duration = 1.0 -- seconds
+			local startTime = tick()
+			local startOffset = billboard.StudsOffset
+			local floatDistance = 2 -- studs to move up
+			while true do
+				local elapsed = tick() - startTime
+				local alpha = math.clamp(elapsed / duration, 0, 1)
+				-- Move up
+				billboard.StudsOffset = startOffset + Vector3.new(0, floatDistance * alpha, 0)
+				-- Fade out
+				DamageLabel.TextTransparency = alpha
+				DamageLabel.TextStrokeTransparency = alpha
+				if alpha >= 1 then
+					break
+				end
+				task.wait()
+			end
+			billboard:Destroy()
+		end)
+	end
+	ReplicatedStorage.RemoteEvents.TextFade.OnClientEvent:Connect(function(data)
+		local rootPart
+		if data.source then
+			rootPart = data.source
+		elseif data.position then
+			rootPart = Instance.new("Part")
+			rootPart.CanCollide = false
+			rootPart.CanQuery = false
+			rootPart.CanTouch = false
+			rootPart.CanTouch = false
+			rootPart.AudioCanCollide = false
+			rootPart.CastShadow = false
+			rootPart.Anchored = true
+			rootPart.Size = Vector3.new(1, 1, 1)
+			rootPart.Transparency = 1
+			rootPart.Position = data.position
+			rootPart.Parent = workspace
+		end
+		local damage = data.text
+		print("this damage shuld be printed ", damage)
+		fadingText(rootPart, damage)
+	end)
 end

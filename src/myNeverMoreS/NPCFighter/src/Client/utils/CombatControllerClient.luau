@@ -18,6 +18,7 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 
+local alert = require(StarterPlayer.StarterPlayerScripts.facade.alert)
 local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local MovementController =
@@ -25,7 +26,7 @@ local MovementController =
 local TargetController =
 	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.TargetController)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
-local CombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
+local PetCombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.PetCombatCon
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Constants = require(ReplicatedStorage.utils.Constants)
@@ -52,12 +53,21 @@ do
 		proximityPrompt.Style = Enum.ProximityPromptStyle.Default
 		proximityPrompt.RequiresLineOfSight = false
 		proximityPrompt.Name = "Fight"
-		proximityPrompt.Parent = parent.Union
+		local hrp = parent.PrimaryPart or parent:WaitForChild("HumanoidRootPart")
+		proximityPrompt.Parent = hrp
+
+		-- Handle prompt trigger
 
 		-- Handle triggered event
 		return proximityPrompt.Triggered:Connect(function(playerWhoTriggered)
 			-- Fire to server with the pet/NPC that was interacted with
-			CombatCon:Fire()
+			proximityPrompt.Enabled = false
+			PetCombatCon:Fire({
+				enemy = parent,
+				enemy_hrp = hrp,
+				enemy_health = CombatControllerClient.getHealth(playerWhoTriggered, "PlayerPet"),
+			})
+			alert.alert("the fight is about to start!")
 		end)
 	end
 
@@ -85,6 +95,12 @@ do
 		if petData[petName] and petData[petName].animationRunSpeed then
 			controllerdataInint.animationRunSpeed = petData[petName].animationRunSpeed
 		end
+		controllerdataInint.hrp = parent.PrimaryPart or parent:WaitForChild("HumanoidRootPart")
+		controllerdataInint.player = player
+		print("controllerdataInint ", controllerdataInint)
+		controllerdataInint.timer = 0
+		controllerdataInint.lastTriggerTime = 0
+		controllerdataInint.Humanoid = parent:FindFirstChildOfClass("Humanoid") or parent:WaitForChild("Humanoid")
 
 		return controllerdataInint
 	end
@@ -125,19 +141,9 @@ do
 		-- petData.billboardService = billboardService
 		-- setUpAtt(parent, petInfo, maid, current_pet_stats)
 		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerBoss")
-		return {
-			maid = maid,
-			pet = parent,
-
-			-- timers
-			timer = 0,
-			lastTriggerTime = 0,
-			-------------------
-
-			-------- Controlles --------
-
-			DeadController = DeadController.new(controllerdataInint, serviceBag) or nil,
-		}
+		local data = table.clone(controllerdataInint)
+		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
+		return data
 	end
 
 	function CombatControllerClient.setPetCtx(
@@ -164,22 +170,13 @@ do
 		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerPet")
 
 		CollectionService:AddTag(parent, "petFollower" .. tostring(player.UserId))
+		local data = table.clone(controllerdataInint)
 
-		return {
-			maid = maid,
-			pet = parent,
-
-			-- timers
-			timer = 0,
-			lastTriggerTime = 0,
-			-------------------
-
-			-------- Controlles --------
-
-			DeadController = DeadController.new(controllerdataInint, serviceBag) or nil,
-			TargetController = TargetController.new(controllerdataInint, serviceBag, player),
-			MovementController = MovementController.new(controllerdataInint, serviceBag, player),
-		}
+		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
+		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
+		data.TargetController = TargetController.new(controllerdataInint, serviceBag, player)
+		data.MovementController = MovementController.new(controllerdataInint, serviceBag, player)
+		return data
 	end
 end
 
@@ -269,11 +266,13 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 		local hrp = petTemplate.PrimaryPart
 		hrp.Anchored = false
 		-- Copy attributes from the reference pet
-		for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
-			if attributeName == "AnimatorName" then
-				continue
+		do
+			for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
+				if attributeName == "AnimatorName" then
+					continue
+				end
+				petTemplate:SetAttribute(attributeName, attributeValue)
 			end
-			petTemplate:SetAttribute(attributeName, attributeValue)
 		end
 
 		petTemplate.Parent = workspace

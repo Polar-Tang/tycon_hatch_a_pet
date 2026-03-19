@@ -1,10 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
 
 -- COMPONENTS
 local Components = script.Parent.Components
-local HealthBars = require(StarterPlayer.StarterPlayerScripts.RoactApp.Components.billboards.HealthBars)
 local Roact = require(ReplicatedStorage.Roact)
+local HealthBars = require(Components.billboards.HealthBars)
 local CustomProximityPrompts = require(Components.CustomProx.CustomProximityPrompts)
 local Billboards = require(Components.billboards.Billboards)
 

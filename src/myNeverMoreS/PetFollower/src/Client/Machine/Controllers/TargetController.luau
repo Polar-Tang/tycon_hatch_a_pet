@@ -5,8 +5,6 @@ local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 -- local PathFindCustom = require(ReplicatedStorage.utils.PathFindCustom)
-local testPart = require(ReplicatedStorage.utils.testPart)
-local utils = require(ReplicatedStorage.utils.utils)
 
 local TargetController = {}
 TargetController.__index = TargetController
@@ -83,7 +81,7 @@ function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): V
 	return nearPlayer
 end
 
-function TargetController:GetTo(basePart: BasePart, distance: number?): CFrame
+function TargetController:GetTo(basePart: BasePart, distance: number?): Vector3
 	distance = distance or 3
 
 	local targetPos = basePart.Position
@@ -96,7 +94,7 @@ function TargetController:GetTo(basePart: BasePart, distance: number?): CFrame
 	local goalPos = targetPos + direction * distance
 
 	-- Face the target
-	return CFrame.lookAt(goalPos, targetPos)
+	return goalPos
 end
 
 return TargetController

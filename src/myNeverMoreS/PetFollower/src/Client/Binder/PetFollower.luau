@@ -6,6 +6,7 @@ local healthBarListener = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 
+local CombatCon = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.PetCombatCon
 local StatesFolder = ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.States
 local PetFollower = setmetatable({}, NPCBase)
 PetFollower.__index = PetFollower
@@ -28,6 +29,15 @@ function PetFollower:Init(player, initData: NpcFighterTypes.petStats)
 	)
 	self.state = state
 	self._initialized = true
+
+	-- A single life connection
+	self.combat_connection = CombatCon.Event:Connect(function(data)
+		-- Notify the server the combat has started
+		ReplicatedStorage.RemoteEvents.NPCFighter:FireServer(player, self.char)
+
+		self:StartCombat(data.enemy, data.enemy_hrp, data.enemy_health)
+		self.combat_connection:Disconnect()
+	end)
 
 	-- pet follower should listen to the pet health bar, not the boss
 	healthBarListener(player, self.char, "PlayerPet")

@@ -107,48 +107,7 @@ ReplicatedStorage.RemoteEvents.NPCFighter.OnServerEvent:Connect(function(a0: Pla
 	----print("IDK ")
 end)
 
--- This is the event triggered on boss teleport, it confirms player can go to the instance, register it, teleport the player to the instance and tell the client to create all the npcs that just lives in the client
 local CombatController = require(ServerScriptService.Pets.Pet.Combat.CombatController)
-local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
-BossRemoteEvent.OnServerEvent:Connect(function(a0: Player, data: NpcFighterTypes.combatInstanceData)
-	local petId = data.petId
-	local bossName = data.bossName
-
-	local folderSession = CombatController.createAFightSession(a0, data)
-	if not folderSession then
-		return
-	end
-
-	local bestiaryHandler = Registry:GetHandler(a0)
-	local pets_stats = bestiaryHandler:getPetStats(petId)
-
-	do
-		local petInformation = {
-			healthVal = utils.HealthCalc(pets_stats.Health),
-			meleeVal = utils.MeleeCalc(pets_stats.Melee),
-			petId = petId,
-		}
-		local bossInformation = {
-			healthVal = 500,
-			meleeVal = 200,
-			petId = bossName,
-		}
-
-		local fightInfo = {
-			player_pet = petInformation,
-			player_boss = bossInformation,
-		}
-		----print("fightInfo ", fightInfo)
-		CombatController.initFightSession(a0, folderSession, fightInfo) --tag:telepor_point_croakan
-		BossRemoteEvent:FireClient(a0, fightInfo)
-	end
-
-	local point_name = Constants.teleportPointSuffix .. string.lower(bossName)
-	local teleportpoint: BasePart = workspace:WaitForChild(point_name)
-
-	local character: Model = a0.Character or a0.CharacterAdded:Wait()
-	character:PivotTo(teleportpoint.CFrame)
-end)
 
 local SpawnEggShop = workspace:WaitForChild("SpawnEggShop")
 local SpawnKiblyShop = workspace:WaitForChild("SpawnKiblyShop")
@@ -164,8 +123,16 @@ local teleportDestinations = {
 		return PlotService.GetSpawnPlot(player)
 	end,
 }
+type teleportDestinations = "eggShop" | "kiblyShop" | "plot"
+local checkDestination = function(destination: string): boolean
+	if destination == "eggShop" or destination == "kiblyShop" or destination == "plot" then
+		return true
+	else
+		return false
+	end
+end
 
-game.ReplicatedStorage.RemoteEvents.TeleportRemote.OnServerEvent:Connect(function(player: Player, teleportTo: string)
+local function teleport(player: Player, teleportTo: teleportDestinations)
 	if typeof(teleportTo) ~= "string" then
 		print("Invalid teleport destination: ", teleportTo)
 		return
@@ -191,7 +158,71 @@ game.ReplicatedStorage.RemoteEvents.TeleportRemote.OnServerEvent:Connect(functio
 
 	character:PivotTo(destination)
 	CombatController.destroyFightSession(player)
-end)
+end
+
+game.ReplicatedStorage.RemoteEvents.TeleportRemote.OnServerEvent:Connect(
+	function(player: Player, teleportTo: teleportDestinations)
+		local isValid = checkDestination(teleportTo)
+		if isValid then
+			teleport(player, teleportTo)
+		else
+			print("Invalid teleport destination: ", teleportTo)
+		end
+	end
+)
+
+-- This is the event triggered on boss teleport, it confirms player can go to the instance, register it, teleport the player to the instance and tell the client to create all the npcs that just lives in the client
+local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
+BossRemoteEvent.OnServerEvent:Connect(
+	function(a0: Player, data: NpcFighterTypes.combatInstanceData & { destroy: boolean? })
+		local posibleSession = CombatController.getPlayerSessionFolder(a0)
+		print("data from client to server ", data)
+		if data.destroy and posibleSession then
+			teleport(a0, "plot")
+			return
+		elseif data.destroy and not posibleSession then
+			print("send return with no session")
+			return
+		end
+		local petId = data.petId
+		local bossName = data.bossName
+
+		local folderSession = CombatController.createAFightSession(a0, data)
+		if not folderSession then
+			return
+		end
+
+		local bestiaryHandler = Registry:GetHandler(a0)
+		local pets_stats = bestiaryHandler:getPetStats(petId)
+
+		do
+			local petInformation = {
+				healthVal = utils.HealthCalc(pets_stats.Health),
+				meleeVal = utils.MeleeCalc(pets_stats.Melee),
+				petId = petId,
+			}
+			local bossInformation = {
+				healthVal = 500,
+				meleeVal = 200,
+				petId = bossName,
+			}
+
+			local fightInfo = {
+				player_pet = petInformation,
+				player_boss = bossInformation,
+			}
+			----print("fightInfo ", fightInfo)
+			CombatController.initFightSession(a0, folderSession, fightInfo) --tag:telepor_point_croakan
+			BossRemoteEvent:FireClient(a0, fightInfo)
+		end
+
+		local point_name = Constants.teleportPointSuffix .. string.lower(bossName)
+		local teleportpoint: BasePart = workspace:WaitForChild(point_name)
+
+		local character: Model = a0.Character or a0.CharacterAdded:Wait()
+		character:PivotTo(teleportpoint.CFrame)
+	end
+)
 
 -- This is the event that confirms the pét player can do the damage, all the health values should be instances that lives in the Replicated storage and the server handles it while the client only renders it
 ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Player, data)
@@ -220,15 +251,10 @@ ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Pl
 		return
 	end
 
-	local attackerName = data and data.npc and data.npc.Name
-	if not attackerName then
-		return
-	end
-
 	local targetHealth: IntValue
 	local damage = 0
 
-	if attackerName == petIdVal.Value then
+	if data.petId == petIdVal.Value then
 		-- player's pet dealt damage to boss
 		targetHealth = bossFolder:FindFirstChild("Health")
 
@@ -250,10 +276,10 @@ ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Pl
 		else
 			damage = 1
 		end
-	elseif attackerName == bossIdVal.Value then
+	elseif data.petId == bossIdVal.Value then
 		-- boss hit the pet; use a hard coded value for now
 		targetHealth = petFolder:FindFirstChild("Health")
-		damage = 50
+		damage = 200
 	else
 		-- attacker not part of this session
 		return
@@ -262,9 +288,16 @@ ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Pl
 	if not targetHealth then
 		return
 	end
+	ReplicatedStorage.RemoteEvents.TextFade:FireClient(player, {
+		text = tostring(damage),
+		position = data.position,
+	})
 
 	-- subtract and clamp to zero
+	print("", targetHealth.Name, " health: ", targetHealth.Value)
+
 	targetHealth.Value = math.max(targetHealth.Value - damage, 0)
+	print("", targetHealth.Name, " new health: ", targetHealth.Value)
 end)
 
 return {}

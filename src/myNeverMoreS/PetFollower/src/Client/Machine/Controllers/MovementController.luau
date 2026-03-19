@@ -187,4 +187,23 @@ function MovementController.DestroyNPC(self: NpcFighterTypes.MovementController)
 	self.pet:Destroy()
 end
 
+local TweenService = game:GetService("TweenService")
+
+local LOOK_TWEEN_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+function MovementController.LookTo(self: NpcFighterTypes.MovementController, to: Vector3)
+	local currentCFrame = self.hrp.CFrame
+	local targetCFrame = CFrame.lookAt(currentCFrame.Position, to)
+
+	local tween = TweenService:Create(self.hrp, LOOK_TWEEN_INFO, {
+		CFrame = targetCFrame,
+	})
+
+	self._maid:GiveTask(tween)
+
+	tween:Play()
+
+	return tween
+end
+
 return MovementController

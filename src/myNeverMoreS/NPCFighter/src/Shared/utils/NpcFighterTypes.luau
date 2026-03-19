@@ -26,7 +26,7 @@ export type petStats = {
 
 export type NPCBase = {
 	new: (char: Model, serviceBag: any) -> NPCFighterClient,
-	StartCombat: (self: NPCFighterClient) -> (),
+	StartCombat: (self: NPCFighterClient, enemy: Model, enemy_hrp: BasePart, enemy_health: IntValue) -> (),
 	Destroy: (self: NPCFighterClient) -> (),
 
 	state: StateMachine.RobloxStateMachine?,
@@ -70,11 +70,18 @@ export type controllerdataInint = {
 	player: Player,
 	player_character: Model,
 	animationHandler: any,
+	Humanoid: Humanoid,
 }
 
 export type FightInfo = {
 	player_pet: petStats,
 	player_boss: petStats,
+}
+
+export type bossCombatConData = {
+	enemy: Model,
+	enemy_hrp: BasePart,
+	enemy_health: IntValue,
 }
 
 --|| Controllers
@@ -91,7 +98,7 @@ export type TargetController = {
 	modelHeight: number,
 
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> TargetController,
-	GetTo: (self: TargetController, BasePart) -> CFrame?,
+	GetTo: (self: TargetController, BasePart, distance: number?) -> Vector3,
 	GetGoal: (self: TargetController) -> Vector3?,
 	CalculatePath: (self: TargetController, goal: Vector3) -> Promise.Promise<Path>,
 	_getGoalPos: (self: TargetController) -> Vector3,
@@ -99,12 +106,13 @@ export type TargetController = {
 
 export type MovementController = {
 	new: (data: controllerdataInint, serviceBag: any, player: Player) -> MovementController,
-	MoveTo: (self: MovementController, Path) -> (),
+	MoveTo: (self: MovementController, Path) -> Promise.Promise<()>,
 	ForgotPath: (self: MovementController) -> (),
 	Stop: (self: MovementController) -> (),
 	_moveToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
 	_jumpToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
 	getAnimHandler: (self: MovementController) -> any,
+	LookTo: (self: MovementController, to: Vector3) -> (),
 
 	_currentMovePromise: Promise.Promise<>?,
 	isMoving: boolean,
@@ -119,12 +127,16 @@ export type bossStateCtx = {
 	maid: Maid.Maid,
 	pet: Model,
 	Health: IntValue,
-
+	hrp: BasePart,
 	timer: number,
 	lastTriggerTime: number,
+	player: Player,
+	enemy_health: IntValue,
+	enemy: Model,
+	enemy_hrp: BasePart,
 
 	DeadController: DeadController,
-}
+} & controllerdataInint
 
 export type petStateCtx = {
 	maid: Maid.Maid,
@@ -132,6 +144,7 @@ export type petStateCtx = {
 	--- ON combat --
 	enemy: Model,
 	enemy_hrp: BasePart,
+	enemy_health: IntValue,
 
 	timer: number,
 	lastTriggerTime: number,
@@ -139,6 +152,5 @@ export type petStateCtx = {
 	DeadController: DeadController,
 	TargetController: TargetController,
 	MovementController: MovementController,
-}
-
+} & controllerdataInint
 return {}

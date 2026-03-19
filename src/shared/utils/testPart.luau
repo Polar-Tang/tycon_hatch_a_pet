@@ -1,3 +1,4 @@
+local Debris = game:GetService("Debris")
 type args = {
 	Size: Vector3?,
 	Color3: Color3?,
@@ -6,9 +7,10 @@ type args = {
 	Nate: boolean?,
 	Name: string?,
 	CFrame: CFrame?,
+	lifeTime: number?,
 }
 
-return function(data: args)
+return function(data: args): Part
 	local testPart = Instance.new("Part")
 	testPart.Size = data.Size or Vector3.new(1, 1, 1)
 	testPart.Color = data.Color3 or Color3.fromRGB(0, 0, 255)
@@ -26,4 +28,6 @@ return function(data: args)
 	if data.Name then
 		testPart.Name = data.Name
 	end
+	Debris:AddItem(testPart, data.lifeTime)
+	return testPart
 end

@@ -5,34 +5,34 @@ local HealthCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.s
 local CombatControllerClient = require(script.Parent.CombatControllerClient)
 return function(player: Player, model: Model, id: NpcFighterTypes.healthBarId)
 	-- This acts as a bridge between the new health value and the healthBar components in the client
-	local healthBar = CombatControllerClient.getHealth(player, id)
-	if not healthBar then
+	local healthVal: IntValue? = CombatControllerClient.getHealth(player, id)
+	if not healthVal then
 		print("An error has occurred please alert UI an error has ocurred and need to retry")
 		return
 	end
 
-	local currentHealth = healthBar.Value
+	local currentHealth = healthVal.Value
 	local healthbarInfo: NpcFighterTypes.HealthNetData = {
 		health = currentHealth,
 		petId = id,
 		model = model,
 		type = "Init",
-		level = 150,
+		level = model:GetAttribute("Level"),
 		percent = 100,
 	}
 
 	HealthCon:Fire(healthbarInfo)
 
-	healthBar.AttributeChanged:Connect(function(a0: string)
-		local newHealth = healthBar.Value
-		local maxH = healthBar:GetAttribute("MaxHealth")
+	healthVal.Changed:Connect(function(a0: number)
+		local newHealth = healthVal.Value
+		local maxH = healthVal:GetAttribute("MaxHealth")
 
 		local healthbarInfo: NpcFighterTypes.HealthNetData = {
 			health = newHealth,
 			petId = id,
 			model = model,
 			type = "Update",
-			level = 150,
+			level = model:GetAttribute("Level"),
 			percent = newHealth / maxH,
 		}
 

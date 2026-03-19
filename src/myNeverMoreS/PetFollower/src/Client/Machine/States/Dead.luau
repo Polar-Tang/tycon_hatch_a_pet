@@ -1,5 +1,7 @@
 local ReplicatedSorage = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
+local alert = require(StarterPlayer.StarterPlayerScripts.facade.alert)
 local StateMachine = require(ReplicatedSorage.StateMachine)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 
@@ -11,10 +13,14 @@ function Dead:OnEnter(data: NpcFighterTypes.bossStateCtx)
 	-- reset the timers
 	data.lastTriggerTime = 0
 	data.timer = 0
-
-	data.DeadController:CreateWhirpol()
-	task.delay(2, function()
+	data.Humanoid:TakeDamage(100)
+	data.pet:BreakJoints()
+	alert.alert(data.enemy.Name .. " have died!")
+	task.delay(5, function()
 		data.DeadController:DestroyNPC()
+	end)
+	task.delay(8, function()
+		ReplicatedSorage.RemoteEvents.BossRemoteEvent:FireServer({ destroy = true })
 	end)
 end
 

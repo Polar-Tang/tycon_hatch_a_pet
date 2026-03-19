@@ -10,11 +10,12 @@ DeadController.__index = DeadController
 
 function DeadController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
 	local self = setmetatable(data, DeadController)
+	self.Humanoid.BreakJointsOnDeath = true
 
 	return self
 end
 
-function DeadController.CreateWhirpol()
+function DeadController.CreateWhirpol(self: NpcFighterTypes.DeadController)
 	-- local StuntWhir: Model = Whirpool:clone()
 	-- local rootpart = StuntWhir.PrimaryPart
 	-- rootpart.Massless = false

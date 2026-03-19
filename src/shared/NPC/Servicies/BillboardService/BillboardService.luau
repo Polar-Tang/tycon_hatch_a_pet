@@ -57,4 +57,28 @@ function module:resizes()
 	end
 end
 
+function module.resizeBillboard(pet): { Size: UDim2, StudsOffset: UDim2 }
+	assert(pet, "resizeBillboard: pet is nil")
+
+	local modelSize = pet:GetExtentsSize()
+	local magnitude = modelSize.Magnitude
+	local scale_factor = math.log(magnitude) * 0.3
+
+	local scale = 1 + scale_factor
+	scale = math.clamp(scale, 1, 2.2)
+
+	local newSize = UDim2.fromScale(ORIGINAL_SIZE.X.Scale * scale, ORIGINAL_SIZE.Y.Scale * scale)
+
+	local petName = pet:GetAttribute("petName")
+	local current_pet_stats = petStats[petName]
+	local newStudsOffset = Vector3.new(0, 3, 0) * scale
+	if current_pet_stats and current_pet_stats.adorneeOffset then
+		newStudsOffset = current_pet_stats.adorneeOffset * scale
+	end
+	return {
+		Size = newSize,
+		StudsOffset = newStudsOffset,
+	}
+end
+
 return module

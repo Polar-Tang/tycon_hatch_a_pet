@@ -6,14 +6,12 @@ local HealthBars = Roact.Component:extend("HealthBars")
 function HealthBars:render()
 	local context = script.Parent.Parent.Parent.Context
 	local HealthbarContext = require(context.HealthbarContext.HealthbarContext)
-
 	local useContext = require(context.Utils.useContext)
 
 	local withCtx = useContext({ HealthbarContext = HealthbarContext })
 
 	return withCtx(function(ctx)
 		local clone = {}
-
 		for id, data: billboardTypes.HealthbarComponentData in pairs(ctx.HealthbarContext.HealthbarComponents) do
 			if data.type == "Destroy" then
 				clone[data.petId] = nil

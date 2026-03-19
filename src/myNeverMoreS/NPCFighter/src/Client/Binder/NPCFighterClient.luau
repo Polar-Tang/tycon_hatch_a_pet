@@ -1,3 +1,6 @@
+--[[
+	This is the npc fighter which only lives in the client and its suposed to live during a fight session and quickly die
+]]
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local NPCBase = require(ReplicatedStorage.Nevermore.Custom.NPCBase.src.Client.NPCBase)
 local CombatControllerClient =
@@ -6,7 +9,7 @@ local healthBarListener = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 
-local CombatCon = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.CombatCon
+local BossCombatCon = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.BossCombatCon
 
 local StatesFolder = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.Machine.States
 local NPCFighterClient = setmetatable({}, NPCBase)
@@ -30,10 +33,10 @@ function NPCFighterClient.Init(self: NpcFighterTypes.NPCFighterClient, player, i
 	self.state = state
 
 	-- A single life connection
-	self.combat_connection = CombatCon.Event:Connect(function(...)
+	self.combat_connection = BossCombatCon.Event:Connect(function(data: NpcFighterTypes.bossCombatConData)
 		-- Notify the server the combat has started
 		ReplicatedStorage.RemoteEvents.NPCFighter:FireServer(player, self.char)
-		self:StartCombat()
+		self:StartCombat(data.enemy, data.enemy_hrp, data.enemy_health)
 		self.combat_connection:Disconnect()
 	end)
 	-- if the pet destroyed and the connection doesn't trigger it will clean anyway
