@@ -81,6 +81,11 @@ function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): V
 	return nearPlayer
 end
 
+function TargetController.Destroy(self: NpcFighterTypes.TargetController)
+	self.maid:DoCleaning()
+	self.pet:Destroy()
+end
+
 function TargetController:GetTo(basePart: BasePart, distance: number?): Vector3
 	distance = distance or 3
 

@@ -113,6 +113,7 @@ export type MovementController = {
 	_jumpToWaypoint: (self: MovementController, targetPosition: Vector3, onComplete: (boolean) -> ()) -> (),
 	getAnimHandler: (self: MovementController) -> any,
 	LookTo: (self: MovementController, to: Vector3) -> (),
+	Destroy: (self: MovementController) -> (),
 
 	_currentMovePromise: Promise.Promise<>?,
 	isMoving: boolean,

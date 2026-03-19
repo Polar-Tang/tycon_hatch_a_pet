@@ -8,7 +8,7 @@ local fontFamily = Enum.Font.Gotham
 
 function Healthbar:render()
 	local pet = self.props.model
-	local percent = self.props.percent / 100
+	local percent = self.props.percent
 	local petLevel = self.props.petLevel
 	print("new Percent ", percent)
 	print("for ", pet.Name)
@@ -34,7 +34,6 @@ function Healthbar:render()
 		Size = newSize,
 		StudsOffset = newStudsOffset,
 		AlwaysOnTop = true,
-		Parent = pet,
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 	}, {
 

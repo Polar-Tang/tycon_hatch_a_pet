@@ -1,7 +1,6 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 --||Nevermore Shit||--
@@ -50,9 +49,6 @@ local BinderProviderStarted = serviceBag:GetService(AllBinders)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
-local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
-local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
-local testPart = require(ReplicatedStorage.utils.testPart)
 
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
@@ -171,6 +167,7 @@ do
 	})
 	local _ = require(StarterPlayer.StarterPlayerScripts.UI.petMediatorClient)
 
+	IndexButton.init()
 	IndexButton.getIndexButton().Activated:Connect(function(a0: InputObject, a1: number)
 		if Index.isOpen() then
 			Index.close()

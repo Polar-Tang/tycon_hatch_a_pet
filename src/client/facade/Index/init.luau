@@ -197,6 +197,9 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 		petDetails.setPetData(data)
 		createUIStroke(rariry_camelCase)
 	end
+	if data == _G["bossToFight"] then
+		createUIStroke(rariry_camelCase)
+	end
 	if isBoss and data == _G["bossToFight"] then
 		FightButton.open()
 	end

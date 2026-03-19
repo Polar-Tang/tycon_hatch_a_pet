@@ -18,7 +18,7 @@ return function(player: Player, model: Model, id: NpcFighterTypes.healthBarId)
 		model = model,
 		type = "Init",
 		level = model:GetAttribute("Level"),
-		percent = 100,
+		percent = 1,
 	}
 
 	HealthCon:Fire(healthbarInfo)

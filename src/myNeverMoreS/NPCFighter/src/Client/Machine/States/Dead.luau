@@ -17,7 +17,7 @@ function Dead:OnEnter(data: NpcFighterTypes.petStateCtx)
 	data.Humanoid:TakeDamage(100)
 	data.pet:BreakJoints()
 
-	alert.alert("You gained " .. "{data.Reward} coins!")
+	alert.alert("You gained " .. "<placeholder>!")
 
 	task.delay(5, function()
 		data.DeadController:DestroyNPC()

@@ -100,13 +100,27 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		end
 
 		local animHandler = self:getAnimHandler()
-		animHandler:LoadAnimation(true, "walk")
+		-- Not very sure why Promise defer does run after maid:DoCleaning but this fix it
+		local status = pcall(function()
+			animHandler:LoadAnimation(true, "walk")
+		end)
+		print("status ", status)
+		if not status then
+			reject()
+			self:Destroy()
+			return
+		end
+
 		self.isMoving = true
 
 		local currentIndex = 1
 		local function moveNext()
 			-- clean previous move connections and promises
-
+			print("self.isMoving  ", self.isMoving)
+			if not self.isMoving then
+				resolve()
+				return
+			end
 			if currentIndex > #waypoints then
 				animHandler:LoadAnimation(false, "walk")
 				self.isMoving = false
@@ -185,6 +199,13 @@ end
 function MovementController.DestroyNPC(self: NpcFighterTypes.MovementController)
 	self._maid:DoCleaning()
 	self.pet:Destroy()
+	self.isMoving = false
+end
+
+function MovementController.Destroy(self: NpcFighterTypes.MovementController)
+	self._maid:DoCleaning()
+	self.pet:Destroy()
+	self.isMoving = false
 end
 
 local TweenService = game:GetService("TweenService")

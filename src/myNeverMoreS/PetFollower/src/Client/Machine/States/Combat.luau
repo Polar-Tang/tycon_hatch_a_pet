@@ -20,7 +20,8 @@ Combat.Transitions = {
 }
 
 function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
-	local new_goal = data.TargetController:GetTo(data.enemy_hrp, data.pet:GetExtentsSize().X * 2)
+	local new_goal =
+		data.TargetController:GetTo(data.enemy_hrp, (data.pet:GetExtentsSize().X + data.enemy:GetExtentsSize().X) / 2)
 	data.TargetController:CalculatePath(new_goal):Then(function(path): ...any
 		data.MovementController:ForgotPath()
 		data.MovementController:MoveTo(path):Then(function()
@@ -28,7 +29,7 @@ function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
 			BossCombatCon:Fire({
 				enemy = data.pet,
 				enemy_hrp = data.hrp,
-				enemy_health = CombatControllerClient.getHealth(data.player, "PlayerBoss"),
+				enemy_health = CombatControllerClient.getHealth(data.player, "PlayerPet"),
 			})
 			self.reached = true
 		end)

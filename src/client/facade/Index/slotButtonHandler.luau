@@ -17,11 +17,11 @@ function SlotButtonHandler.setupButtonActivated(button, data, isBoss, createUISt
 		else
 			createUIStroke(rarity)
 			if _G["petToFight"] then
-				_G["bossToFight"] = data
 				FightButton.open()
 			else
-				alert.alert("select a pet for the combat first")
+				alert.alert("select a pet to fight with")
 			end
+			_G["bossToFight"] = data
 		end
 	end)
 	return con

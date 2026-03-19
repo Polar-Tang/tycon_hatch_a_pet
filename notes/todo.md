@@ -57,6 +57,9 @@ check if the petId id exists on bestiary
 
 [] the custom proximity prompt needs to be fixed
 [] Figure out what height does the backpabk
-[] WTF viewport frames, probably need to use replicated first or some kind of shit that is not overwrited by rojo
-[] add an scale hover to the indexButton
-[] add it offset too
+
+[.] WTF viewport frames, probably need to use replicated first or some kind of shit that is not overwrited by rojo
+[.] add an scale hover to the indexButton
+[.] Add petStats visible on hover
+[.] add it offset too
+[.] cache the pet boss selection too

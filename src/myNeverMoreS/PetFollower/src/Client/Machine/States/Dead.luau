@@ -15,7 +15,7 @@ function Dead:OnEnter(data: NpcFighterTypes.bossStateCtx)
 	data.timer = 0
 	data.Humanoid:TakeDamage(100)
 	data.pet:BreakJoints()
-	alert.alert(data.enemy.Name .. " have died!")
+	alert.alert(data.pet.Name .. " have died!")
 	task.delay(5, function()
 		data.DeadController:DestroyNPC()
 	end)

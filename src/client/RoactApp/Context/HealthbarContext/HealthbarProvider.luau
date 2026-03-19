@@ -19,6 +19,7 @@ end
 function HealthbarProvider:didMount()
 	HealthCon.Event:Connect(function(data: NpcFighterTypes.HealthNetData)
 		local clone = table.clone(self.state.HealthbarComponents)
+		print("new data incomming ", data)
 		if not data.model then
 			return
 		end

@@ -65,7 +65,7 @@ do
 			PetCombatCon:Fire({
 				enemy = parent,
 				enemy_hrp = hrp,
-				enemy_health = CombatControllerClient.getHealth(playerWhoTriggered, "PlayerPet"),
+				enemy_health = CombatControllerClient.getHealth(playerWhoTriggered, "PlayerBoss"),
 			})
 			alert.alert("the fight is about to start!")
 		end)
@@ -173,9 +173,17 @@ do
 		local data = table.clone(controllerdataInint)
 
 		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
-		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
 		data.TargetController = TargetController.new(controllerdataInint, serviceBag, player)
 		data.MovementController = MovementController.new(controllerdataInint, serviceBag, player)
+		local big_maid = Maid.new()
+		big_maid:GiveTask(data.TargetController)
+		big_maid:GiveTask(data.MovementController)
+		local autoDestroyCon = parent.AncestryChanged:Connect(function(_, newParent)
+			if newParent == nil then
+				big_maid:DoCleaning()
+			end
+		end)
+		big_maid:GiveTask(autoDestroyCon)
 		return data
 	end
 end
