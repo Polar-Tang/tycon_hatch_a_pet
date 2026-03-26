@@ -1,7 +1,7 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local EggTypes = require(script.Parent.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)

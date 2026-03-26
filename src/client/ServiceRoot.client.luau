@@ -1,5 +1,6 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
@@ -23,7 +24,7 @@ _G.FistBag = serviceBag
 ---------- BINDERS ----------
 local Binder = Nevermore("Binder")
 local AnimationHandler = Nevermore("AnimationHandler")
-local StateMachine = Nevermore("StateMachine")
+local StateMachine = Nevermore("PlotPet")
 local NPCFighterClient = Nevermore("NPCFighterClient")
 local PetFollower = Nevermore("PetFollower")
 local Binders = {
@@ -49,6 +50,8 @@ local BinderProviderStarted = serviceBag:GetService(AllBinders)
 local AnimBinder = BinderProviderStarted:Get("AnimationHandler")
 
 local animationsData = require(ReplicatedStorage.Animations.animationsData)
+local PlotServiceClient = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.NPC.Servicies.PlotServiceClient)
+local utils = require(ReplicatedStorage.utils.utils)
 
 -- Register all the animations registered with the models name
 AnimBinder:GetClassAddedSignal():Connect(function(binder)
@@ -92,6 +95,39 @@ PetNew.OnClientEvent:Connect(function(data)
 	if data.allPets then
 		-- TODO [Collectionable Pets task]: pets should be tagged and placed in a slot here, with data from the server
 		_G["pets_registry"] = data.allPets
+		-- Pet service from data to world
+
+		-- function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, position: Vector3?)
+		for _, petInfo in pairs(_G["pets_registry"]) do
+			local userId = tostring(Players.LocalPlayer.UserId)
+			local pet: Model = ReplicatedFirst.Pets[petInfo.petName]:Clone()
+			assert(pet.PrimaryPart, "model " .. pet.Name .. " has no primary part")
+			pet:SetAttribute("petName", pet.Name)
+
+			local playerRegistry = Instance.new("StringValue", pet)
+			playerRegistry.Value = userId
+			playerRegistry.Name = "Owner"
+
+			local plot = PlotServiceClient.GetPlotByUserId(userId)
+
+			pet.Name = petInfo.petId
+
+			-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
+			local endPos = PlotServiceClient:GetRandPosition(plot)
+
+			pet.Parent = workspace
+
+			pet:PivotTo(CFrame.new(endPos))
+
+			pet:MoveTo(endPos)
+
+			CollectionService:AddTag(pet, "NPC")
+			CollectionService:AddTag(pet, "AnimationHandler")
+
+			CollectionService:AddTag(pet, "plot_" .. plot:FindFirstChild("PlotId").Value)
+			CollectionService:AddTag(pet, "pets_" .. userId)
+			utils.ScaleToLvl(pet, petInfo.petLvl)
+		end
 	elseif data.newPet then
 		_G["pets_registry"][data.newPet.petId] = data.newPet
 	else

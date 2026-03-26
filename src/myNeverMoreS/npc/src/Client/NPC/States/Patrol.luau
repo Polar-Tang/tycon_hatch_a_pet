@@ -12,14 +12,17 @@ Patrol.Transitions = {
 
 function Patrol:OnEnter(data)
 	data.EatController:StopAnim()
+	data.lastTriggerTime = data.timer
 
-	data.patrolStartTime = data.timer
-	local goal: Vector3? = data.TargetingController:getRandomNearbyPosition(50)
-	if not goal then
-		return
+	local goalPos = data.TargetController:GetGoal()
+	print("go to")
+	if goalPos then
+		data.TargetController:CalculatePath(goalPos):Then(function(path: Path): ...any
+			data.MovementController:ForgotPath()
+			-- TODO : calculate wayponts[#waypoints].Position using walkSpeed and self.hrp.Position as start position to calclulate
+			data.patrol_duration = data.MovementController:MoveTo(path)
+		end)
 	end
-	-- TODO: need to use an eat duration that last the same that the animation
-	data.patrol_duration = data.MovementController:MoveTo(goal) + 3
 end
 
 function Patrol:OnLeave(data)

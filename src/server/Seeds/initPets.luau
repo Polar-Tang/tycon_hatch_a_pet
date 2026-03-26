@@ -15,6 +15,7 @@ local DogId = HttpService:GenerateGUID(false)
 
 local init_data = {
 	[foxId] = {
+		rarity = "common",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -29,6 +30,7 @@ local init_data = {
 	},
 
 	[HippoId] = {
+		rarity = "common",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -42,6 +44,7 @@ local init_data = {
 		},
 	},
 	[RhinoId] = {
+		rarity = "common",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -55,6 +58,7 @@ local init_data = {
 		},
 	},
 	[ElephantId] = {
+		rarity = "common",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -68,6 +72,7 @@ local init_data = {
 		},
 	},
 	[PandaId] = {
+		rarity = "common",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -81,6 +86,7 @@ local init_data = {
 		},
 	},
 	[DogId] = {
+		rarity = "uncommon",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -94,6 +100,7 @@ local init_data = {
 		},
 	},
 	[LionId] = {
+		rarity = "uncommon",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -107,6 +114,7 @@ local init_data = {
 		},
 	},
 	[CatId] = {
+		rarity = "uncommon",
 		petProg = 0,
 		isInvoked = true,
 		avaiblePoints = 150,
@@ -134,7 +142,7 @@ return function(player): PetData.PetsDataStore
 	-- 	PandaId,
 	-- }
 
-	-- local petShit = {}
+	-- local petShit = {
 	-- -- for i = 1, 3 do
 	-- local rand = math.random(1, 5)
 	-- local petId = idArr[rand]

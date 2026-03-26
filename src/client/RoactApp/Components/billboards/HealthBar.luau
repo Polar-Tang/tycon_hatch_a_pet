@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
-local Roact = require(ReplicatedStorage:WaitForChild("Roact"))
+local BillboardService =
+	require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.NPC.Servicies.BillboardService.BillboardService)
+local Roact = require(ReplicatedStorage.Roact)
 
 local Healthbar = Roact.Component:extend("Healthbar")
 
@@ -30,7 +31,7 @@ function Healthbar:render()
 
 	return Roact.createElement("BillboardGui", {
 		Name = "CustomHumanoidBar",
-		Adornee = pet:FindFirstChild("Head") or pet.PrimaryPart,
+		Adornee = pet.PrimaryPart,
 		Size = newSize,
 		StudsOffset = newStudsOffset,
 		AlwaysOnTop = true,

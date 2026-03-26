@@ -1,9 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 local utils = require(ReplicatedStorage.utils.utils)
 local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
-local petStats = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local BaseObject = require(ReplicatedStorage.Nevermore.Quenty.baseobject.Shared.BaseObject)
 
 local module = setmetatable({}, BaseObject)
@@ -12,15 +11,15 @@ module.__index = module
 function module.new(parent, maid, petInfo)
 	local self = setmetatable({}, module)
 
-	local stats = petInfo.petStats
-	local billboard = ReplicatedStorage.NPC.Overhead:Clone()
+	local petStats = petInfo.petStats
+	local billboard = ReplicatedStorage.Nevermore.Custom.npc.src.Client.NPC.Overhead:Clone()
 
 	-- resizes billboard
 
 	local petName = parent:GetAttribute("petName")
 	billboard.Frame.NpcName.Text = petName
-	billboard.Frame.Rarity.Text = string.upper(petStats[petName].rarity)
-	billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(stats.Stamina))) .. "/s"
+	billboard.Frame.Rarity.Text = string.upper(petData[petName].rarity)
+	billboard.Frame.Production.Text = MoneyLib.HandleMoney(math.round(utils.MoneyCalc(petStats.Stamina))) .. "/s"
 	billboard.Adornee = parent.PrimaryPart
 	billboard.Parent = parent.PrimaryPart
 
@@ -50,7 +49,7 @@ function module:resizes()
 
 	current_billboard.Size = UDim2.fromScale(ORIGINAL_SIZE.X.Scale * scale, ORIGINAL_SIZE.Y.Scale * scale)
 
-	local current_pet_stats = petStats[self.pet:GetAttribute("petName")]
+	local current_pet_stats = petData[self.pet:GetAttribute("petName")]
 
 	if current_pet_stats.adorneeOffset then
 		current_billboard.StudsOffset = current_pet_stats.adorneeOffset * scale
@@ -70,7 +69,7 @@ function module.resizeBillboard(pet): { Size: UDim2, StudsOffset: UDim2 }
 	local newSize = UDim2.fromScale(ORIGINAL_SIZE.X.Scale * scale, ORIGINAL_SIZE.Y.Scale * scale)
 
 	local petName = pet:GetAttribute("petName")
-	local current_pet_stats = petStats[petName]
+	local current_pet_stats = petData[petName]
 	local newStudsOffset = Vector3.new(0, 3, 0) * scale
 	if current_pet_stats and current_pet_stats.adorneeOffset then
 		newStudsOffset = current_pet_stats.adorneeOffset * scale

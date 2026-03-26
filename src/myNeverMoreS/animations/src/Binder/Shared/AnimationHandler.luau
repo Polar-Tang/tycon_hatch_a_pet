@@ -67,7 +67,12 @@ export type AnimationHandlerType = {
 	_initialized: boolean,
 	animator: Animator,
 	Init: (self: AnimationHandlerType, animationContainer: Instance) -> (),
-	LoadAnimation: (self: AnimationHandlerType, state: boolean, animaName: string, isPreload: boolean?) -> AnimationTrack?,
+	LoadAnimation: (
+		self: AnimationHandlerType,
+		state: boolean,
+		animaName: string,
+		isPreload: boolean?
+	) -> AnimationTrack?,
 	AddAnimations: (self: AnimationHandlerType, newAnims: AnimationMap) -> (),
 	Restart: (self: AnimationHandlerType) -> (),
 	Destroy: (self: AnimationHandlerType) -> (),
@@ -92,9 +97,9 @@ end
 function AnimationHandler:Init(animationContainer: Instance)
 	assert(not self._initialized, "Already initialized")
 	if animationContainer:IsA("AnimationController") then
-		self.animator = (animationContainer :: any).Animator
+		self.animator = (animationContainer :: any):WaitForChild("Animator")
 	elseif animationContainer:IsA("Humanoid") then
-		self.animator = (animationContainer :: any).Animator
+		self.animator = (animationContainer :: any):WaitForChild("Animator")
 	else
 		error("animationContainer must be AnimationController or Humanoid")
 	end
@@ -117,7 +122,7 @@ function AnimationHandler:LoadAnimation(state: boolean, animaName: string, isPre
 	local current_desc = self:_getDescriptor(animaName)
 	self:_ensurePreload(animaName)
 	local animaTionTrack: AnimationTrack = current_desc.AnimationTrack
-
+	print("animation priority ", animaTionTrack.Priority, " for " .. animaName)
 	if state and not animaTionTrack then
 		local newanimaTionTrack = self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
 		newanimaTionTrack:Play()
@@ -170,10 +175,18 @@ function AnimationHandler:_ensurePreload(animaName)
 	self:_initDescriptior(animaName)
 
 	-- Load the animation and declare it
+
 	do
-		local animaTionTrack: AnimationTrack =
-			self.animator:LoadAnimation(self.animationDescriptors[animaName].Animation)
+		local animation: Animation = self.animationDescriptors[animaName].Animation
+		local animaTionTrack: AnimationTrack = self.animator:LoadAnimation(animation)
 		animaTionTrack:Play()
+		local priority
+		if animaName == "idle" then
+			priority = Enum.AnimationPriority.Idle
+		end
+		if priority then
+			animaTionTrack.Priority = priority
+		end
 		animaTionTrack:Stop()
 		self.animationDescriptors[animaName].AnimationTrack = animaTionTrack
 	end

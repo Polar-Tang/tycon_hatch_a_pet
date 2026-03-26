@@ -25,7 +25,7 @@ local MovementController =
 	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.MovementController)
 local TargetController =
 	require(ReplicatedStorage.Nevermore.Custom.PetFollower.src.Client.Machine.Controllers.TargetController)
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 local PetCombatCon: BindableEvent = ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Client.utils.PetCombatCon
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
@@ -84,7 +84,7 @@ do
 		local controllerdataInint = table.clone(combatInitData)
 		controllerdataInint.pet = parent
 		controllerdataInint.maid = maid
-		controllerdataInint.hrp = parent.PrimaryPart or parent:FindFirstChild("RootPart")
+		controllerdataInint.hrp = parent.PrimaryPart or parent:FindFirstChild("HumanoidRootPart")
 		controllerdataInint.player = player
 		controllerdataInint.player_character = playerCharacter
 		controllerdataInint.Health = CombatControllerClient.getHealth(player, band)

@@ -2,9 +2,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local StateMachine = require(ReplicatedStorage.StateMachine)
 local setCTX = require(script.Parent.helpers.setCtx)
-local StatesFolder = ReplicatedStorage.NPC.States
+local StatesFolder = ReplicatedStorage.Nevermore.Custom.npc.src.Client.NPC.States
+
 local StateMachineBinder = {}
-StateMachineBinder.ServiceName = "StateMachine"
+StateMachineBinder.ServiceName = "PlotPet"
 StateMachineBinder.__index = StateMachineBinder
 
 function StateMachineBinder.new(char: Model, serviceBag)

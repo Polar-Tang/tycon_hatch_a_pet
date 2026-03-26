@@ -7,7 +7,7 @@ local Idle = State.new("Idle")
 
 Idle.Transitions = {
 	require(script.Parent.Parent.Transitions.StartPatrol),
-	require(ReplicatedSorage.NPC.Transitions.StartEating),
+	require(script.Parent.Parent.Transitions.StartEating),
 }
 
 -- Helper to sync a single attribute
@@ -41,7 +41,7 @@ function Idle:OnInit(data)
 	local registry = _G.pets_registry
 	local petEntry = registry[petId]
 
-	if petId == "fd4ed60c-94a9-4965-8776-3dcd094a89c7" then 
+	if petId == "fd4ed60c-94a9-4965-8776-3dcd094a89c7" then
 		print()
 	end
 

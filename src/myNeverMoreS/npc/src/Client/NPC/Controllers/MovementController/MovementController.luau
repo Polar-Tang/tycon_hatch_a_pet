@@ -3,10 +3,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local packages = RS.Nevermore.Quenty
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 
 local MovementController = setmetatable({}, BaseObject)
 MovementController.__index = MovementController
@@ -25,8 +25,9 @@ function MovementController.new(data: NpcFighterTypes.controllerdataInint, servi
 		humanoid.WalkSpeed = self.speed
 	end
 	self.humanoid = humanoid
+	self.hrp = self.pet:WaitForChild("HumanoidRootPart")
 	self.maid_waypoints = Maid.new()
-	self.maid:GiveTask(self.maid_waypoints)
+	self._maid:GiveTask(self.maid_waypoints)
 	return self
 end
 
@@ -61,7 +62,7 @@ function MovementController._jumpToWaypoint(
 
 		self.pet:MoveTo(newPos)
 	end)
-	self.maid:GiveTask(moveConn)
+	self._maid:GiveTask(moveConn)
 end
 
 function MovementController.Stop(self: NpcFighterTypes.MovementController)
@@ -91,9 +92,8 @@ end
 
 function MovementController.MoveTo(self: NpcFighterTypes.MovementController, path: Path)
 	self._maid:DoCleaning()
+	local waypoints = path:GetWaypoints()
 	self._currentMovePromise = Promise.new(function(resolve, reject)
-		local waypoints = path:GetWaypoints()
-
 		if #waypoints == 0 then
 			resolve()
 			return
@@ -104,7 +104,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		local status = pcall(function()
 			animHandler:LoadAnimation(true, "walk")
 		end)
-		print("status ", status)
 		if not status then
 			reject()
 			self:Destroy()
@@ -134,7 +133,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 				if reached then
 					currentIndex += 1
 					moveNext()
-					animHandler:LoadAnimation(true, "eat")
 				else
 					self:_jumpToWaypoint(waypoint.Position, function(reached)
 						if reached then
@@ -149,9 +147,18 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		end
 		moveNext()
 	end):Finally(function(...): ...any
-		self.maid:DoCleaning()
+		self._maid:DoCleaning()
 	end)
-	return self._currentMovePromise
+	if not waypoints[1] then
+		print("no waypoints for ", self.pet)
+		return
+	end
+	print("waypoints[#waypoints] ", waypoints[#waypoints])
+	local totalDistance = (waypoints[1].Position - self.hrp.Position).Magnitude
+	for i = 2, #waypoints do
+		totalDistance += (waypoints[i].Position - waypoints[i - 1].Position).Magnitude
+	end
+	return totalDistance / self.speed
 end
 
 function MovementController._moveToWaypoint(
@@ -209,7 +216,6 @@ function MovementController.Destroy(self: NpcFighterTypes.MovementController)
 end
 
 local TweenService = game:GetService("TweenService")
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Client.Binder.helpers.petData)
 
 local LOOK_TWEEN_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 

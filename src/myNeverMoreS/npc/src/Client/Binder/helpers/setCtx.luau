@@ -1,17 +1,16 @@
 -- Utility setting the npc context
-local RS = game:GetService("ReplicatedStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Controllers = RS.NPC.Controllers
-local TargetingController = require(Controllers.TargetController.TargetController)
+local npcFolder = ReplicatedStorage.Nevermore.Custom.npc.src.Client.NPC
+local Controllers = npcFolder.Controllers
+local TargetController = require(Controllers.TargetController.TargetController)
 local SoundController = require(Controllers.SoundController.SoundController)
 local MovementController = require(Controllers.MovementController.MovementController)
 local EatController = require(Controllers.EatController.EatController)
 local animData = require(ReplicatedStorage.Animations.animationsData)
-local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnimatorController.PetAnimatorController)
-local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
+local PetAnimatorController = require(Controllers.PetAnimatorController.PetAnimatorController)
+local BillboardService = require(npcFolder.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
 local petStats = require(script.Parent.petData)
-local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
 -- EVENTS
 local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
@@ -22,10 +21,14 @@ local setUpAtt = function(parent, petInfo)
 	parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
 	parent:SetAttribute("Stamina", stats.Stamina)
 
-	parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
-		local thisValue = parent:GetAttribute("Level")
-		ScaleToLvl(parent, thisValue)
-	end)
+	-- The server should do this
+	--[[
+		parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
+			local thisValue = parent:GetAttribute("Level")
+			ScaleToLvl(parent, thisValue)
+		end)
+	
+	]]
 end
 
 local function createProximityPrompt(parent)
@@ -48,7 +51,7 @@ local function createProximityPrompt(parent)
 end
 
 local getStats = function(parent, maid, isOwnerLocal)
-	local root = parent:WaitForChild("Rootpart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
+	local root = parent:WaitForChild("HumanoidRootPart") -- CLIENT CANT SEE THE ROOTPART FOR A WHILE
 
 	local current_pet_stats = petStats[parent:GetAttribute("petName")]
 	-- global
@@ -114,7 +117,7 @@ return function(parent, serviceBag: any, player, maid)
 		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
 		EatController = EatController.new(petData, serviceBag, player),
 		MovementController = MovementController.new(petData, serviceBag),
-		TargetingController = TargetingController.new(petData, serviceBag),
+		TargetController = TargetController.new(petData, serviceBag),
 		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
 	}
 end

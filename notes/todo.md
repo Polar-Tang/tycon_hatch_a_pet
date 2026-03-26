@@ -63,3 +63,5 @@ check if the petId id exists on bestiary
 [.] Add petStats visible on hover
 [.] add it offset too
 [.] cache the pet boss selection too
+
+[] When pet scale primary part get a lil sinked

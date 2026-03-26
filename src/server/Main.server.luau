@@ -79,10 +79,7 @@ do
 		if descendant:IsA("BasePart") then
 			descendant.CanCollide = true
 			descendant.CollisionGroup = "Npcs"
-			-- descendant.Anchored = true
-			if descendant.Name == "Rootpart" then
-				--descendant.Anchored = true
-			end
+			descendant.Anchored = false
 		end
 	end
 
@@ -101,7 +98,7 @@ do
 	local pets = petsFolder:GetDescendants()
 
 	for _, pet in pets do
-		pet:SetAttribute("AnimatorName", "AnimationController")
+		pet:SetAttribute("AnimatorName", "Humanoid")
 		setCollider(pet, onDescendantAdded)
 	end
 	local petsFighterFolder: Folder = ReplicatedFirst.Pets

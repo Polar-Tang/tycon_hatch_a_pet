@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
@@ -9,7 +8,7 @@ local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalcula
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local InitPlot = require(ServerScriptService.Seeds.InitPlot)
 local initPets = require(ServerScriptService.Seeds.initPets)
-local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local PlotService = require(ServerScriptService.Services.PlotService)
 
 -- local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
@@ -50,7 +49,6 @@ function module.PlayerAdded(player: Player, playerData)
 	})
 	local bestiaryList = Registry:GetHandler(player)
 	local inventory = PlayerInventory:GetHandler(player)
-
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
 
@@ -90,15 +88,14 @@ function module.PlayerRemoving(player)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local bestiaryHandler = Registry:GetHandler(player)
 	local newData = {}
-	local plot = FenceBoundsService.GetPlotByUserId(player.UserId)
-	FenceBoundsService:MarkOffline(plot)
+	local plot = PlotService.GetPlotByUserId(player.UserId)
+	PlotService:MarkOffline(plot)
 
 	local playerPets = PetService.getPlayerPets(player)
 	for _, pet in playerPets do
 		PetService.destroyPet(player, pet.Name)
 	end
 	local allTheCash = playerInventory.cash
-	-- --print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
 
 	newData.pets = bestiaryHandler.pets

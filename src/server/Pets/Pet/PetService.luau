@@ -5,7 +5,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local PetInformation = require(script.Parent.PetInformation)
 local Registry = require(ServerScriptService.Pets.Registry.Registry)
-local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local PlotService = require(ServerScriptService.Services.PlotService)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 -- local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -29,6 +29,9 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	local endPos = position or PlotService:GetRandPosition(plot)
+
+	local Raycasts
+
 	local fixedY = pet.PrimaryPart.Position.Y
 	endPos = Vector3.new(endPos.X, fixedY, endPos.Z)
 
@@ -67,10 +70,26 @@ end
 function PetService.fixPetY(plot, petName): Vector3
 	local pet: Model = ServerStorage.Pets[petName]:Clone()
 	assert(pet.PrimaryPart)
-	local originalY = pet.PrimaryPart.Position.Y
+	local origin = Vector3.new(pet.PrimaryPart.Position.X, pet.PrimaryPart.Position.Y + 20, pet.PrimaryPart.Position.Z)
+	local origin = Vector3.new(pet.PrimaryPart.Position.X, pet.PrimaryPart.Position.Y + 20, pet.PrimaryPart.Position.Z)
 
 	local randPos = PlotService:GetRandPosition(plot)
 	local fixedPoint = Vector3.new(randPos.X, originalY, randPos.Z)
+	-- Raycast params
+	local params = RaycastParams.new()
+
+	-- Cast the ray
+	local result = workspace:Raycast(origin, direction, params)
+
+	if result then
+		if result.Material == Enum.Material.Plaster then
+			print("Hit plaster!")
+		else
+			print("Hit something else:", result.Material)
+		end
+	else
+		print("Ray hit nothing")
+	end
 	return fixedPoint
 end
 

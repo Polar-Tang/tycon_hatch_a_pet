@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
-local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local FenceBoundsService = require(ServerScriptService.Services.PlotService)
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 
 return function(player: Player, playerPets: PetData.PetsDataStore)
@@ -13,7 +13,7 @@ return function(player: Player, playerPets: PetData.PetsDataStore)
 
 	FenceBoundsService:AssignPlot(plot, player)
 
-	for petId, petInfo in pairs(playerPets) do
-		PetService.fromDataToWorld(player, petInfo)
-	end
+	-- for petId, petInfo in pairs(playerPets) do
+	-- 	PetService.fromDataToWorld(player, petInfo)
+	-- end
 end
