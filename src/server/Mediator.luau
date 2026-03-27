@@ -50,7 +50,6 @@ function module.PlayerAdded(player: Player, playerData)
 	})
 	local bestiaryList = Registry:GetHandler(player)
 	local inventory = PlayerInventory:GetHandler(player)
-
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
 

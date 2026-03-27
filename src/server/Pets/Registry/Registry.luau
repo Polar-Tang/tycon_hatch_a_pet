@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
+
 local BestiaryList = {}
 -- PlayerQuestHandler.lua
 BestiaryList.__index = BestiaryList
@@ -43,6 +45,7 @@ export type BestiaryList = {
 	_levelUpPet: (self: BestiaryList, pet: PetData.PetData) -> PetData.PetData?,
 	getPetStats: (self: BestiaryList, petId: string) -> PetData.petStats?,
 	_ensureValidEat: (self: BestiaryList, petId: string) -> boolean,
+	getPetModel: (self: BestiaryList, petId: string) -> PetData.PetData?,
 }
 
 function BestiaryList.new(pets: PetData.PetsDataStore)
@@ -86,13 +89,14 @@ function BestiaryList.spendPoint(self: BestiaryList, petId: string, abillityName
 	return self.pets
 end
 
-function BestiaryList:_levelUpPet(pet): PetData.PetData?
+function BestiaryList._levelUpPet(self: BestiaryList, pet): PetData.PetData?
 	if pet.petLvl >= 150 then
 		return
 	end
 	pet.avaiblePoints += 1
 	pet.petLvl += 1
 	pet.petProg -= 100 -- carry over excess XP
+
 	return pet
 end
 
@@ -123,9 +127,13 @@ function BestiaryList:getPetStats(petId: string)
 	return self.pets[petId].petStats
 end
 
+function BestiaryList.getPetModel(self: BestiaryList, petId: string): PetData.PetData?
+	return workspace:WaitForChild(petId)
+end
+
 function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg): PetData.PetData?
 	local pet = table.clone(self.pets[petId])
-	local petModel = workspace:WaitForChild(petId)
+	local petModel = self:getPetModel(petId)
 	--print(petModel)
 	if pet.petLvl >= 150 then
 		-- warn("max level reached")
@@ -147,6 +155,7 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 	self.pets[petId] = pet
 
 	--print("self.pets[petId] ", self.pets[petId])
+	ScaleToLvl(petModel, pet.petLvl)
 	petModel:SetAttribute("Level", pet.petLvl)
 	return pet
 end

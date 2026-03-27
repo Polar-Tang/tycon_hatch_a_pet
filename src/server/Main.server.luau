@@ -79,9 +79,9 @@ do
 		if descendant:IsA("BasePart") then
 			descendant.CanCollide = true
 			descendant.CollisionGroup = "Npcs"
-			-- descendant.Anchored = true
+			descendant.Anchored = false
 			if descendant.Name == "Rootpart" then
-				--descendant.Anchored = true
+				descendant.Anchored = true
 			end
 		end
 	end

@@ -30,7 +30,7 @@ function Healthbar:render()
 
 	return Roact.createElement("BillboardGui", {
 		Name = "CustomHumanoidBar",
-		Adornee = pet:FindFirstChild("Head") or pet.PrimaryPart,
+		Adornee = pet.PrimaryPart,
 		Size = newSize,
 		StudsOffset = newStudsOffset,
 		AlwaysOnTop = true,

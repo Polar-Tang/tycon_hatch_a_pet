@@ -11,7 +11,6 @@ local PetAnimatorController = require(ReplicatedStorage.NPC.Controllers.PetAnima
 local BillboardService = require(ReplicatedStorage.NPC.Servicies.BillboardService.BillboardService)
 local utils = require(ReplicatedStorage.utils.utils)
 local petStats = require(script.Parent.petData)
-local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
 -- EVENTS
 local petClickedEvent = ReplicatedStorage.RemoteEvents.PetClicked
@@ -22,10 +21,14 @@ local setUpAtt = function(parent, petInfo)
 	parent:SetAttribute("Health", utils.HealthCalc(stats.Health))
 	parent:SetAttribute("Stamina", stats.Stamina)
 
-	parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
-		local thisValue = parent:GetAttribute("Level")
-		ScaleToLvl(parent, thisValue)
-	end)
+	-- The server should do this
+	--[[
+		parent:GetAttributeChangedSignal("Level"):Connect(function(newValue)
+			local thisValue = parent:GetAttribute("Level")
+			ScaleToLvl(parent, thisValue)
+		end)
+	
+	]]
 end
 
 local function createProximityPrompt(parent)
