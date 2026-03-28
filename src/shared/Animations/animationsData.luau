@@ -43,7 +43,7 @@ module["Lion"] = {
 }
 
 module["Dog"] = {
-	["eat"] = "rbxassetid://133357500339174",
+	["eat"] = "rbxassetid://97391833718623",
 	["walk"] = "rbxassetid://104099222538950",
 	["idle"] = "rbxassetid://99420169821423",
 }

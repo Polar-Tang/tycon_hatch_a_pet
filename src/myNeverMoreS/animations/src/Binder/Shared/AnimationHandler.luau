@@ -67,7 +67,12 @@ export type AnimationHandlerType = {
 	_initialized: boolean,
 	animator: Animator,
 	Init: (self: AnimationHandlerType, animationContainer: Instance) -> (),
-	LoadAnimation: (self: AnimationHandlerType, state: boolean, animaName: string, isPreload: boolean?) -> AnimationTrack?,
+	LoadAnimation: (
+		self: AnimationHandlerType,
+		state: boolean,
+		animaName: string,
+		isPreload: boolean?
+	) -> AnimationTrack?,
 	AddAnimations: (self: AnimationHandlerType, newAnims: AnimationMap) -> (),
 	Restart: (self: AnimationHandlerType) -> (),
 	Destroy: (self: AnimationHandlerType) -> (),
@@ -92,9 +97,9 @@ end
 function AnimationHandler:Init(animationContainer: Instance)
 	assert(not self._initialized, "Already initialized")
 	if animationContainer:IsA("AnimationController") then
-		self.animator = (animationContainer :: any).Animator
+		self.animator = (animationContainer :: any):WaitForChild("Animator")
 	elseif animationContainer:IsA("Humanoid") then
-		self.animator = (animationContainer :: any).Animator
+		self.animator = (animationContainer :: any):WaitForChild("Animator")
 	else
 		error("animationContainer must be AnimationController or Humanoid")
 	end

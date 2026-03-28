@@ -1,3 +1,6 @@
+local CollectionService = game:GetService("CollectionService")
+local Workspace = game:GetService("Workspace")
+
 local utils = {}
 utils.ScaleToLvl = function(npc: Model, LVL: number)
 	local baseScale = 1
@@ -14,6 +17,47 @@ utils.fixPetY = function(model: Model, root: BasePart)
 
 	local groundOffset = rootY - root.Size.Y / 2
 	return root.Position.Y
+end
+
+function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: number)
+	assert(model.PrimaryPart, "Model must have a PrimaryPart")
+
+	local primaryPart = model.PrimaryPart
+
+	-- Start ray above the pet
+	-- 1.325
+	local origin = primaryPart.Position + Vector3.new(0, rayHeight, 0)
+	local direction = Vector3.new(0, -rayDepth, 0)
+
+	local params: RaycastParams = RaycastParams.new()
+	params.FilterDescendantsInstances = CollectionService:GetTagged("NPC")
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.CollisionGroup = "NPCs"
+
+	local result = Workspace:Raycast(origin, direction, params)
+
+	if not result then
+		return nil -- no ground found
+	end
+
+	-- Get model bounding box
+	local _, size = model:GetBoundingBox()
+
+	-- Calculate correct Y (ground + half height)
+	local correctedY = result.Position.Y
+
+	return correctedY, result
+end
+
+function utils.ArrangeYPosition(model: Model, position: Vector3?)
+	local y = utils.GetGroundYPosition(model, 20, 100)
+	local root = model.PrimaryPart
+	local currentPos = position or root.Position
+
+	if y then
+		local newPosition = Vector3.new(currentPos.X, y, currentPos.Z)
+		model:MoveTo(newPosition)
+	end
 end
 
 utils.MoneyCalc = function(stamina)

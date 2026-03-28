@@ -29,19 +29,9 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	local endPos = position or PlotService:GetRandPosition(plot)
-	local fixedY = pet.PrimaryPart.Position.Y
-	endPos = Vector3.new(endPos.X, fixedY, endPos.Z)
 
 	pet.Parent = workspace
 	-- pet.PrimaryPart.Position = endPos
-	if position then
-		position = Vector3.new(position.X, fixedY, position.Z)
-
-		-- testPart({Position = position})
-		pet:PivotTo(CFrame.new(endPos))
-	else
-		pet:MoveTo(endPos)
-	end
 
 	CollectionService:AddTag(pet, "NPC")
 	CollectionService:AddTag(pet, "AnimationHandler")
@@ -49,6 +39,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	CollectionService:AddTag(pet, "plot_" .. plot:FindFirstChild("PlotId").Value)
 	CollectionService:AddTag(pet, "pets_" .. userId)
 	utils.ScaleToLvl(pet, petInfo.petLvl)
+	utils.ArrangeYPosition(pet, endPos)
 end
 
 function PetService.getPlayerPets(player: Player): { Model }

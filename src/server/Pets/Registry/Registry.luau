@@ -137,7 +137,7 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 	--print(petModel)
 	if pet.petLvl >= 150 then
 		-- warn("max level reached")
-		petModel:SetAttribute("Level", pet.petLvl)
+		-- petModel:SetAttribute("Level", pet.petLvl)
 		return
 	end
 	if not self:_ensureValidEat(petId) then
@@ -156,7 +156,7 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 
 	--print("self.pets[petId] ", self.pets[petId])
 	ScaleToLvl(petModel, pet.petLvl)
-	petModel:SetAttribute("Level", pet.petLvl)
+	-- petModel:SetAttribute("Level", pet.petLvl)
 	return pet
 end
 

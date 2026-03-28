@@ -57,6 +57,17 @@ function MovementController:MoveTo(targetPosition)
 	end
 	self._lastTarget = targetPosition
 
+	-- Arrange the current Pet position to don't look sink
+	do
+		local y = utils.GetGroundYPosition(self.Model, 20, 100)
+		local currentPos = self._root.Position
+
+		if y then
+			local newPosition = Vector3.new(currentPos.X, y, currentPos.Z)
+			self.Model:MoveTo(newPosition)
+		end
+	end
+
 	return self:PlainMove(targetPosition)
 end
 

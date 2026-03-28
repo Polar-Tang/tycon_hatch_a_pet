@@ -2,7 +2,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local Constants = require(ReplicatedStorage.utils.Constants)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
+local utils = require(ReplicatedStorage.utils.utils)
 local EggTypes = require(script.Parent.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 
@@ -48,20 +50,15 @@ function Egg:Spawn(position: Vector3)
 		self:CloneModel()
 	end
 
+	position = Vector3.new(position.X, Constants.GroundY, position.Z)
 	self.position = position
 
-	-- Do no why the egg is placed weird
-
-	local YFixed = Vector3.new(position.X, position.Y + 1.030, position.Z)
-	assert(self.model)
-
-	self.model:PivotTo(CFrame.new(YFixed))
 	self.model.Parent = workspace
+	self.model:MoveTo(position)
 	npcUtils.createBillboard(self.model, {
 		componentName = "ProgresBar",
 		npc = self.model,
 	})
-	print("sent create billboard")
 end
 
 -- start hatching timer
