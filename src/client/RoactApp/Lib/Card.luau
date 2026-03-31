@@ -27,7 +27,6 @@ function Card:render()
 		for petValueKey, petValueValue in pairs(petsValue) do
 			-- plural check
 			local name = petValueKey
-			print(petsValue[petValueKey], petsValue)
 
 			if petsRepetetion[petValueKey] > 1 then
 				name = name .. "s"

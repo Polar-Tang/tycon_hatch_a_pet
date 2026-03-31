@@ -13,8 +13,6 @@ end
 function TooltipExample:render()
 	local pos = self.props.Position
 	local Size = self.props.Size
-	local image = self.props.Image
-	local Title = self.props.Title
 	local layer = self.props.layer or 0
 
 	return Roact.createFragment({
@@ -32,7 +30,6 @@ function TooltipExample:render()
 					self:setState({ testing = true })
 				end)
 				local delayClose = task.delay(0.5, function()
-					print(self.state)
 					if not self.state.isHoveringToolTip then
 						self:setState({ hovering = false })
 					end
@@ -54,7 +51,7 @@ function TooltipExample:render()
 				self:setState({ isHoveringToolTip = true })
 			end,
 			MouseLeave = function()
-				self:setState({ isHoveringToolTip = false })
+				self:setState({ isHoveringToolTip = false, hovering = false })
 			end,
 		}) or nil,
 	})
