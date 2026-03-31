@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local PlayerInventory = {}
 -- PlayerQuestHandler.lua
@@ -62,20 +61,15 @@ function PlayerInventory:setRegisterTime()
 end
 
 function PlayerInventory:Init(money_cb: () -> number)
-	self._timer = 0
-	self._last_timer = 0
-	local money_con = RunService.Heartbeat:Connect(function(dt: number)
-		self._timer += dt
-
-		if self._timer - self._last_timer >= 1 then
-			self._last_timer = self._timer
-			self:setRegisterTime()
-			local moneyGenerated = money_cb()
-			self.cash += moneyGenerated
-		end
-	end)
-
-	self._maid:GiveTask(money_con)
+	local increaseMoneyFunc
+	increaseMoneyFunc = function()
+		self:setRegisterTime()
+		local moneyGenerated = money_cb()
+		self.cash += moneyGenerated
+		local increaseMoneyTask = task.delay(1, increaseMoneyFunc)
+		self._maid._cleanup = increaseMoneyTask
+	end
+	increaseMoneyFunc()
 end
 
 function PlayerInventory:Destoy()

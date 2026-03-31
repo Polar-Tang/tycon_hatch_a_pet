@@ -48,4 +48,16 @@ module["Dog"] = {
 	["idle"] = "rbxassetid://99420169821423",
 }
 
+module["Giraffe"] = {
+	["eat"] = "rbxassetid://126455693054162",
+	["walk"] = "rbxassetid://119023631448919",
+	["idle"] = "rbxassetid://133266992083508",
+}
+
+module["Pig"] = {
+	["eat"] = "rbxassetid://140544883893155",
+	["walk"] = "rbxassetid://132847805554305",
+	["idle"] = "rbxassetid://126630772020803",
+}
+
 return module

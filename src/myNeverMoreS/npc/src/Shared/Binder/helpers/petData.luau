@@ -110,6 +110,18 @@ module["Fox"] = merge({
 	YOffset = 0.5,
 }, common_stats)
 
+module["Giraffe"] = merge({
+	walkSpeed = 10,
+	["rarity"] = "common",
+	CameraDistanceFactor = 0.8,
+
+	["velocity"] = 4,
+	["speed"] = 2,
+	["animationRunSpeed"] = 2.5,
+	adorneeOffset = Vector3.new(0, 4, 0),
+	YOffset = 0.5,
+}, common_stats)
+
 module["Panda"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "common",
@@ -148,6 +160,18 @@ module["Elephant"] = merge({
 }, common_stats)
 
 module["Hippo"] = merge({
+	walkSpeed = 10,
+	["rarity"] = "common",
+	CameraDistanceFactor = 1.2,
+
+	["velocity"] = 8,
+
+	["speed"] = 2,
+	["animationRunSpeed"] = 2.5,
+	["adorneeOffset"] = Vector3.new(0, 9, 0),
+}, common_stats)
+
+module["Pig"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,

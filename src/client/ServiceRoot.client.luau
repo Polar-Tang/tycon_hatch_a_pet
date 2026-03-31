@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 --||Nevermore Shit||--
 ----------------------------- getting servicebag and loader -----------------------------
 
@@ -18,9 +19,8 @@ local serviceBag = ServiceBag.new()
 
 ----------------------------- init process -----------------------------
 _G.FistBag = serviceBag
-
----------- COLDOWNS ----------
 ---------- BINDERS ----------
+local ValueObject = Nevermore("ValueObject")
 local Binder = Nevermore("Binder")
 local AnimationHandler = Nevermore("AnimationHandler")
 local StateMachine = Nevermore("StateMachine")
@@ -86,17 +86,25 @@ _G.BinderProvider = AllBinders
 -- 	end
 -- end
 
+-- initialize the registry as a ValueObject per request
+_G["pets_registry"] = _G["pets_registry"] or {} :: PetTypes.PetsDataStore
+_G.pets_registry_value = _G.pets_registry_value or ValueObject.new(_G["pets_registry"] :: PetTypes.PetsDataStore)
+
 local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 PetNew.OnClientEvent:Connect(function(data)
 	--print("data ", data)
+	local oldPets = _G["pets_registry"]
 	if data.allPets then
-		-- TODO [Collectionable Pets task]: pets should be tagged and placed in a slot here, with data from the server
 		_G["pets_registry"] = data.allPets
 	elseif data.newPet then
 		_G["pets_registry"][data.newPet.petId] = data.newPet
 	else
 		warn("Unkown attribute")
+		debug.traceback("", 2)
+		return
 	end
+	_G.pets_registry_value.Value = _G["pets_registry"]
+	_G.pets_registry_value.Changed:Fire(_G["pets_registry"] :: PetTypes.PetsDataStore)
 	print("_G['pets_registry'] ", _G["pets_registry"])
 end)
 

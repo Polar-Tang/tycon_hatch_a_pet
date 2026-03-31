@@ -4,7 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Egg = require(ServerScriptService.Pets.Egg.Egg)
 local EggTypes = require(ServerScriptService.Pets.Egg.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
-local Registry = require(ServerScriptService.Pets.Registry.Registry)
+local Registry = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
@@ -99,7 +99,7 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 
 		local inventory = PlayerInventory:GetHandler(player)
 		inventory:IncreaseMoney(price)
-		ReplicatedStorage.RemoteEvents.PetNew:FireClient(player, petLists.pets)
+		ReplicatedStorage.RemoteEvents.PetNew:FireClient(player, { allPets = petLists.pets })
 	end
 )
 

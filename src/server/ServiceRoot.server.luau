@@ -6,33 +6,35 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 --||Nevermore Shit||--
-do
-	----------------------------- getting servicebag and loader -----------------------------
 
-	local NeverMorePackages = ReplicatedStorage.Nevermore
-	local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
-	local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
+----------------------------- getting servicebag and loader -----------------------------
 
-	local ServiceBag = Nevermore("ServiceBag")
-	local serviceBag = ServiceBag.new()
+local NeverMorePackages = ReplicatedStorage.Nevermore
+local loader = NeverMorePackages:FindFirstChild("LoaderUtils", true).Parent
+local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
 
-	----------------------------- init process -----------------------------
-	_G.FistBag = serviceBag
+local ServiceBag = Nevermore("ServiceBag")
 
-	---------- COLDOWNS ----------
+local serviceBag = ServiceBag.new()
+local Registry = Nevermore("BestiaryList")
+local Incomes = serviceBag:GetService(Nevermore("Incomes"))
 
-	----- ------------------------ INIT SERVICEBAG -----------------------------
-	serviceBag:Init()
+----------------------------- init process -----------------------------
+_G.FistBag = serviceBag
 
-	serviceBag:Start()
-	_G.FistBag = nil
-	_G.ServiceBag = serviceBag
-end
+---------- COLDOWNS ----------
+
+----- ------------------------ INIT SERVICEBAG -----------------------------
+serviceBag:Init()
+
+serviceBag:Start()
+_G.FistBag = nil
+_G.ServiceBag = serviceBag
+print(serviceBag, " serviceBag ")
 
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
-local Registry = require(script.Parent.Pets.Registry.Registry)
 local _ = require(script.Parent.ShopKeepers.npcMediator)
 ------------------Once initilized-------------------------------
 local ds = DataStoreService:GetDataStore(Env.DB_URI)

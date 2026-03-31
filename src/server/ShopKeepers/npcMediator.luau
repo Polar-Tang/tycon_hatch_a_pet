@@ -120,10 +120,7 @@ local Items = rs.RemoteEvents.ItemsEvent
 Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local itemData = ItemData[data.itemName]
-	print("data ", data)
-	print("itemData ", itemData)
 	if not itemData then
-		print("Item ", data.itemName, " not found")
 		return
 	end
 	local ItemsTemplate = rs.Items:FindFirstChild(data.itemName):Clone()

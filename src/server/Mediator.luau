@@ -3,13 +3,14 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineRewards)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
-local Registry = require(ServerScriptService.Pets.Registry.Registry)
+local Registry = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalculator)
 -- local Items = require(ServerScriptService.Player.Inventory.Items)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local InitPlot = require(ServerScriptService.Seeds.InitPlot)
 local initPets = require(ServerScriptService.Seeds.initPets)
 local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 
 -- local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
@@ -42,14 +43,20 @@ function module.PlayerAdded(player: Player, playerData)
 
 	local totalMoney = playerData.cash or 0
 
-	InitPlot(player, playerData.pets)
+	InitPlot(player, playerData.pets) -- creates the pet and set them in the plot
+
+	-- start a registry for the player
 	Registry:InitPlayer(player, playerData.pets)
+	local bestiaryList = Registry:GetHandler(player)
+	Incomes:InitPlayer(player, bestiaryList)
+
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
 		player = player,
 	})
-	local bestiaryList = Registry:GetHandler(player)
 	local inventory = PlayerInventory:GetHandler(player)
+
+	-- Offline rewards, needs pet registry
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
 
@@ -66,8 +73,6 @@ function module.PlayerAdded(player: Player, playerData)
 		local pets = bestiaryList.pets
 		return MoneyCalculator.calculateEarnings(pets, 1)
 	end)
-	-- CurrencyController:InitPlayer(player)
-	-- local petsInitialized = initPets(player)
 
 	local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 	PetNew:FireClient(player, {

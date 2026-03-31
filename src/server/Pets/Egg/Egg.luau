@@ -16,8 +16,8 @@ Egg.__index = Egg
 
 -- pet pools per egg color
 local PetPools: { [EggColor]: { string } } = {
-	white = { "Elephant", "Fox", "Panda", "Rhino", "Hippo" },
-	red = { "Dog", "Cat", "Lion" },
+	white = { "Dog", "Cat", "Lion", "Fox", "Rhino", "Hippo" },
+	red = { "Elephant", "Panda", "Giraffe", "Pig" },
 }
 
 -- constructor

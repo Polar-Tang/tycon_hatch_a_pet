@@ -1,8 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local BestiaryList = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local petInformation = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local utils = require(ReplicatedStorage.utils.utils)
-local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 -- OfflineRewards.lua
 local OfflineRewards = {}
@@ -31,7 +31,7 @@ function OfflineRewards._init(petStats, offlineTime)
 end
 
 function OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
-	local bestiary = Registry:GetHandler(player)
+	local bestiary = BestiaryList:GetHandler(player)
 	local pets = bestiary.pets
 
 	-- Calculate total production per minute
@@ -65,7 +65,7 @@ function OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
 end
 
 function OfflineRewards.CalculateXP(player, offlineTime)
-	local bestiary = Registry:GetHandler(player)
+	local bestiary = BestiaryList:GetHandler(player)
 	local pets = bestiary.pets
 	for petId, petData: PetData.PetData in pairs(pets) do
 		local petStats = petInformation[petData.petName]

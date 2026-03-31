@@ -4,8 +4,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local PetInformation = require(script.Parent.PetInformation)
-local Registry = require(ServerScriptService.Pets.Registry.Registry)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local BestiaryList = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 -- local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -68,7 +68,6 @@ end
 function PetService.createPet(Owner: Player, maybePetName: string, position: Vector3?)
 	local tPetName = function(name)
 		for _, petName in ipairs(PetTypes.allPetNames) do
-			print("petName ", petName)
 			if name ~= petName then
 				continue
 			else
@@ -86,7 +85,7 @@ function PetService.createPet(Owner: Player, maybePetName: string, position: Vec
 		return
 	end
 
-	local bestiaryHandler = Registry:GetHandler(Owner)
+	local bestiaryHandler = BestiaryList:GetHandler(Owner)
 	local newPet = table.clone(PetInformation[petName])
 	assert(newPet, "Pet '" .. petName .. "' is not registered")
 	local petId = HttpService:GenerateGUID(false)

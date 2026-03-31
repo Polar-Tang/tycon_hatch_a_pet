@@ -6,6 +6,7 @@ local Roact = require(ReplicatedStorage.Roact)
 local HealthBars = require(Components.billboards.HealthBars)
 local CustomProximityPrompts = require(Components.CustomProx.CustomProximityPrompts)
 local Billboards = require(Components.billboards.Billboards)
+local BoostersConsumer = require(Components.boosters.BoostersConsumer)
 
 local App = Roact.Component:extend("App")
 function App:init()
@@ -19,6 +20,7 @@ function App:render()
 		CustomProximityPrompts = Roact.createElement(CustomProximityPrompts),
 		Billboards = Roact.createElement(Billboards),
 		HealthBars = Roact.createElement(HealthBars),
+		Boosters = Roact.createElement(BoostersConsumer),
 	})
 end
 

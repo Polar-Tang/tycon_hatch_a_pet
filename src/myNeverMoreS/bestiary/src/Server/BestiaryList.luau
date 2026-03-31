@@ -1,6 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
+local Rx = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Rx)
+local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
@@ -21,7 +24,7 @@ export type BestiaryList = {
 	-- ===== State =====
 	pets: PetData.PetsDataStore,
 	petClicked: string?,
-
+	PetsValue: ValueObject.ValueObject<PetData.PetsDataStore>,
 	-- ===== Core API =====
 
 	listController: (self: BestiaryList, petId: string, controller: any) -> (),
@@ -50,6 +53,8 @@ export type BestiaryList = {
 
 function BestiaryList.new(pets: PetData.PetsDataStore)
 	local self = setmetatable({}, BestiaryList)
+	self.PetsValue = ValueObject.new(pets)
+
 	self.pets = pets or {}
 
 	return self
@@ -62,12 +67,15 @@ end
 function BestiaryList:listNewPet(petId: string, data: PetData.PetData)
 	self.pets[petId] = data
 	--print(self.pets, "self.pets ")
+	self.PetsValue.Changed:Fire(self.pets)
+
 	return self.pets
 end
 
-function BestiaryList:removePet(petId: string)
+function BestiaryList.removePet(self: BestiaryList, petId: string)
 	-- TODO: USE PET SERVICE TO REMOVE THE PET FROM WORKSPACE
 	self.pets[petId] = nil
+	self.PetsValue.Changed:Fire(self.pets)
 end
 
 function BestiaryList.getPetRarity(self: BestiaryList, petId: string): PetTypes.rarity?
@@ -153,7 +161,6 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 	--print("pet ", pet)
 
 	self.pets[petId] = pet
-
 	--print("self.pets[petId] ", self.pets[petId])
 	ScaleToLvl(petModel, pet.petLvl)
 	-- petModel:SetAttribute("Level", pet.petLvl)
@@ -202,35 +209,4 @@ end
 
 --end
 
-local BestiaryListHandler = {}
-
-BestiaryListHandler.__index = BestiaryListHandler
-
-BestiaryListHandler._players = {}
-
-type PlayerData = {
-	player: Player,
-	character: Model & { Humanoid: Humanoid, Health: NumberValue },
-	pets: {},
-}
-
-function BestiaryListHandler:InitPlayer(player, pets)
-	local handler = BestiaryList.new(pets)
-	self._players[player.UserId] = handler
-end
-
--- accept a player
--- Get the player handler
--- return the particular player handler
-function BestiaryListHandler:GetHandler(player): BestiaryList
-	return self._players[player.UserId]
-end
-
--- accept a player
--- remove the player instance
--- return nil
-function BestiaryListHandler:RemovePlayer(player)
-	self._players[player.UserId] = nil
-end
-
-return BestiaryListHandler
+return PlayerBinder.new(BestiaryList)

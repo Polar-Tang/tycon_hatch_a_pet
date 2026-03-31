@@ -106,4 +106,30 @@ return {
 		},
 		rarity = "uncommon",
 	},
+	["Giraffe"] = {
+		petProg = 0,
+		isInvoked = false,
+		avaiblePoints = 0,
+		petName = "Giraffe",
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = "rare",
+	},
+	["Pig"] = {
+		petProg = 0,
+		isInvoked = false,
+		avaiblePoints = 0,
+		petName = "Pig",
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = "rare",
+	},
 } :: PetTypes.Petsinformation
