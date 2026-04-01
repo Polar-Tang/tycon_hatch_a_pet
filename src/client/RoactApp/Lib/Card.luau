@@ -5,9 +5,7 @@ local Card = Roact.Component:extend("Card")
 function Card:render()
 	local Position = self.props.Position
 	local Size = self.props.Size
-	local image = self.props.Image
 	local Title = self.props.Title
-	local layer = self.props.layer or 0
 
 	local function createPetValueLabels()
 		local texts = {

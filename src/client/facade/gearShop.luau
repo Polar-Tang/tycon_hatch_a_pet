@@ -25,6 +25,7 @@ end
 
 function gearShop.open(name: string?)
 	screen.GearShop.Visible = true
+	_G.context.shopIsOpen = true
 
 	if name then
 		gearShop.changeTitle(name)
@@ -41,6 +42,7 @@ end
 function gearShop.close()
 	itemNum = 0
 	screen.GearShop.Visible = false
+	_G.context.shopIsOpen = false
 	global_maid:DoCleaning()
 end
 

@@ -1,5 +1,4 @@
-local StarterPlayer = game:GetService("StarterPlayer")
-local ToolTip = require(StarterPlayer.StarterPlayerScripts.RoactApp.Lib.ToolTip)
+local boosterDefault = require(script.Parent.boosterDefault)
 local Roact = require(game.ReplicatedStorage.Roact)
 
 type Props = {
@@ -9,49 +8,9 @@ type Props = {
 local coinBooster = Roact.Component:extend("coinBooster")
 
 function coinBooster:render()
-	local data = self.props or {}
-
-	-- First map: aggregate sums
-	local petsValue: { [string]: number } = {}
-	for name, value in pairs(data) do
-		if petsValue[name] then
-			petsValue[name] += value
-		else
-			petsValue[name] = value
-		end
-	end
-
-	-- Second map: count repetitions
-	local repetitions: { [string]: number } = {}
-
-	for name, _ in pairs(data) do
-		if repetitions[name] then
-			repetitions[name] += 1
-		else
-			repetitions[name] = 1
-		end
-	end
-
-	-- Total sum of first map
-	local totalSum = 0
-	for _, value in pairs(petsValue) do
-		totalSum += value
-	end
-
-	return Roact.createElement("TextLabel", {
-		Size = UDim2.new(0.1, 0, 0.25, 0), --{0.1, 0},{0.25, 0}
-		Text = "X" .. tostring(totalSum),
-		Position = UDim2.new(0.1, 0, 0.78, 0),
-		BackgroundTransparency = 1,
-		TextScaled = true,
-	}, {
-		UIStroke = Roact.createElement("UIStroke", {
-			Thickness = 2,
-		}),
-		ToolTip = Roact.createElement(ToolTip, {
-			petsValue = petsValue,
-			petsRepetitions = repetitions,
-		}),
+	return Roact.createElement(boosterDefault, {
+		ToolTipSize = UDim2.new(3, 0, 1.25, 0),
+		ToolTipPosition = UDim2.new(0, 0, -1, 0),
 	})
 end
 

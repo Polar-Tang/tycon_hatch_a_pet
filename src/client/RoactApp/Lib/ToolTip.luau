@@ -26,9 +26,6 @@ function TooltipExample:render()
 				self:setState({ hovering = true })
 			end,
 			[Roact.Event.MouseLeave] = function()
-				task.delay(0.2, function()
-					self:setState({ testing = true })
-				end)
 				local delayClose = task.delay(0.5, function()
 					if not self.state.isHoveringToolTip then
 						self:setState({ hovering = false })
@@ -42,8 +39,8 @@ function TooltipExample:render()
 			Title = "Coin Boost",
 			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
 			TextColor3 = Color3.fromRGB(255, 255, 255),
-			Size = UDim2.new(3, 0, 1.25, 0),
-			Position = UDim2.new(0, 0, -1, 0),
+			Size = self.props.ToolTipSize,
+			Position = self.props.ToolTipPosition,
 			petsValue = self.props.petsValue,
 			petsRepetitions = self.props.petsRepetitions,
 			isHoveringToolTip = self.props.isHoveringToolTip,
