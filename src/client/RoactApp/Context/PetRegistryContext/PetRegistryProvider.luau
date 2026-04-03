@@ -23,25 +23,13 @@ function PetRegistryProvider:render()
 	}, self.props[Roact.Children])
 end
 
-local isPetBoosterByTheMoment = function(name: string)
-	return name == "Pig" or name == "Elephant" or name == "Giraffe" or name == "Panda"
-end
-
 function PetRegistryProvider:didMount()
 	type filteresPets = { [PetTypes.petNames]: PetTypes.PetData }
-	local function filter_pets(newPets: PetTypes.PetsDataStore): filteresPets
-		local pets = {}
-		for petId, pet in pairs(newPets) do
-			if not isPetBoosterByTheMoment(pet.petName) then
-				continue
-			end
-			pets[pet.petName] = pet
-		end
-		return pets
-	end
+	
 	if _G.pets_registry_value and _G.pets_registry_value.Changed then
 		local connection = _G.pets_registry_value:Observe():Subscribe(function(newPets)
-			self:setState(filter_pets(newPets))
+			-- local filterPets = filter_pets(newPets)
+			self:setState({pets = newPets})
 		end)
 
 		self._maid:GiveTask(connection)

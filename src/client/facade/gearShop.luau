@@ -23,9 +23,23 @@ function gearShop.isDifferentShop(name: string)
 	return screen.GearShop.Header.Txt.Text == name
 end
 
+local uicontext = {}
+uicontext.isOpen = Instance.new("BoolValue", Players.LocalPlayer)
+uicontext.isOpen.Name = "isOpenShop"
+_G.ui_context = uicontext
+
+local toggleUIContext = function(bool: boolean)
+	-- some dirty code
+	-- [WARNING] : should migrate src/client/RoactApp/Components/CustomProx/DefaultProximityPrompt.luau to a roact component, consume the booster context in src/client/RoactApp/Components/CustomProx/CustomProximityPrompts.luau giving it a self.props.function that set some kind of state that cause a re-render in hagling bosster
+	local uicontext = table.clone(_G.ui_context)
+
+	uicontext.isOpen.Value = bool
+	_G.ui_context = uicontext
+end
+
 function gearShop.open(name: string?)
 	screen.GearShop.Visible = true
-	_G.context.shopIsOpen = true
+	toggleUIContext(true)
 
 	if name then
 		gearShop.changeTitle(name)
@@ -42,7 +56,7 @@ end
 function gearShop.close()
 	itemNum = 0
 	screen.GearShop.Visible = false
-	_G.context.shopIsOpen = false
+	toggleUIContext(false)
 	global_maid:DoCleaning()
 end
 

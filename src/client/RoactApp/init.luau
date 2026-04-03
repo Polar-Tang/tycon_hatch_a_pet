@@ -6,6 +6,7 @@ local MainAppUI = require(src.MainApp)
 local ctx = src.Context
 local PromptProvider = require(ctx.PromptContext.PromptProvider)
 local BillboardProvider = require(ctx.BillboardContext.BilldoardProvider)
+local PetRegistryProvider = require(ctx.PetRegistryContext.PetRegistryProvider)
 local HealthbarProvider = require(ctx.HealthbarContext.HealthbarProvider)
 
 --local StarterGui: StarterGui = game:GetService("StarterGui")
@@ -22,9 +23,11 @@ function App:render()
 
 		PromptProvider = Roact.createElement(PromptProvider, {}, {
 			BillboardProvider = Roact.createElement(BillboardProvider, {}, {
-				HealthbarProvider = Roact.createElement(HealthbarProvider, {}, {
+				PetRegistryProvider = Roact.createElement(PetRegistryProvider, {}, {
+					HealthbarProvider = Roact.createElement(HealthbarProvider, {}, {
 
-					AppUI = Roact.createElement(MainAppUI),
+						AppUI = Roact.createElement(MainAppUI),
+					}),
 				}),
 			}),
 		}),

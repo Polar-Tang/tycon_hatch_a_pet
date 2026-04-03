@@ -18,20 +18,18 @@ function Card:render()
 		}
 
 		local petsValue: { [string]: number } = self.props.petsValue or {}
-		local petsRepetetion = self.props.petsRepetitions
 
 		local elements = {}
 
 		for petValueKey, petValueValue in pairs(petsValue) do
 			-- plural check
 			local name = petValueKey
-
-			if petsRepetetion[petValueKey] > 1 then
+			local petsRepetition = #self.props.petsBooster[name]
+			if petsRepetition > 1 then
 				name = name .. "s"
 			end
 
-			local textString =
-				string.format("X%s for %s (%s)", tostring(petValueValue), name, petsRepetetion[petValueKey])
+			local textString = string.format("%-8s for %s (%s)", "X" .. tostring(petValueValue), name, tostring(petsRepetition))
 
 			elements[petValueKey] = Roact.createElement("TextLabel", {
 				Text = textString,

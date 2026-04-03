@@ -106,34 +106,31 @@ utils.GenerateRandStats = function(LVL)
 end
 
 utils.GetModelHeight = function(model: Model): number
-	local lowestPart: BasePart?
-	local highestPart: BasePart?
+	-- local lowestPart: BasePart?
+	-- local highestPart: BasePart?
 
-	for _, part in ipairs(model:GetDescendants()) do
-		if part:IsA("BasePart") then
-			if not lowestPart or part.Position.Y - part.Size.Y / 2 < lowestPart.Position.Y - lowestPart.Size.Y / 2 then
-				lowestPart = part
-			end
-			if
-				not highestPart
-				or part.Position.Y + part.Size.Y / 2 > highestPart.Position.Y + highestPart.Size.Y / 2
-			then
-				highestPart = part
-			end
-		end
-	end
+	-- for _, part in ipairs(model:GetDescendants()) do
+	-- 	if part:IsA("BasePart") then
+	-- 		if not lowestPart or part.Position.Y - part.Size.Y / 2 < lowestPart.Position.Y - lowestPart.Size.Y / 2 then
+	-- 			lowestPart = part
+	-- 		end
+	-- 		if
+	-- 			not highestPart
+	-- 			or part.Position.Y + part.Size.Y / 2 > highestPart.Position.Y + highestPart.Size.Y / 2
+	-- 		then
+	-- 			highestPart = part
+	-- 		end
+	-- 	end
+	-- end
 
-	if not lowestPart or not highestPart then
-		return 0
-	end
+	-- if not lowestPart or not highestPart then
+	-- 	return 0
+	-- end
 
-	local bottomOfLowest = lowestPart.Position.Y - lowestPart.Size.Y / 2
-	local topOfHighest = highestPart.Position.Y + highestPart.Size.Y / 2
-	local otherHeight = topOfHighest - bottomOfLowest
-	print("Model Height: ", otherHeight)
+	-- local bottomOfLowest = lowestPart.Position.Y - lowestPart.Size.Y / 2
+	-- local topOfHighest = highestPart.Position.Y + highestPart.Size.Y / 2
 
 	local height = model:GetExtentsSize().Y
-	print("Model Height: ", height)
 	return height
 end
 

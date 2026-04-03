@@ -34,15 +34,14 @@ function TooltipExample:render()
 				self._maid._cleanup = delayClose
 			end,
 		}),
-
 		Tooltip = self.state.hovering and Roact.createElement(Card, {
-			Title = "Coin Boost",
+			Title = self.props.cardTitle,
 			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			Size = self.props.ToolTipSize,
 			Position = self.props.ToolTipPosition,
 			petsValue = self.props.petsValue,
-			petsRepetitions = self.props.petsRepetitions,
+			petsBooster = self.props.petsBooster,
 			isHoveringToolTip = self.props.isHoveringToolTip,
 			MouseEnter = function()
 				self:setState({ isHoveringToolTip = true })

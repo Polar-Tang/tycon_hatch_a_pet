@@ -49,6 +49,7 @@ function module.PlayerAdded(player: Player, playerData)
 	Registry:InitPlayer(player, playerData.pets)
 	local bestiaryList = Registry:GetHandler(player)
 	Incomes:InitPlayer(player, bestiaryList)
+	local playerIncomes = Incomes:GetHandler(player)
 
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
@@ -59,19 +60,16 @@ function module.PlayerAdded(player: Player, playerData)
 	-- Offline rewards, needs pet registry
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
-
-		local offlineMoney, _, _ = OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
-		if offlineMoney then
-			totalMoney += offlineMoney
-		end
-
+		local offlineMoney = OfflineRewards.GetOfflineRewards(player, offlineTime, totalMoney)
 		inventory:IncreaseMoney(offlineMoney)
-		OfflineRewards.CalculateXP(player, offlineTime)
 	end
 
 	inventory:Init(function()
 		local pets = bestiaryList.pets
-		return MoneyCalculator.calculateEarnings(pets, 1)
+		local defaultEarning = MoneyCalculator.calculateEarnings(pets, 1)
+		local boosted = defaultEarning * playerIncomes.CoinsFactor.Value
+
+		return boosted
 	end)
 
 	local PetNew = ReplicatedStorage.RemoteEvents.PetNew

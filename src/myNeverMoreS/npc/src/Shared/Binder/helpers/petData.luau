@@ -112,7 +112,7 @@ module["Fox"] = merge({
 
 module["Giraffe"] = merge({
 	walkSpeed = 10,
-	["rarity"] = "common",
+	["rarity"] = "rare",
 	CameraDistanceFactor = 0.8,
 
 	["velocity"] = 4,
@@ -173,7 +173,7 @@ module["Hippo"] = merge({
 
 module["Pig"] = merge({
 	walkSpeed = 10,
-	["rarity"] = "common",
+	["rarity"] = "rare",
 	CameraDistanceFactor = 1.2,
 
 	["velocity"] = 8,

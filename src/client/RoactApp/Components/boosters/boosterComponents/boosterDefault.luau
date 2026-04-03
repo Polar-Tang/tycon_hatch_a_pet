@@ -1,4 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+local incomeUtils = require(ReplicatedStorage.utils.incomeUtils)
 local ToolTip = require(StarterPlayer.StarterPlayerScripts.RoactApp.Lib.ToolTip)
 local Roact = require(game.ReplicatedStorage.Roact)
 
@@ -9,43 +11,22 @@ type Props = {
 local boosterDefault = Roact.Component:extend("boosterDefault")
 
 function boosterDefault:render()
-	local data = self.props or {}
+
+	local formatText = self.props.formatText
+
+	local data = self.props.boosterPets
 
 	if not next(data) then
 		return
 	end
 
-	-- First map: aggregate sums
-	local petsValue: { [string]: number } = {}
-	for name, value in pairs(data) do
-		if petsValue[name] then
-			petsValue[name] += value
-		else
-			petsValue[name] = value
-		end
-	end
+	local petsValue, totalSum = incomeUtils.totalBoost(data) 
 
-	-- Second map: count repetitions
-	local repetitions: { [string]: number } = {}
-
-	for name, _ in pairs(data) do
-		if repetitions[name] then
-			repetitions[name] += 1
-		else
-			repetitions[name] = 1
-		end
-	end
-
-	-- Total sum of first map
-	local totalSum = 0
-	for _, value in pairs(petsValue) do
-		totalSum += value
-	end
 
 	return Roact.createElement("TextLabel", {
-		Size = UDim2.new(0.1, 0, 0.25, 0), --{0.1, 0},{0.25, 0}
-		Text = "X" .. tostring(totalSum),
-		Position = UDim2.new(0.1, 0, 0.78, 0),
+		Size = self.props.Size, --{0.1, 0},{0.25, 0}
+		Text = formatText(totalSum), --Text
+		Position = self.props.Position,
 		BackgroundTransparency = 1,
 		TextScaled = true,
 	}, {
@@ -53,8 +34,9 @@ function boosterDefault:render()
 			Thickness = 2,
 		}),
 		ToolTip = Roact.createElement(ToolTip, {
+			cardTitle = self.props.cardTitle,
 			petsValue = petsValue,
-			petsRepetitions = repetitions,
+			petsBooster = data,
 			ToolTipSize = self.props.ToolTipSize,
 			ToolTipPosition = self.props.ToolTipPosition,
 		}),

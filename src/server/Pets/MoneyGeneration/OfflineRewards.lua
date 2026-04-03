@@ -64,6 +64,17 @@ function OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
 	return totalMoney, offlineMinutes, productionPerMinute
 end
 
+function OfflineRewards.GetOfflineRewards(player: Player, offlineTime: number, totalMoney:number): number
+	local offlineMoney, _, _ = OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
+	local nerfedOfflineMoney = offlineMoney / 4
+	if offlineMoney then
+		totalMoney += nerfedOfflineMoney
+	end
+
+	OfflineRewards.CalculateXP(player, offlineTime)
+	return nerfedOfflineMoney
+end
+
 function OfflineRewards.CalculateXP(player, offlineTime)
 	local bestiary = BestiaryList:GetHandler(player)
 	local pets = bestiary.pets
