@@ -63,3 +63,23 @@ check if the petId id exists on bestiary
 [.] Add petStats visible on hover
 [.] add it offset too
 [.] cache the pet boss selection too
+
+
+# Release update [non-combat abilities]
+This task include the base system used for the non-attackabilitiesas well as 3 pets abilities fully completed
+## Features
+The following features were added to the game
+### Passive abilites
+All the abilities got an effect that always occur. For testing purposes new pets were added as placeholders (Pig, Giraffe), the new abilities are
+- Elephant (*1.25 coins erning)
+- Panda (*1.25 coins erning)
+- Pig (*2 coins erning)
+- Giraffe (-10% off, needs enhacement)
+All the current effects are listed in the client and full reactiiveto the pet player changes
+### Bonus abilities
+During certain amount of time the pet does trigger some benefit to the player
+
+## Updates
+Some systems already in the game were improved 
+- Boss rewards
+    A system of RNG for the bosses were introduced

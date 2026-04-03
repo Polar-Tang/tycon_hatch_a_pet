@@ -1,3 +1,4 @@
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
@@ -20,6 +21,8 @@ local function shallowCopy(t)
 	return out
 end
 
+
+-- This class in brasking Single responsability principle. We need to refactor this and separate responsibilities. Many methods like spendPoint, increaseXP, _levelUpPet should be used via a controller. We'll need every pet in the list to be a controller to separate functionalities at the same time that keeping its pure data (PetData.PetsDataStore) each controller may be initialized with that data on _init method called from new, but most of the internal handling should be up to this controller without breaking the current bestiaryListHandler
 export type BestiaryList = {
 	-- ===== State =====
 	pets: PetData.PetsDataStore,
@@ -174,39 +177,5 @@ end
 function BestiaryList:unsetPetClicked()
 	self.petClicked = nil
 end
-
--- function BestiaryList:listBuff(petId: string, item)
--- 	local pet = self.pets[petId]
--- 	if not pet then
--- 		return
--- 	end
-
--- 	local clone = table.clone(pet)
--- 	clone.buffs = shallowCopy(pet.buffs) or {}
--- 	clone.buffs[item.itemId] = item
--- 	----print("data.item ", item)
--- 	self.pets[petId] = clone
--- 	return self.pets
--- end
-
--- function BestiaryList:deleteBuff(petId: string, itemId: string)
--- 	local pet = self.pets[petId]
--- 	if not pet then
--- 		return
--- 	end
-
--- 	local clone = table.clone(pet)
--- 	clone.buffs = shallowCopy(pet.buffs) or {}
--- 	clone.buffs[itemId] = nil
--- 	self.pets[petId] = clone
-
--- 	return self.pets
--- end
-
---function BestiaryList:getMaxH(petId: string)
---	local pet = self.pets[petName]
---	return pet.petStats["stamina"]*32 +128
-
---end
 
 return PlayerBinder.new(BestiaryList)

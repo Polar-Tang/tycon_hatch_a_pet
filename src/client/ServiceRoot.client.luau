@@ -212,45 +212,6 @@ do
 	end
 end
 
--- Do some weird tecnique for avoiding pet colliding with the camera
---[[
-	
-do
-	local camera = workspace.CurrentCamera
-	local player_character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-	local function updatePetTransparency(pet, character)
-		local origin = camera.CFrame.Position
-		local target = character.HumanoidRootPart.Position
-
-		local params = RaycastParams.new()
-		params.FilterDescendantsInstances = { character }
-		params.FilterType = Enum.RaycastFilterType.Exclude
-
-		local result = workspace:Raycast(origin, target - origin, params)
-
-		if result and result.Instance:GetAttribute("petName") then
-			for _, part in pet:GetDescendants() do
-				if part:IsA("BasePart") then
-					part.LocalTransparencyModifier = 0.7
-				end
-			end
-		else
-			for _, part in pet:GetDescendants() do
-				if part:IsA("BasePart") then
-					part.LocalTransparencyModifier = 0
-				end
-			end
-		end
-	end
-
-	RunService.RenderStepped:Connect(function()
-		for _, pet in CollectionService:GetTagged(Constants.PetFollower) do
-			updatePetTransparency(pet, player_character)
-		end
-	end)
-end
-]]
-
 -- FADING TEXT EVENT
 do
 	local fadingText = function(rootPart: BasePart, text: string, textColor: Color3?, size: UDim2?)
@@ -318,4 +279,14 @@ do
 		print("this damage shuld be printed ", damage)
 		fadingText(rootPart, damage)
 	end)
+end
+
+-- Remote network 
+do 
+	local alert = require(StarterPlayer.StarterPlayerScripts.facade.alert)
+
+	ReplicatedStorage.RemoteEvents.Notifier.OnClientEvent:Connect(function(notificationData: {notification: string})  
+		alert.alert(notificationData.notification)
+	end)	
+	
 end
