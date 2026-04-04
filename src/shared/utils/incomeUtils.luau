@@ -34,6 +34,8 @@ local isPetBoosterByTheMoment = function(name: string)
 	return name == "Pig" or name == "Elephant" or name == "Giraffe" or name == "Panda"
 end
 
+
+
 export type boosterList = { [PetTypes.petNames]: { number} }
 --[=[
 	Returns a boosterList for a boosterType.

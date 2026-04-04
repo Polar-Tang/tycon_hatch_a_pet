@@ -1,19 +1,17 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
-local Rx = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Rx)
 local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
-local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
+local PetController = require(script.Parent.PetController)
 
 local BestiaryList = {}
 -- PlayerQuestHandler.lua
 BestiaryList.__index = BestiaryList
 --local petRegistry = require(script.Parent.PetRegistry)
 
-local function shallowCopy(t)
+local function _shallowCopy(t)
 	local out = {}
 	for k, v in pairs(t or {}) do
 		out[k] = v
@@ -22,12 +20,14 @@ local function shallowCopy(t)
 end
 
 
--- This class in brasking Single responsability principle. We need to refactor this and separate responsibilities. Many methods like spendPoint, increaseXP, _levelUpPet should be used via a controller. We'll need every pet in the list to be a controller to separate functionalities at the same time that keeping its pure data (PetData.PetsDataStore) each controller may be initialized with that data on _init method called from new, but most of the internal handling should be up to this controller without breaking the current bestiaryListHandler
 export type BestiaryList = {
 	-- ===== State =====
 	pets: PetData.PetsDataStore,
 	petClicked: string?,
 	PetsValue: ValueObject.ValueObject<PetData.PetsDataStore>,
+
+	_petControllers: { [string]: PetController.PetController },
+	PetObservables: { ValueObject.ValueObject<PetController.PetController> },
 	-- ===== Core API =====
 
 	listController: (self: BestiaryList, petId: string, controller: any) -> (),
@@ -48,9 +48,7 @@ export type BestiaryList = {
 
 	-- ===== Internal Methods =====
 
-	_levelUpPet: (self: BestiaryList, pet: PetData.PetData) -> PetData.PetData?,
 	getPetStats: (self: BestiaryList, petId: string) -> PetData.petStats?,
-	_ensureValidEat: (self: BestiaryList, petId: string) -> boolean,
 	getPetModel: (self: BestiaryList, petId: string) -> PetData.PetData?,
 }
 
@@ -59,17 +57,31 @@ function BestiaryList.new(pets: PetData.PetsDataStore)
 	self.PetsValue = ValueObject.new(pets)
 
 	self.pets = pets or {}
-
+	self._petControllers = {}
+	self.PetObservables = {}
+	
+	self:_init()
 	return self
 end
 
-function BestiaryList:listController(petId: string, controller)
-	self.pets[petId] = controller
+
+function BestiaryList:_init()
+	for petId, pet in pairs(self.pets) do 
+		self:listController(petId, pet)
+	end
+end
+
+function BestiaryList:listController(petId: string, data)
+	if not self._petControllers[petId] then 
+		local controller = PetController.new(petId, data)
+		self._petControllers[petId] = controller
+		self.PetObservables[petId] = controller.ValueObject
+	end
 end
 
 function BestiaryList:listNewPet(petId: string, data: PetData.PetData)
+	self:listController(petId, data)
 	self.pets[petId] = data
-	--print(self.pets, "self.pets ")
 	self.PetsValue.Changed:Fire(self.pets)
 
 	return self.pets
@@ -78,6 +90,7 @@ end
 function BestiaryList.removePet(self: BestiaryList, petId: string)
 	-- TODO: USE PET SERVICE TO REMOVE THE PET FROM WORKSPACE
 	self.pets[petId] = nil
+	self._petControllers[petId] = nil
 	self.PetsValue.Changed:Fire(self.pets)
 end
 
@@ -86,56 +99,20 @@ function BestiaryList.getPetRarity(self: BestiaryList, petId: string): PetTypes.
 	if not pet then
 		return
 	end
-	print("pet ", pet.rarity)
 	return pet.rarity
 end
 
 function BestiaryList.spendPoint(self: BestiaryList, petId: string, abillityName: string): PetData.PetsDataStore | nil
-	local pet = self.pets[petId]
-	if 0 >= pet.avaiblePoints then
-		return
+	local controller = self._petControllers[petId]
+	if not controller then
+		return nil
 	end
-	pet.avaiblePoints = pet.avaiblePoints - 1
-	pet.petStats[abillityName] = pet.petStats[abillityName] + 1
-	return self.pets
-end
-
-function BestiaryList._levelUpPet(self: BestiaryList, pet): PetData.PetData?
-	if pet.petLvl >= 150 then
-		return
+	if controller:spendPoint(abillityName) then
+		self.pets[petId] = controller:getData()
+		self.PetsValue.Changed:Fire(self.pets)
+		return self.pets
 	end
-	pet.avaiblePoints += 1
-	pet.petLvl += 1
-	pet.petProg -= 100 -- carry over excess XP
-
-	return pet
-end
-
--- The state machine uses remote event, check the intervals between the eat time is the same that the state machine use
-function BestiaryList:_ensureValidEat(petId: string): boolean
-	local pet = table.clone(self.pets[petId])
-	if not pet.startTrack then
-		pet.lastEat = tick()
-		pet.startTrack = true
-
-		self.pets[petId] = pet
-		return true
-	end
-	local puddingTime = tick() - pet.lastEat
-	--print("last eat - now ", puddingTime)
-	local petInformation = petData[pet.petName]
-	-- substract by 1 just in case
-	local isValidEat = puddingTime > (petInformation.eat_interval + petInformation.eat_duration - 1)
-	if isValidEat then
-		pet.lastEat = tick()
-		self.pets[petId] = pet
-	end
-
-	return isValidEat
-end
-
-function BestiaryList:getPetStats(petId: string)
-	return self.pets[petId].petStats
+	return nil
 end
 
 function BestiaryList.getPetModel(self: BestiaryList, petId: string): PetData.PetData?
@@ -143,31 +120,18 @@ function BestiaryList.getPetModel(self: BestiaryList, petId: string): PetData.Pe
 end
 
 function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg): PetData.PetData?
-	local pet = table.clone(self.pets[petId])
+	local controller = self._petControllers[petId]
+	if not controller then
+		return nil
+	end
 	local petModel = self:getPetModel(petId)
-	--print(petModel)
-	if pet.petLvl >= 150 then
-		-- warn("max level reached")
-		-- petModel:SetAttribute("Level", pet.petLvl)
-		return
+	local updated = controller:increaseXP(newPetProg, petModel)
+	if updated then
+		self.pets[petId] = updated
+		self.PetsValue.Changed:Fire(self.pets)
+		return updated
 	end
-	if not self:_ensureValidEat(petId) then
-		--print("invalid interval")
-		return
-	end
-
-	pet.petProg += newPetProg
-	--print("pet ", pet)
-	while pet.petProg >= 100 do
-		self:_levelUpPet(pet)
-	end
-	--print("pet ", pet)
-
-	self.pets[petId] = pet
-	--print("self.pets[petId] ", self.pets[petId])
-	ScaleToLvl(petModel, pet.petLvl)
-	-- petModel:SetAttribute("Level", pet.petLvl)
-	return pet
+	return nil
 end
 
 function BestiaryList:setPetClicked(petId: string)
