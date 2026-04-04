@@ -10,8 +10,7 @@ function Healthbar:render()
 	local pet = self.props.model
 	local percent = self.props.percent
 	local petLevel = self.props.petLevel
-	print("new Percent ", percent)
-	print("for ", pet.Name)
+	
 	if not pet then
 		return
 	end

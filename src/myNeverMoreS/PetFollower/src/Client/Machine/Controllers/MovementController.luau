@@ -116,7 +116,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		local currentIndex = 1
 		local function moveNext()
 			-- clean previous move connections and promises
-			print("self.isMoving  ", self.isMoving)
 			if not self.isMoving then
 				resolve()
 				return

@@ -27,7 +27,7 @@ export type BestiaryList = {
 	PetsValue: ValueObject.ValueObject<PetData.PetsDataStore>,
 
 	_petControllers: { [string]: PetController.PetController },
-	PetObservables: { ValueObject.ValueObject<PetController.PetController> },
+	PetObservables: { ValueObject.ValueObject<PetData.PetsDataStore> },
 	-- ===== Core API =====
 
 	listController: (self: BestiaryList, petId: string, controller: any) -> (),
@@ -90,6 +90,7 @@ end
 function BestiaryList.removePet(self: BestiaryList, petId: string)
 	-- TODO: USE PET SERVICE TO REMOVE THE PET FROM WORKSPACE
 	self.pets[petId] = nil
+	self._petControllers[petId]:Destroy()
 	self._petControllers[petId] = nil
 	self.PetsValue.Changed:Fire(self.pets)
 end
@@ -132,6 +133,10 @@ function BestiaryList.increaseXP(self: BestiaryList, petId: string, newPetProg):
 		return updated
 	end
 	return nil
+end
+
+function BestiaryList.getPetStats(self: BestiaryList, petId: string): PetData.petStats?
+	return self._petControllers[petId]:getStats()
 end
 
 function BestiaryList:setPetClicked(petId: string)

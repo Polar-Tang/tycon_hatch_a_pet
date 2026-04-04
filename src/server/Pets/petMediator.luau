@@ -134,20 +134,20 @@ end
 
 local function teleport(player: Player, teleportTo: teleportDestinations)
 	if typeof(teleportTo) ~= "string" then
-		print("Invalid teleport destination: ", teleportTo)
+		warn("Invalid teleport destination: ", teleportTo)
 		return
 	end
 
 	local resolver = teleportDestinations[teleportTo]
 
 	if not resolver then
-		print("Not a valid destination: " .. tostring(teleportTo))
+		warn("Not a valid destination: " .. tostring(teleportTo))
 		return
 	end
 
 	local destination: CFrame? = resolver(player)
 	if not destination then
-		print("Could not resolve CFrame for: " .. tostring(teleportTo))
+		warn("Could not resolve CFrame for: " .. tostring(teleportTo))
 		return
 	end
 
@@ -176,12 +176,11 @@ local BossRemoteEvent = ReplicatedStorage.RemoteEvents.BossRemoteEvent
 BossRemoteEvent.OnServerEvent:Connect(
 	function(a0: Player, data: NpcFighterTypes.combatInstanceData & { destroy: boolean? })
 		local posibleSession = CombatController.getPlayerSessionFolder(a0)
-		print("data from client to server ", data)
 		if data.destroy and posibleSession then
 			teleport(a0, "plot")
 			return
 		elseif data.destroy and not posibleSession then
-			print("send return with no session")
+			warn("send return with no session")
 			return
 		end
 		local petId = data.petId
@@ -212,7 +211,7 @@ BossRemoteEvent.OnServerEvent:Connect(
 				player_boss = bossInformation,
 			}
 			----print("fightInfo ", fightInfo)
-			CombatController.initFightSession(a0, folderSession, fightInfo) --tag:telepor_point_croakan
+			CombatController.initFightSession(a0, fightInfo) --tag:telepor_point_croakan
 			BossRemoteEvent:FireClient(a0, fightInfo)
 		end
 
@@ -294,10 +293,10 @@ ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Pl
 	})
 
 	-- subtract and clamp to zero
-	print("", targetHealth.Name, " health: ", targetHealth.Value)
+	-- print("", targetHealth.Name, " health: ", targetHealth.Value)
 
 	targetHealth.Value = math.max(targetHealth.Value - damage, 0)
-	print("", targetHealth.Name, " new health: ", targetHealth.Value)
+	-- print("", targetHealth.Name, " new health: ", targetHealth.Value)
 end)
 
 return {}

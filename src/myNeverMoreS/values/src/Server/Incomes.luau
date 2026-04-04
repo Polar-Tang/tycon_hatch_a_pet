@@ -4,41 +4,23 @@ local ServerScriptService = game:GetService("ServerScriptService")
     Income aggregate factory for per-player income value objects.
 ]]
 
-local BestiaryList = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
-local PetController = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.PetController)
+local PetInformation = require(ServerScriptService.Pets.Pet.PetInformation)
+local PetData = require(ServerScriptService.types.PetData)
 local serverTypes = require(ServerScriptService.types.serverTypes)
 local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
-local Observable = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Observable)
 local Rx = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Rx)
 local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local incomeUtils = require(ReplicatedStorage.utils.incomeUtils)
 
 type ValueObject = ValueObject.ValueObject<number>
 
-export type Income = {
-	Xp: ValueObject,
-	CoinsFactor: ValueObject,
-	EggRNG: ValueObject,
-	EggDurationFactor: ValueObject,
-	StorageSlot: ValueObject,
-	Haggling: ValueObject,
-	KiblyFactor: ValueObject,
-	Luck: ValueObject,
-
-	pets: ValueObject.ValueObject<{}>,
-	boosters: { boosterType: incomeUtils.boosterList },
-
-	_maid: Maid.Maid,
-
-	new: (self: Income) -> Income,
-	Init: (self: Income, serviceBag: any) -> (),
-}
+type Income = serverTypes.Income
 
 local Income = {}
 Income.__index = Income
 
-function Income.new(bestiaryList)
+function Income.new(bestiaryList, inventory)
 	local self = setmetatable({
 		Xp = ValueObject.new(1),
 		CoinsFactor = ValueObject.new(1),
@@ -50,28 +32,47 @@ function Income.new(bestiaryList)
 		Luck = ValueObject.new(1),
 
 		bestiaryList = bestiaryList,
+		inventory = inventory, --inventory.cash/80
 		_maid = Maid.new(),
 	}, Income)
 
 	local isPetBoosterByTheMoment = function(petData)
-		return petData.Petname == "Pig"
-			or petData.Petname == "Elephant"
-			or petData.Petname == "Giraffe"
-			or petData.Petname == "Panda"
+		local filteredPets = {}
+		for _, petInfo in pairs(petData) do
+			-- stylua: ingore
+			if
+				petData.petName == "Pig"
+				or petData.petName == "Elephant"
+				or petData.petName == "Giraffe"
+				or petData.petName == "Panda"
+			then
+				table.insert(filteredPets, petInfo)
+			end
+		end
+		return filteredPets
 	end
 
-	Rx.combineLatest(bestiaryList.PetsValue)
-		:Pipe({
-			Rx.where(isPetBoosterByTheMoment),
-		})
-		:Subscribe(function(newPets)
-			print("new pets ", newPets)
-		end)
+	-- This is probably wrong but it works
+	--[[
+		probably need to tdo something more like thi
+	]]
+	bestiaryList.PetsValue:Observe():Subscribe(function()
+		
+		Rx.combineLatest(bestiaryList.PetObservables)
+			:Pipe({
+				Rx.where(function(petData): boolean
+					print("petData ", petData)
+					return isPetBoosterByTheMoment(petData)
+				end),
+			})
+			:Subscribe(function(newPets)
+				print("new pets ", newPets)
+				for _, petValue in pairs(newPets) do
+					self:_activeBonus(petValue)
+				end
+			end)
+	end)
 
-		for _, petValue in pairs(bestiaryList.PetsValue) do
-			print("isObservable", (petValue):isValueObject())
-			self:_activeBonus(petValue)
-		end
 	-- -- Observe changes to the pets
 	-- bestiaryList.PetsValue:Observe():Subscribe(function(newPets)
 	-- 	local boosters = incomeUtils.mapPetsToBoosters(newPets)
@@ -83,37 +84,45 @@ function Income.new(bestiaryList)
 	return self
 end
 
-function Income._activeBonus(self: Income, petValue: ValueObject.ValueObject<PetController.PetController>)
-	petValue
-		:ObserveBrio(function(value)
-			return value == nil
-		end)
-		:Subscribe(function()
-			print("destroyed shit!")
-			local petId = petValue:GetValue():getId()
-			print("petId ", petId)
-			self._maid[petId]:DoCleaning()
-		end)
+function Income._activeBonus(self: Income, petValue: ValueObject.ValueObject<PetData.PetData>)
+	local value = petValue._value
+	if not value then 
+		return
+	end
+	local petId = value.petId
+
+	if self._maid[petId] then
+		return
+	end
+	
 
 	petValue
 		:ObserveBrio(function(value)
 			return value ~= nil
 		end)
 		:Subscribe(function()
-			print("re-run")
 			local function GetRandTime()
-				return math.random(60, 300) -- 1 between 5 minutes
+				-- return math.random(60, 300) -- 1 between 5 minutes
+				return math.random(5, 10)
 			end
 			local bonus
 			bonus = function()
-				print("do something")
+				if not petValue._value then 
+					self._maid[petId] = task.spawn(function()end)
+					return
+				end
+				local petName = petValue:GetValue().petName
+				if PetInformation[petName].bonus then 
+					PetInformation[petName].bonus(self)
+				end
 				local t = GetRandTime()
 				local bonus = task.delay(t, bonus)
-				self._maid[petValue:GetValue():getId()] = bonus
+				-- petValue.maid 
+				self._maid[petValue:GetValue().petId] = bonus
 			end
 			-- init the recursive task
 			local t = GetRandTime()
-			self._maid[petValue:GetValue():getId()] = task.delay(t, bonus)
+			self._maid[petId] = task.delay(t, bonus)
 		end)
 end
 

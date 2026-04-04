@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local serverTypes = require(ServerScriptService.types.serverTypes)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 return {
 	["Fox"] = {
@@ -125,6 +127,9 @@ return {
 		avaiblePoints = 0,
 		petName = "Pig",
 		petLvl = 1,
+		bonus = function()
+			
+		end,
 		petStats = {
 			["Health"] = 1,
 			["Melee"] = 1,
@@ -132,4 +137,4 @@ return {
 		},
 		rarity = "rare",
 	},
-} :: PetTypes.Petsinformation
+} :: serverTypes.Petsinformation

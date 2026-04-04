@@ -11,12 +11,12 @@ function PlayerBinder.new(handler)
 	return self
 end
 
-function PlayerBinder:InitPlayer(player, data: any)
+function PlayerBinder:InitPlayer(player, ...)
 	local handler
 	if type(self._handler) == "table" and type(self._handler.new) == "function" then
-		handler = self._handler.new(data)
+		handler = self._handler.new(...)
 	elseif type(self._handler) == "function" then
-		handler = self._handler(data)
+		handler = self._handler(...)
 	else
 		error("PlayerBinder._handler must be a table with .new or a function")
 	end

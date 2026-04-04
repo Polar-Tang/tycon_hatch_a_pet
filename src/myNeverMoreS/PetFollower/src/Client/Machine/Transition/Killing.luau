@@ -7,8 +7,6 @@ local Transition = RobloxStateMachine.Transition
 local Killing = Transition.new("Following")
 
 function Killing:OnDataChanged(data: NpcFighterTypes.bossStateCtx)
-	print("data.enemy_health.Value ", data.enemy_health.Value)
-
 	return data.enemy_health and data.enemy_health.Value <= 0
 end
 

@@ -7,7 +7,7 @@ return function(player: Player, model: Model, id: NpcFighterTypes.healthBarId)
 	-- This acts as a bridge between the new health value and the healthBar components in the client
 	local healthVal: IntValue? = CombatControllerClient.getHealth(player, id)
 	if not healthVal then
-		print("An error has occurred please alert UI an error has ocurred and need to retry")
+		warn("An error has occurred please alert UI an error has ocurred and need to retry")
 		return
 	end
 

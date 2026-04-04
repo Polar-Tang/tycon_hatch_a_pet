@@ -13,6 +13,7 @@ export type PetController = {
     ValueObject: ValueObject.ValueObject<PetData.PetData>,
 
 	new: (petId: string, data: PetData.PetData) -> PetController,
+    Destroy: (self: PetController) -> (),
 	spendPoint: (self: PetController, abillityName: string) -> boolean,
 	increaseXP: (self: PetController, newPetProg: number, petModel: Model?) -> PetData.PetData?,
 	_levelUpPet: (self: PetController) -> (),
@@ -94,6 +95,11 @@ end
 
 function PetController:getId(): string
 	return self._petId
+end
+
+function PetController:Destroy()
+	self.ValueObject:Destroy()
+    self = nil
 end
 
 return PetController

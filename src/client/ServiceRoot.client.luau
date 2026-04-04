@@ -215,7 +215,6 @@ end
 -- FADING TEXT EVENT
 do
 	local fadingText = function(rootPart: BasePart, text: string, textColor: Color3?, size: UDim2?)
-		print("text ", text)
 		local billboard = Instance.new("BillboardGui")
 		billboard.Name = "CustomHumanoidBar"
 		billboard.Adornee = rootPart
@@ -235,6 +234,13 @@ do
 		DamageLabel.ZIndex = 2
 		DamageLabel.TextScaled = true
 		DamageLabel.Parent = billboard
+
+		local UIStroke = Instance.new("UIStroke")
+		UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+		UIStroke.Color = BrickColor.Black()
+		UIStroke.StrokeSizingMode = Enum.StrokeSizingMode.ScaledSize
+		UIStroke.Thickness = 0.08
+
 		-- Animation: float up and fade out
 		task.spawn(function()
 			local duration = 1.0 -- seconds

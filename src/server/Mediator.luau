@@ -48,8 +48,7 @@ function module.PlayerAdded(player: Player, playerData)
 	-- start a registry for the player
 	Registry:InitPlayer(player, playerData.pets)
 	local bestiaryList = Registry:GetHandler(player)
-	Incomes:InitPlayer(player, bestiaryList)
-	local playerIncomes = Incomes:GetHandler(player)
+	
 
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
@@ -57,6 +56,8 @@ function module.PlayerAdded(player: Player, playerData)
 	})
 	local inventory = PlayerInventory:GetHandler(player)
 
+	Incomes:InitPlayer(player, bestiaryList, inventory)
+	local playerIncomes = Incomes:GetHandler(player)
 	-- Offline rewards, needs pet registry
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection

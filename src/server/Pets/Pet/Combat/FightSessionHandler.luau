@@ -29,7 +29,7 @@ type FightSessionHandler = {
 local FightSessionHandler = {}
 FightSessionHandler.__index = FightSessionHandler
 
-function FightSessionHandler.new(player: Player, data: NpcFighterTypes.FightInfo): FightSessionHandler?
+function FightSessionHandler.new(player: Player): FightSessionHandler?
 	local folder = FightSessionHandler._createFolder(player)
 	if not folder then
 		warn("Error creating folder")
@@ -41,7 +41,6 @@ function FightSessionHandler.new(player: Player, data: NpcFighterTypes.FightInfo
         _maid = Maid.new()
 	}, FightSessionHandler)
 
-	self:_initSession(player, data)
 
 	return self
 end
@@ -57,7 +56,7 @@ function FightSessionHandler._createFolder(player: Player): Folder?
 	return newFolder
 end
 
-function FightSessionHandler._initSession(self: FightSessionHandler,player: Player, data: NpcFighterTypes.FightInfo)
+function FightSessionHandler.Init(self: FightSessionHandler,player: Player, data: NpcFighterTypes.FightInfo)
 	local playerRegistrer = Instance.new("StringValue", self._folderSession)
 	playerRegistrer.Name = "PlayerId"
 	playerRegistrer.Value = tostring(player.UserId)

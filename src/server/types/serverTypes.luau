@@ -1,3 +1,7 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local incomeUtils = require(ReplicatedStorage.utils.incomeUtils)
 -- Server-wide type declarations for dynamically injected binders.
 
 export type ValueObject = {
@@ -8,7 +12,7 @@ export type PlayerBinder<handler> = {
 	_players: { [number]: any },
 	_handler: handler,
 	new: (handler: handler) -> any,
-	InitPlayer: (self: PlayerBinder<handler>, player: Player, pets: any) -> (),
+	InitPlayer: (self: PlayerBinder<handler>, player: Player, ...any) -> (),
 	GetHandler: (self: PlayerBinder<handler>, player: Player) -> handler,
 	RemovePlayer: (self: PlayerBinder<handler>, player: Player) -> (),
 }
@@ -40,5 +44,32 @@ export type FightSessionBinder = {
 	GetSession: (self: FightSessionBinder, player: Player) -> FightSessionHandler?,
 	DestroySession: (self: FightSessionBinder, player: Player) -> (),
 }
+
+export type Income = {
+	Xp: ValueObject,
+	CoinsFactor: ValueObject,
+	EggRNG: ValueObject,
+	EggDurationFactor: ValueObject,
+	StorageSlot: ValueObject,
+	Haggling: ValueObject,
+	KiblyFactor: ValueObject,
+	Luck: ValueObject,
+
+	pets: {ValueObject},
+	boosters: { boosterType: incomeUtils.boosterList },
+
+	_maid: Maid.Maid,
+
+	new: (self: Income) -> Income,
+	Init: (self: Income, serviceBag: any) -> (),
+}
+
+export type PetData = PetTypes.PetData & {
+	bonus: (incomes: Income) -> (),
+}
+
+export type PetsDataStore = { [string]: PetData }
+
+export type Petsinformation = { [PetTypes.petNames]: PetData }
 
 return {}

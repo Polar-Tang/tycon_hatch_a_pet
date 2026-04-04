@@ -97,7 +97,6 @@ do
 		end
 		controllerdataInint.hrp = parent.PrimaryPart or parent:WaitForChild("HumanoidRootPart")
 		controllerdataInint.player = player
-		print("controllerdataInint ", controllerdataInint)
 		controllerdataInint.timer = 0
 		controllerdataInint.lastTriggerTime = 0
 		controllerdataInint.Humanoid = parent:FindFirstChildOfClass("Humanoid") or parent:WaitForChild("Humanoid")
@@ -302,11 +301,11 @@ end
 
 function CombatControllerClient.getHealth(player: Player, nameInstance: NpcFighterTypes.healthBarId): IntValue?
 	if not nameInstance or typeof(nameInstance) ~= "string" then
-		print("invalid name instance ", nameInstance)
+		warn("invalid name instance ", nameInstance)
 		return nil
 	end
 	if not (nameInstance == "PlayerBoss" or nameInstance == "PlayerPet") then
-		print("invalid name instance name " .. nameInstance)
+		warn("invalid name instance name " .. nameInstance)
 		return nil
 	end
 	return combatInstanceRegistryFolder

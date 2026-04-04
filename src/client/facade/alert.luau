@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 
 local Alert = {}
 
+local activeAlerts = {}
+
 local function getAlertGui()
 	local player = Players.LocalPlayer
 	if not player then
@@ -22,6 +24,48 @@ local function getAlertGui()
 	end
 
 	return gui
+end
+
+local function removeAlert(container)
+	local index = nil
+	for i, alert in ipairs(activeAlerts) do
+		if alert.frame == container then
+			index = i
+			break
+		end
+	end
+	if not index then return end
+
+	-- Tween hide
+	local hideGoals = {
+		Position = UDim2.new(0.5, 0, 0, -40),
+		BackgroundTransparency = 1,
+	}
+	local hideTextGoals = {
+		TextTransparency = 1,
+	}
+
+	local hideTween = TweenService:Create(container, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), hideGoals)
+	local hideTextTween = TweenService:Create(activeAlerts[index].label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), hideTextGoals)
+	hideTween:Play()
+	hideTextTween:Play()
+	hideTween.Completed:Connect(function()
+		container:Destroy()
+	end)
+
+	-- Remove from table
+	table.remove(activeAlerts, index)
+
+	-- Shift remaining alerts up
+	for i = index, #activeAlerts do
+		local alert = activeAlerts[i]
+		local newY = 14 + (i - 1) * 40
+		local shiftGoals = {
+			Position = UDim2.new(0.5, 0, 0, newY),
+		}
+		local shiftTween = TweenService:Create(alert.frame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), shiftGoals)
+		shiftTween:Play()
+	end
 end
 
 function Alert.alert(notification: string)
@@ -59,8 +103,9 @@ function Alert.alert(notification: string)
 
 	local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
+	local stackedY = 14 + (#activeAlerts * 40)
 	local showGoals = {
-		Position = UDim2.new(0.5, 0, 0, 14),
+		Position = UDim2.new(0.5, 0, 0, stackedY),
 		BackgroundTransparency = 0,
 	}
 	local showTextGoals = {
@@ -72,24 +117,12 @@ function Alert.alert(notification: string)
 	showTween:Play()
 	showTextTween:Play()
 
-	showTween.Completed:Connect(function()
-		task.delay(3, function()
-			local hideGoals = {
-				Position = UDim2.new(0.5, 0, 0, -40),
-				BackgroundTransparency = 1,
-			}
-			local hideTextGoals = {
-				TextTransparency = 1,
-			}
+	-- Add to active alerts
+	table.insert(activeAlerts, {frame = container, label = label})
 
-			local hideTween = TweenService:Create(container, tweenInfo, hideGoals)
-			local hideTextTween = TweenService:Create(label, tweenInfo, hideTextGoals)
-			hideTween:Play()
-			hideTextTween:Play()
-			hideTween.Completed:Connect(function()
-				container:Destroy()
-			end)
-		end)
+	-- Schedule removal
+	task.delay(3, function()
+		removeAlert(container)
 	end)
 end
 

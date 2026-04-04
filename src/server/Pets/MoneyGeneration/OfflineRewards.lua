@@ -66,7 +66,8 @@ end
 
 function OfflineRewards.GetOfflineRewards(player: Player, offlineTime: number, totalMoney:number): number
 	local offlineMoney, _, _ = OfflineRewards.CalculatePerMinuteEarnings(player, offlineTime)
-	local nerfedOfflineMoney = offlineMoney / 16 -- playing is gaining so much money while is offline
+	local nerfedOfflineMoney = offlineMoney / 200 -- playing is gaining so much money while is offline
+	print("Wtf offline rewards? ", nerfedOfflineMoney)
 	if offlineMoney then
 		totalMoney += nerfedOfflineMoney
 	end

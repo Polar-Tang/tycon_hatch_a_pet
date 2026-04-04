@@ -83,3 +83,10 @@ During certain amount of time the pet does trigger some benefit to the player
 Some systems already in the game were improved 
 - Boss rewards
     A system of RNG for the bosses were introduced
+- Notifier system
+    an alert showed to the UI was improved, the alerts can come directly from the server and stack in the order they come from
+
+## Still pending
+- Boss difficulties
+- Smooth curve between the boss rewards and its difficulty
+- Shop prices balanced by the earnings curve
