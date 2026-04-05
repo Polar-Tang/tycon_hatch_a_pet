@@ -1,10 +1,13 @@
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
+local Brio = require(ReplicatedStorage.Nevermore.Quenty.brio.Shared.Brio)
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local PetController = require(script.Parent.PetController)
+local serverTypes = require(ServerScriptService.types.serverTypes)
 
 local BestiaryList = {}
 -- PlayerQuestHandler.lua
@@ -19,15 +22,14 @@ local function _shallowCopy(t)
 	return out
 end
 
-
 export type BestiaryList = {
 	-- ===== State =====
 	pets: PetData.PetsDataStore,
 	petClicked: string?,
 	PetsValue: ValueObject.ValueObject<PetData.PetsDataStore>,
 
-	_petControllers: { [string]: PetController.PetController },
-	PetObservables: { ValueObject.ValueObject<PetData.PetsDataStore> },
+	_petControllers: { [string]: serverTypes.PetController },
+	PetObservables: { Brio.Brio<PetData.PetsDataStore> },
 	-- ===== Core API =====
 
 	listController: (self: BestiaryList, petId: string, controller: any) -> (),
@@ -59,22 +61,25 @@ function BestiaryList.new(pets: PetData.PetsDataStore)
 	self.pets = pets or {}
 	self._petControllers = {}
 	self.PetObservables = {}
-	
-	self:_init()
+	self._maid = Maid.new()
+
 	return self
 end
 
-
-function BestiaryList:_init()
-	for petId, pet in pairs(self.pets) do 
+function BestiaryList:Init()
+	for petId, pet in pairs(self.pets) do
 		self:listController(petId, pet)
 	end
 end
 
 function BestiaryList:listController(petId: string, data)
-	if not self._petControllers[petId] then 
+	if not self._petControllers[petId] then
 		local controller = PetController.new(petId, data)
 		self._petControllers[petId] = controller
+		self._maid:Add(controller.ValueObject:GetDiedSignal():Connect(function()
+			self._petControllers[petId] = nil
+			self.PetObservables[petId] = nil
+		end))
 		self.PetObservables[petId] = controller.ValueObject
 	end
 end
@@ -145,6 +150,11 @@ end
 
 function BestiaryList:unsetPetClicked()
 	self.petClicked = nil
+end
+
+function BestiaryList:Destroy()
+	self._maid:DoCleaning()
+	setmetatable(self, nil)
 end
 
 return PlayerBinder.new(BestiaryList)

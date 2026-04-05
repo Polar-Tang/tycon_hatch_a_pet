@@ -134,4 +134,26 @@ utils.GetModelHeight = function(model: Model): number
 	return height
 end
 
+utils.getPercentage = function(T, fr)
+	--[[
+					1000 -> 100
+					200  -> (200*100)/1000
+					
+					100 -> 1000
+					0.5 -> 100/(1000*0.5)
+				]]
+	return T * fr / 100
+end
+
+utils.bossCoins = function(cash)
+	--[[
+					1000 -> 100
+					200  -> (200*100)/1000
+					
+					100 -> 1000
+					0.5 -> 100/(1000*0.5)
+				]]
+	return utils.getPercentage(cash, 15)
+end
+
 return utils

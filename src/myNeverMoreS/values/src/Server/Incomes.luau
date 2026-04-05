@@ -4,14 +4,18 @@ local ServerScriptService = game:GetService("ServerScriptService")
     Income aggregate factory for per-player income value objects.
 ]]
 
-local PetInformation = require(ServerScriptService.Pets.Pet.PetInformation)
+local PetBonuses = require(ServerScriptService.Pets.Pet.PetBonuses)
 local PetData = require(ServerScriptService.types.PetData)
 local serverTypes = require(ServerScriptService.types.serverTypes)
 local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
+local bonusBase = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.bonuses.bonusBase)
+local Brio = require(ReplicatedStorage.Nevermore.Quenty.brio.Shared.Brio)
+
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local Rx = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Rx)
 local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local incomeUtils = require(ReplicatedStorage.utils.incomeUtils)
+local utils = require(ReplicatedStorage.utils.utils)
 
 type ValueObject = ValueObject.ValueObject<number>
 
@@ -20,7 +24,7 @@ type Income = serverTypes.Income
 local Income = {}
 Income.__index = Income
 
-function Income.new(bestiaryList, inventory)
+function Income.new(bestiaryList)
 	local self = setmetatable({
 		Xp = ValueObject.new(1),
 		CoinsFactor = ValueObject.new(1),
@@ -30,11 +34,25 @@ function Income.new(bestiaryList, inventory)
 		Haggling = ValueObject.new(1),
 		KiblyFactor = ValueObject.new(1),
 		Luck = ValueObject.new(1),
+		ExtraCoinBoss = ValueObject.new(0),
+		DoubledCoin = ValueObject.new(0),
+		_slightlyIncreased = ValueObject.new(0),
 
-		bestiaryList = bestiaryList,
-		inventory = inventory, --inventory.cash/80
+		_bonuses = {},
 		_maid = Maid.new(),
 	}, Income)
+
+	return self
+end
+
+local bonusesModule = {
+	["active"] = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.bonuses.activeBonus),
+	["passive"] = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.bonuses.passiveBonus),
+}
+
+function Income.Init(self, fakeServiceBag)
+	self.bestiaryList = fakeServiceBag.bestiaryList
+	self.inventory = fakeServiceBag.inventory --inventory.cash/80
 
 	local isPetBoosterByTheMoment = function(petData)
 		local filteredPets = {}
@@ -54,76 +72,40 @@ function Income.new(bestiaryList, inventory)
 
 	-- This is probably wrong but it works
 	--[[
-		probably need to tdo something more like thi
+		probably need to to use some kind of Brio/ValuObject wrapping the pets. Unpack that table in a Rx.CombineLatest and have come kind of predicate for each pet value
 	]]
-	bestiaryList.PetsValue:Observe():Subscribe(function()
-		
-		Rx.combineLatest(bestiaryList.PetObservables)
-			:Pipe({
-				Rx.where(function(petData): boolean
-					print("petData ", petData)
-					return isPetBoosterByTheMoment(petData)
-				end),
-			})
-			:Subscribe(function(newPets)
-				print("new pets ", newPets)
-				for _, petValue in pairs(newPets) do
-					self:_activeBonus(petValue)
+	self.bestiaryList.PetsValue:Observe():Subscribe(function(petsRegistry)
+		for petId, petValue in pairs(petsRegistry) do
+			local petBrio: Brio.Brio<serverTypes.PetData> = self.bestiaryList.PetObservables[petId]
+			if not petBrio then
+				continue
+			end
+			if not isPetBoosterByTheMoment(petValue) then
+				continue
+			end
+			if not self._bonuses[petId] then
+				local petName = petValue.petName
+				local petBonuses = PetBonuses[petName]
+				if petBonuses then
+					local bonus: bonusBase.bonusBase = bonusesModule[petBonuses.bonusType].new(petBrio, petName)
+					self._bonuses[petId] = bonus
+					self._maid[petId] = Maid.new()
+					self._maid[petId]:GiveTask(bonus)
+					local died = petBrio:GetDiedSignal():Connect(function()
+						self._maid[petId]:DoCleaning()
+					end)
+					self._maid[petId]:GiveTask(died)
+
+					bonus:setActiveBonus(self)
 				end
-			end)
+			end
+		end
+
+		local boosters = incomeUtils.mapPetsToBoosters(petsRegistry)
+
+		self.boosters = boosters
+		self:_setCoinIncome(boosters["coinBooster"])
 	end)
-
-	-- -- Observe changes to the pets
-	-- bestiaryList.PetsValue:Observe():Subscribe(function(newPets)
-	-- 	local boosters = incomeUtils.mapPetsToBoosters(newPets)
-
-	-- 	self.boosters = boosters
-	-- 	self:_setCoinIncome(boosters["coinBooster"])
-	-- end)
-
-	return self
-end
-
-function Income._activeBonus(self: Income, petValue: ValueObject.ValueObject<PetData.PetData>)
-	local value = petValue._value
-	if not value then 
-		return
-	end
-	local petId = value.petId
-
-	if self._maid[petId] then
-		return
-	end
-	
-
-	petValue
-		:ObserveBrio(function(value)
-			return value ~= nil
-		end)
-		:Subscribe(function()
-			local function GetRandTime()
-				-- return math.random(60, 300) -- 1 between 5 minutes
-				return math.random(5, 10)
-			end
-			local bonus
-			bonus = function()
-				if not petValue._value then 
-					self._maid[petId] = task.spawn(function()end)
-					return
-				end
-				local petName = petValue:GetValue().petName
-				if PetInformation[petName].bonus then 
-					PetInformation[petName].bonus(self)
-				end
-				local t = GetRandTime()
-				local bonus = task.delay(t, bonus)
-				-- petValue.maid 
-				self._maid[petValue:GetValue().petId] = bonus
-			end
-			-- init the recursive task
-			local t = GetRandTime()
-			self._maid[petId] = task.delay(t, bonus)
-		end)
 end
 
 function Income._setCoinIncome(self: Income, boosters: incomeUtils.boosterList)
@@ -132,6 +114,38 @@ function Income._setCoinIncome(self: Income, boosters: incomeUtils.boosterList)
 	end
 	local _, total = incomeUtils.totalBoost(boosters)
 	self.CoinsFactor.Value = total
+end
+
+function Income.GetExtraCoins(self: Income, boosters: incomeUtils.boosterList)
+	task.defer(function()
+		self.ExtraCoinBoss.Value = 0
+	end)
+	return self.ExtraCoinBoss.Value
+end
+
+function Income.GetDoubleCoins(self: Income, boosters: incomeUtils.boosterList)
+	task.defer(function()
+		self.DoubledCoin.Value = 0
+	end)
+	if not self.DoubledCoin.Value then
+		return false
+	end
+	return self.DoubledCoin.Value
+end
+
+function Income._checkIncreases(self, input)
+	local increasedInt = input
+	if self._slightlyIncreased.Value > 0 then
+		for i = 1, self._slightlyIncreased.Value do
+			increasedInt += utils.getPercentage(increasedInt, 12.5)
+		end
+	end
+	print(increasedInt, " increasedInt")
+	return increasedInt
+end
+
+function Income.Destroy(self: Income)
+	self._maid:DoCleaning()
 end
 
 return PlayerBinder.new(Income) :: serverTypes.PlayerBinder<Income>

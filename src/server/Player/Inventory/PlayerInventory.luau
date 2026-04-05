@@ -1,42 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local serverTypes = require(script.Parent.Parent.Parent.types.serverTypes)
 local PlayerInventory = {}
 -- PlayerQuestHandler.lua
 PlayerInventory.__index = PlayerInventory
 
-export type InventoryItem = {
-	itemId: string,
-	-- add other item fields here
-	[string]: any,
-}
-
-export type PlayerData = {
-	-- Core state
-	player: Player,
-	cash: number,
-
-	lastRegisterTime: number,
-
-	-- Internal runtime state
-	_timer: number,
-	_last_timer: number,
-	_maid: any, -- Maid
-
-	-- ===== Methods =====
-
-	getRegisterTime: (self: PlayerData) -> number,
-	setRegisterTime: (self: PlayerData) -> (),
-
-	Init: (self: PlayerData, money_cb: (number) -> () -> number) -> (),
-	Destoy: (self: PlayerData) -> (),
-}
-
-export type PlayerInventoryInit = {
-	player: Player,
-	cash: number?,
-}
-
-function PlayerInventory.new(data: PlayerInventoryInit): PlayerData
+function PlayerInventory.new(data: serverTypes.PlayerInventoryInit): serverTypes.PlayerInventory
 	local cash = data.cash
 
 	if not cash then
@@ -60,7 +30,7 @@ function PlayerInventory:setRegisterTime()
 	self.lastRegisterTime = os.time()
 end
 
-function PlayerInventory:Init(money_cb: () -> number)
+function PlayerInventory:Init(fakeServiceBag, money_cb: () -> number)
 	local increaseMoneyFunc
 	increaseMoneyFunc = function()
 		self:setRegisterTime()
@@ -97,29 +67,5 @@ function PlayerInventory:DecreaseMoney(amount): IntValue?
 	return self.cash
 end
 
-local PlayerInventoryHandler = {}
 
-PlayerInventoryHandler.__index = PlayerInventoryHandler
-
-PlayerInventoryHandler._players = {}
-
-function PlayerInventoryHandler:InitPlayer(player, data)
-	local handler = PlayerInventory.new(data)
-	self._players[player.UserId] = handler
-end
-
--- accept a player
--- Get the player handler
--- return the particular player handler
-function PlayerInventoryHandler:GetHandler(player): PlayerData
-	return self._players[player.UserId]
-end
-
--- accept a player
--- remove the player instance
--- return nil
-function PlayerInventoryHandler:RemovePlayer(player)
-	self._players[player.UserId] = nil
-end
-
-return PlayerInventoryHandler
+return PlayerBinder.new(PlayerInventory) :: serverTypes.PlayerBinder<serverTypes.PlayerInventory>

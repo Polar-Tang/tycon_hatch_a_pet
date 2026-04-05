@@ -1,33 +1,19 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local serverTypes = require(ServerScriptService.types.serverTypes)
 local PetData = require(ReplicatedStorage.Pets.PetTypes)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
-local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
+local Brio = require(ReplicatedStorage.Nevermore.Quenty.brio.Shared.Brio)
 local ScaleToLvl = require(ReplicatedStorage.utils.utils).ScaleToLvl
 
 local PetController = {}
 PetController.__index = PetController
 
-export type PetController = {
-	_petId: string,
-	_data: PetData.PetData,
-    ValueObject: ValueObject.ValueObject<PetData.PetData>,
-
-	new: (petId: string, data: PetData.PetData) -> PetController,
-    Destroy: (self: PetController) -> (),
-	spendPoint: (self: PetController, abillityName: string) -> boolean,
-	increaseXP: (self: PetController, newPetProg: number, petModel: Model?) -> PetData.PetData?,
-	_levelUpPet: (self: PetController) -> (),
-	_ensureValidEat: (self: PetController) -> boolean,
-	getStats: (self: PetController) -> PetData.petStats,
-	getData: (self: PetController) -> PetData.PetData,
-    getId: (self: PetController) -> string,
-}
-
-function PetController.new(petId: string, data: PetData.PetData): PetController
+function PetController.new(petId: string, data: PetData.PetData): serverTypes.PetController
 	local self = setmetatable({
 		_petId = petId,
 		_data = table.clone(data), -- clone to avoid modifying original
-        ValueObject = ValueObject.new(data)
+        ValueObject = Brio.new(data)
     }, PetController)
 	return self
 end
@@ -97,9 +83,9 @@ function PetController:getId(): string
 	return self._petId
 end
 
-function PetController:Destroy()
-	self.ValueObject:Destroy()
-    self = nil
+function PetController.Destroy(self: serverTypes.PetController)
+	self.ValueObject:Kill()
+    setmetatable(self, nil)
 end
 
 return PetController

@@ -127,9 +127,7 @@ return {
 		avaiblePoints = 0,
 		petName = "Pig",
 		petLvl = 1,
-		bonus = function()
-			
-		end,
+		
 		petStats = {
 			["Health"] = 1,
 			["Melee"] = 1,

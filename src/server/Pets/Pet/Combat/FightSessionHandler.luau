@@ -1,6 +1,15 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local StarterPlayer = game:GetService("StarterPlayer")
+-- local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
+local MoneyLib = require(StarterPlayer.StarterPlayerScripts.utils.MoneyLib)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
+local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
+-- local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local utils = require(ReplicatedStorage.utils.utils)
 local combatInstanceRegistryFolder = ReplicatedStorage.Pets.Fights
 
 -- Local types
@@ -16,7 +25,7 @@ type PlayerBossInstance = {
 
 type FightSessionHandler = {
 	_folderSession: Folder,
-    _maid: Maid.Maid,
+	_maid: Maid.Maid,
 
 	PlayerPet: PlayerPetInstance,
 	PlayerBoss: PlayerBossInstance,
@@ -33,14 +42,13 @@ function FightSessionHandler.new(player: Player): FightSessionHandler?
 	local folder = FightSessionHandler._createFolder(player)
 	if not folder then
 		warn("Error creating folder")
-        return nil
+		return nil
 	end
 
 	local self = setmetatable({
 		_folderSession = folder,
-        _maid = Maid.new()
+		_maid = Maid.new(),
 	}, FightSessionHandler)
-
 
 	return self
 end
@@ -56,7 +64,7 @@ function FightSessionHandler._createFolder(player: Player): Folder?
 	return newFolder
 end
 
-function FightSessionHandler.Init(self: FightSessionHandler,player: Player, data: NpcFighterTypes.FightInfo)
+function FightSessionHandler.Init(self: FightSessionHandler, player: Player, data: NpcFighterTypes.FightInfo)
 	local playerRegistrer = Instance.new("StringValue", self._folderSession)
 	playerRegistrer.Name = "PlayerId"
 	playerRegistrer.Value = tostring(player.UserId)
@@ -77,7 +85,7 @@ function FightSessionHandler.Init(self: FightSessionHandler,player: Player, data
 		-- uses max health for rendering in the UI
 		petPlayerHealth:SetAttribute("MaxHealth", data.player_pet.healthVal)
 		petPlayerHealth.Value = player_per.healthVal
-		petPlayerHealth.Name = "Health"        
+		petPlayerHealth.Name = "Health"
 
 		self.PlayerPet = {
 			Health = petPlayerHealth,
@@ -101,15 +109,38 @@ function FightSessionHandler.Init(self: FightSessionHandler,player: Player, data
 		petBossHealth.Value = player_boss.healthVal
 		petBossHealth.Name = "Health"
 
-        -- connect boss health
-        self._maid:GiveTask(petBossHealth.Changed:Connect(function(a0: number)  
-            if a0 >= 0 then 
-                print("Reward")
-                ReplicatedStorage.RemoteEvents.Notifier({
-                    notification = ""
-                })
-            end
-        end)) 
+		-- connect boss health
+		self._maid:GiveTask(petBossHealth.Changed:Connect(function(a0: number)
+			if a0 <= 0 then
+				local incomes = Incomes:GetHandler(player)
+				local extraReward = incomes:GetExtraCoins()
+				local inventory = PlayerInventory:GetHandler(player)
+				ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+					notification = player_boss.petId .. " has fallen.",
+				})
+
+				local moneyEarned = utils.bossCoins(inventory.cash)
+				local maybeDoubled = incomes:GetDoubleCoins()
+				if maybeDoubled then
+					moneyEarned = maybeDoubled
+					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+						notification = "[Elephant Bonus]: coins doubled " .. MoneyLib.HandleMoney(moneyEarned) .. "!",
+					})
+				else
+					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+						notification = "You earn " .. MoneyLib.HandleMoney(moneyEarned) .. " coins!",
+					})
+				end
+
+				if extraReward > 0 then
+					inventory:IncreaseMoney(extraReward)
+					extraReward = math.round(extraReward)
+					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+						notification = "[Pig Bonus]: You gained " .. MoneyLib.HandleMoney(extraReward),
+					})
+				end
+			end
+		end))
 
 		self.PlayerBoss = {
 			Health = petBossHealth,
@@ -132,7 +163,8 @@ end
 function FightSessionHandler:Destroy()
 	local playerId = self._folderSession:FindFirstChild("PlayerId")
 	if playerId then
-		game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireClient(playerId.Value, { destroy = true })
+		local player = Players:GetPlayerByUserId(playerId.Value)
+		game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireClient(player, { destroy = true })
 	end
 	self._folderSession:Destroy()
 end

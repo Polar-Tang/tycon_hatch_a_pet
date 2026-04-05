@@ -11,6 +11,8 @@ local InitPlot = require(ServerScriptService.Seeds.InitPlot)
 local initPets = require(ServerScriptService.Seeds.initPets)
 local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
+local BinderProvider = require(ReplicatedStorage.Nevermore.Quenty.binder.Shared.BinderProvider)
+local ServiceBag = require(ReplicatedStorage.Nevermore.Quenty.servicebag.Shared.ServiceBag)
 
 -- local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
@@ -45,19 +47,24 @@ function module.PlayerAdded(player: Player, playerData)
 
 	InitPlot(player, playerData.pets) -- creates the pet and set them in the plot
 
-	-- start a registry for the player
+	-- instiatiate the player binders --
+	local fakeServiceBag = {}
 	Registry:InitPlayer(player, playerData.pets)
 	local bestiaryList = Registry:GetHandler(player)
-	
+	fakeServiceBag["bestiaryList"] = bestiaryList
 
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
 		player = player,
 	})
 	local inventory = PlayerInventory:GetHandler(player)
+	fakeServiceBag["inventory"] = inventory
+
 
 	Incomes:InitPlayer(player, bestiaryList, inventory)
 	local playerIncomes = Incomes:GetHandler(player)
+	fakeServiceBag["playerIncomes"] = playerIncomes
+
 	-- Offline rewards, needs pet registry
 	if playerData.lastConnection then
 		local offlineTime = os.time() - playerData.lastConnection
@@ -65,13 +72,17 @@ function module.PlayerAdded(player: Player, playerData)
 		inventory:IncreaseMoney(offlineMoney)
 	end
 
-	inventory:Init(function()
+	-- Init the player binders using DI --
+	inventory:Init(fakeServiceBag, function()
 		local pets = bestiaryList.pets
 		local defaultEarning = MoneyCalculator.calculateEarnings(pets, 1)
 		local boosted = defaultEarning * playerIncomes.CoinsFactor.Value
-
 		return boosted
 	end)
+
+	playerIncomes:Init(fakeServiceBag)
+
+	bestiaryList:Init(fakeServiceBag)
 
 	local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 	PetNew:FireClient(player, {

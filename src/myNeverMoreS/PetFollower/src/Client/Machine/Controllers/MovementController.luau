@@ -104,7 +104,6 @@ function MovementController.MoveTo(self: NpcFighterTypes.MovementController, pat
 		local status = pcall(function()
 			animHandler:LoadAnimation(true, "walk")
 		end)
-		print("status ", status)
 		if not status then
 			reject()
 			self:Destroy()

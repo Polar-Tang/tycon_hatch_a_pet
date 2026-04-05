@@ -237,7 +237,7 @@ do
 
 		local UIStroke = Instance.new("UIStroke")
 		UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-		UIStroke.Color = BrickColor.Black()
+		UIStroke.Color = Color3.new(0, 0, 0)
 		UIStroke.StrokeSizingMode = Enum.StrokeSizingMode.ScaledSize
 		UIStroke.Thickness = 0.08
 
@@ -282,7 +282,6 @@ do
 			rootPart.Parent = workspace
 		end
 		local damage = data.text
-		print("this damage shuld be printed ", damage)
 		fadingText(rootPart, damage)
 	end)
 end

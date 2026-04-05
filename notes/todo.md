@@ -65,8 +65,12 @@ check if the petId id exists on bestiary
 [.] cache the pet boss selection too
 
 
+### Tdo
+[] Call destroy in every handler of the fakeServiceBag 
+    Please type maid for all the handlers in the service bag and add a Destroy method if they don't have one. Go to  service root and create  and get the three handlers and call t
+
 # Release update [non-combat abilities]
-This task include the base system used for the non-attackabilitiesas well as 3 pets abilities fully completed
+This task include the base system used for the non-attackabilitiesas well as 3 pets abilities fully completed. Some services and refactoration were done to make the code infrsture scalable and SOLID.
 ## Features
 The following features were added to the game
 ### Passive abilites
@@ -77,16 +81,25 @@ All the abilities got an effect that always occur. For testing purposes new pets
 - Giraffe (-10% off, needs enhacement)
 All the current effects are listed in the client and full reactiiveto the pet player changes
 ### Bonus abilities
-During certain amount of time the pet does trigger some benefit to the player
-
+A benefit to the player that is totally up to the pet. It occurs during certain an amount of time and this time may vary for the pet, the bonuses have a rarety bassed in the power of the effect
+- Instant stays active
+- Common bonuses 10, 60
+- Uncommon bonuses 30, 120
+- Rare bonuses 60, 300
+This means that the bonus can happen between that amount of seconds. Common bonuses happen between 10 seconds and a minute which means that after a minute the bonus is bound to happen
+The following bonuses for each pet is added to the game
+- Pig A reward of 10% of the current money after a boss fight `[Common]`
+- Elephant A chance of double the boss reward `[Rare]`
+- Panda for each panda, Pig and Elephant increase 1/8 more `[instant]`
 ## Updates
 Some systems already in the game were improved 
 - Boss rewards
-    A system of RNG for the bosses were introduced
+    Boss rewards with a 15% of the current coins
 - Notifier system
     an alert showed to the UI was improved, the alerts can come directly from the server and stack in the order they come from
 
 ## Still pending
 - Boss difficulties
 - Smooth curve between the boss rewards and its difficulty
+- Also when boss dies it may literally drop items that need to be collected by the player
 - Shop prices balanced by the earnings curve
