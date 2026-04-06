@@ -66,11 +66,11 @@ check if the petId id exists on bestiary
 
 
 ### Tdo
-[] Call destroy in every handler of the fakeServiceBag 
+[.] Call destroy in every handler of the fakeServiceBag 
     Please type maid for all the handlers in the service bag and add a Destroy method if they don't have one. Go to  service root and create  and get the three handlers and call t
 
 # Release update [non-combat abilities]
-This task include the base system used for the non-attackabilitiesas well as 3 pets abilities fully completed. Some services and refactoration were done to make the code infrsture scalable and SOLID.
+This task include the base system used for the non-attack-abilities as well as 3 pets abilities fully completed. Some services and refactorazation were done to make the code infrastructure scalable, SOLID and reactive.
 ## Features
 The following features were added to the game
 ### Passive abilites
@@ -79,27 +79,30 @@ All the abilities got an effect that always occur. For testing purposes new pets
 - Panda (*1.25 coins erning)
 - Pig (*2 coins erning)
 - Giraffe (-10% off, needs enhacement)
-All the current effects are listed in the client and full reactiiveto the pet player changes
+All the current effects are components in the client that display the current abilities, also is full reactive to the pet player changes
 ### Bonus abilities
 A benefit to the player that is totally up to the pet. It occurs during certain an amount of time and this time may vary for the pet, the bonuses have a rarety bassed in the power of the effect
-- Instant stays active
+- Instant, stays active
 - Common bonuses 10, 60
 - Uncommon bonuses 30, 120
 - Rare bonuses 60, 300
 This means that the bonus can happen between that amount of seconds. Common bonuses happen between 10 seconds and a minute which means that after a minute the bonus is bound to happen
 The following bonuses for each pet is added to the game
-- Pig A reward of 10% of the current money after a boss fight `[Common]`
-- Elephant A chance of double the boss reward `[Rare]`
-- Panda for each panda, Pig and Elephant increase 1/8 more `[instant]`
+- Pig: A reward of 10% of the current money after a boss fight `[Common]`
+- Elephant: A chance of double the boss reward `[Rare]`
+- Panda: for each panda, Pig and Elephant increase 1/8 more `[instant]`
+The rarity may be changed to balance the game
 ## Updates
 Some systems already in the game were improved 
 - Boss rewards
     Boss rewards with a 15% of the current coins
 - Notifier system
     an alert showed to the UI was improved, the alerts can come directly from the server and stack in the order they come from
-
+- Y arranger position
+    The pets of big size stand above the fence but Y position arranges quickly
 ## Still pending
+Improves of non combat abilities that depends on system that are not build yet.
 - Boss difficulties
 - Smooth curve between the boss rewards and its difficulty
 - Also when boss dies it may literally drop items that need to be collected by the player
-- Shop prices balanced by the earnings curve
+- Shop prices balanced by the earnings curve so finnish the girraffe abilities 

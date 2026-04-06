@@ -70,6 +70,7 @@ export type Income = {
 	Init: (self: Income, serviceBag: any) -> (),
 	_setCoinIncome: (self: Income, serviceBag: any) -> (),
 	_checkIncreases: (self: Income, input: number) -> number,
+	Destroy: (self: Income) -> (),
 }
 
 export type PetData = PetTypes.PetData & {
@@ -125,7 +126,7 @@ export type PlayerInventory = {
 	getRegisterTime: (self: PlayerInventory) -> number,
 	setRegisterTime: (self: PlayerInventory) -> (),
 	Init: (self: PlayerInventory, money_cb: () -> number) -> (),
-	Destoy: (self: PlayerInventory) -> (),
+	Destroy: (self: PlayerInventory) -> (),
 	IncreaseMoney: (self: PlayerInventory, amount: number) -> number,
 	DecreaseMoney: (self: PlayerInventory, amount: number) -> number?,
 } & PlayerInventoryInit

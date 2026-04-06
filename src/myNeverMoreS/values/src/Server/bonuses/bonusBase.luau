@@ -32,9 +32,6 @@ end
 
 function bonusBase:Destroy()
 	self._maid:DoCleaning()
-	if PetBonuses[self.petName] and PetBonuses[self.petName].destroy then
-		PetBonuses[self.petName].destroy()
-	end
 end
 
 return bonusBase

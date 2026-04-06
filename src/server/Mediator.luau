@@ -120,6 +120,8 @@ function module.PlayerRemoving(player)
 	newData.lastConnection = os.time()
 
 	playerInventory:Destoy()
+	bestiaryHandler:Destroy()
+	Incomes:GetHandler(player):Destroy()
 	--print("========== SAVING DATA ==========")
 	--print("Player:", player.Name)
 	--print("Timestamp being saved:", newData.lastConnection)

@@ -93,9 +93,11 @@ function Income.Init(self, fakeServiceBag)
 					self._maid[petId]:GiveTask(bonus)
 					local died = petBrio:GetDiedSignal():Connect(function()
 						self._maid[petId]:DoCleaning()
+						if PetBonuses[petName] and PetBonuses[petName].destroy then
+							PetBonuses[petName].destroy(self)
+						end
 					end)
 					self._maid[petId]:GiveTask(died)
-
 					bonus:setActiveBonus(self)
 				end
 			end

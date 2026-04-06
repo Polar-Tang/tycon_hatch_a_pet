@@ -1,5 +1,7 @@
 local ReplicatedSorage = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StateMachine = require(ReplicatedSorage.StateMachine)
+local utils = require(ReplicatedStorage.utils.utils)
 
 local State = StateMachine.State
 
@@ -41,21 +43,14 @@ function Idle:OnInit(data)
 	local registry = _G.pets_registry
 	local petEntry = registry[petId]
 
-	if petId == "fd4ed60c-94a9-4965-8776-3dcd094a89c7" then 
-		print()
-	end
-
-	if not petEntry or not petEntry.petStats then
-		warn("Pet registry entry missing for:", petId)
-		return
-	end
-
 	local pet_stats = petEntry.petStats
 
 	-- Bind all required attributes
 	maid:GiveTask(bindAttribute("Melee", pet_stats, model))
 	maid:GiveTask(bindAttribute("Health", pet_stats, model))
 	maid:GiveTask(bindAttribute("Stamina", pet_stats, model))
+
+	utils.ArrangeYPosition(model)
 end
 
 function Idle:OnEnter(data)

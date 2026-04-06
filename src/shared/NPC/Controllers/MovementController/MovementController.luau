@@ -179,6 +179,7 @@ function MovementController:PlainMove(targetPosition)
 				animationTrask:AdjustSpeed(self.speed)
 			end
 			local elapsed = 0
+			local lastTime = 0
 
 			self._moveConn = RunService.Heartbeat:Connect(function(dt)
 				elapsed += dt
@@ -187,16 +188,32 @@ function MovementController:PlainMove(targetPosition)
 					self._moveConn:Disconnect()
 					self._moveConn = nil
 					resolve(timeToReach)
-					self._AnimationHandler:LoadAnimation(false, "walk")
+
+					-- Don't know why the promise call this after self:Destroy
+					local ok = pcall(function(...)
+						self._AnimationHandler:LoadAnimation(false, "walk")
+					end)
+					if not ok then
+						reject()
+						return
+					end
 					self.isMoving = false
 					return
 				end
 
+				
 				local newPos = startPos + dir * self.velocity * elapsed
+				
 				local fixY = utils.fixPetY(self.Model, self._root) --+ Constants.GroundY
+
+				if elapsed - lastTime >= 0.1 then 
+					lastTime = elapsed
+					fixY = utils.GetGroundYPosition(self.Model, 20, 100)
+				end
+
 				newPos = Vector3.new(newPos.X, fixY, newPos.Z)
-				self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
-				-- self.Model:MoveTo(newPos)
+				--self.Model:PivotTo(CFrame.lookAt(newPos, targetPosition) * CFrame.Angles(0, math.rad(90), 0)) -- this causes weird y offsets
+				self.Model:MoveTo(newPos)
 
 				--3.084
 			end)
