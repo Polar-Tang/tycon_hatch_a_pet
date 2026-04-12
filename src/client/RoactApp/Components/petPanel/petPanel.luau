@@ -31,8 +31,8 @@ local function InventoryUI()
 		}, {
 
 			Close = Roact.createElement("ImageButton", {
-				Size = UDim2.fromScale(10 / 300, 0.8),
-				Position = UDim2.fromScale(1 - sidesPadding / 2, 0.1),
+				Size = UDim2.fromScale(10 / 300, 0.75),
+				Position = UDim2.fromScale(1 - sidesPadding / 2, 0.125),
 				AnchorPoint = Vector2.new(1, 0),
 				Image = images.Close,
 				BackgroundTransparency = 1,
@@ -103,20 +103,58 @@ local function InventoryUI()
 				ClipsDescendants = true,
 				LayoutOrder = 2,
 				BackgroundTransparency = 1,
+				-- ZIndex = 1,
 			}, {
 
 				Padding = Roact.createElement("UIPadding", {
-					PaddingTop = UDim.new(0.052, 0),
+					PaddingTop = UDim.new(0.019, 0),
 					PaddingRight = UDim.new(-0.01, 0),
+					PaddingBottom = UDim.new(0.019, 0),
 				}),
-				Grid = Roact.createElement("UIGridLayout", {
-					CellSize = UDim2.new(0.215, 0, 0.13, 0),
-					CellPadding = UDim2.new(0.025, 0, 0.005, 0),
-					FillDirectionMaxCells = 4,
-					HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
+
+				gradientTransparencyFrame = Roact.createElement("Frame", {
+					Size = UDim2.new(0.94, 0, 1, 0),
+					Position = UDim2.new(0.03, 0, 0, 0),
+					BackgroundTransparency = 0,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					ZIndex = 2,
+                    BorderSizePixel = 0,
+
+				}, {
+					-- Gradient transparency effect
+					Gradient = Roact.createElement("UIGradient", {
+						Rotation = 90,
+						Color = ColorSequence.new({
+							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+						}),
+						Transparency = NumberSequence.new({
+							NumberSequenceKeypoint.new(0, 1),
+							NumberSequenceKeypoint.new(0.8, 1),
+							NumberSequenceKeypoint.new(1, 0),
+						}),
+					}),
 				}),
-				InventoryItems = Roact.createElement(InventoryItems),
+				ScrollingFrame = Roact.createElement("ScrollingFrame", {
+					Size = UDim2.fromScale(1, 1),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					ScrollBarThickness = 1,
+					CanvasSize = UDim2.new(0, 0, 0, 0), -- Auto-calculated by UIGridLayout
+					BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+					ZIndex = 3,
+				}, {
+					Grid = Roact.createElement("UIGridLayout", {
+						CellSize = UDim2.new(0.215, 0, 0.13, 0),
+						CellPadding = UDim2.new(0.025, 0, 0.005, 0),
+						FillDirectionMaxCells = 4,
+
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						VerticalAlignment = Enum.VerticalAlignment.Top,
+					}),
+
+					InventoryItems = Roact.createElement(InventoryItems),
+				}),
 			}),
 		}),
 	})

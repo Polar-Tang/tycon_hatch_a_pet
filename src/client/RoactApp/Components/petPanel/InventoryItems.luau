@@ -5,7 +5,7 @@ local images = require(StarterPlayer.StarterPlayerScripts.Public.assets).player_
 local function InventoryItems()
     local slots = {}
 
-    for i = 1, 32 do
+    for i = 1, 64 do
         slots["Slot" .. i] = Roact.createElement("ImageLabel", {
             Size = UDim2.fromScale(1, 1),
             BackgroundTransparency = 1,
