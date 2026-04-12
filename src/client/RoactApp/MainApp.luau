@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Components = script.Parent.Components
 local Roact = require(ReplicatedStorage.Roact)
 local HealthBars = require(Components.billboards.HealthBars)
+local petPanel = require(Components.petPanel.petPanel)
 local CustomProximityPrompts = require(Components.CustomProx.CustomProximityPrompts)
 local Billboards = require(Components.billboards.Billboards)
 local BoostersConsumer = require(Components.boosters.BoostersConsumer)
@@ -21,6 +22,7 @@ function App:render()
 		Billboards = Roact.createElement(Billboards),
 		HealthBars = Roact.createElement(HealthBars),
 		Boosters = Roact.createElement(BoostersConsumer),
+		PetPanel = Roact.createElement(petPanel),
 	})
 end
 

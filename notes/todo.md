@@ -106,3 +106,30 @@ Improves of non combat abilities that depends on system that are not build yet.
 - Smooth curve between the boss rewards and its difficulty
 - Also when boss dies it may literally drop items that need to be collected by the player
 - Shop prices balanced by the earnings curve so finnish the girraffe abilities 
+
+## Inventory [first task] $140
+In this task the player will have a totally custom inventory. This include:
+### Inventory
+- Default backpack inventory override
+    The elements of the backpack will be not visible through the default roblox UI
+- Tools and custom objects will be elements displayed in this inventory represented as 2d image 
+- Persisten objects 
+    Every element is consumable or stays after logout/login
+### UI
+Some image for the UI were provided but the UI needs to be build from scratch, creating all the specific instance needed and rezised manually to resembles the image reference as much as posible. This UI includes.
+- A full optimized copy identical to the UI reference, scripted using Roact
+- A pet 3d panel
+- Stats upgradable from this panel
+### Behold the UI pngs
+There are still functionalities that need to be there but they don't have any elements in the UI, so they need to be created and designed by me. This includes:
+- A text label displaying avaible points
+- A tool tip for the inventory items that allow "Sell" or "Equip" options 
+
+## Egg enhancement [second task] $60
+With these new inclusion, equiping system needs to be refactorizes.Now the eggs are equipped through the inventory. 
+### Description
+So player clicks this item from the inventory and decide wether equip it or sell it, if they equip, the egg is hold by player's right hand and a button label "Place" appears at the bottom center to place the egg
+
+
+### Egg enhacement 
+using adone bounding box to detect if the player position is in the fence bounds area

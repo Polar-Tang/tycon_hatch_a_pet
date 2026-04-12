@@ -129,7 +129,7 @@ function Income.GetDoubleCoins(self: Income, boosters: incomeUtils.boosterList)
 	task.defer(function()
 		self.DoubledCoin.Value = 0
 	end)
-	if not self.DoubledCoin.Value then
+	if self.DoubledCoin.Value >= 0 then
 		return false
 	end
 	return self.DoubledCoin.Value
