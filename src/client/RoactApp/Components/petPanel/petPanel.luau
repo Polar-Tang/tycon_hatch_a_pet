@@ -1,10 +1,15 @@
 local StarterPlayer = game:GetService("StarterPlayer")
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
+local InventoryItems = require(script.Parent.InventoryItems)
 
 local images = assets.player_inventory
 
 local function InventoryUI()
+	local sidesPadding = 4 / 300
+	local yPadding = 4 / 165
+	local cellPadding = Vector2.new(sidesPadding / 2, yPadding / 2)
+
 	return Roact.createElement("Frame", {
 		Size = UDim2.fromScale(0.9, 0.9), -- container scales to screen
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -19,13 +24,15 @@ local function InventoryUI()
 
 		-- Topbar
 		Topbar = Roact.createElement("ImageLabel", {
-			Size = UDim2.fromScale(1, 10 / 165),
+			Size = UDim2.fromScale(1, 16 / 165),
+			BackgroundTransparency = 1,
+			ScaleType = Enum.ScaleType.Stretch,
 			Image = images.Header,
 		}, {
 
 			Close = Roact.createElement("ImageButton", {
-				Size = UDim2.fromScale(10 / 300, 1),
-				Position = UDim2.fromScale(1, 0),
+				Size = UDim2.fromScale(10 / 300, 0.8),
+				Position = UDim2.fromScale(1 - sidesPadding / 2, 0.1),
 				AnchorPoint = Vector2.new(1, 0),
 				Image = images.Close,
 				BackgroundTransparency = 1,
@@ -34,22 +41,23 @@ local function InventoryUI()
 
 		-- Content
 		Content = Roact.createElement("ImageLabel", {
-			Size = UDim2.fromScale(1, 1 - (10 / 165)),
-			Position = UDim2.fromScale(0, 10 / 165),
+			Size = UDim2.fromScale(1, 1 - (16 / 165)),
+			Position = UDim2.fromScale(0, 16 / 165),
 			Image = images.MainFrame,
+			BackgroundTransparency = 1,
 		}, {
 
 			Padding = Roact.createElement("UIPadding", {
-				PaddingTop = UDim.new(4 / 165, 0),
-				PaddingBottom = UDim.new(4 / 165, 0),
-				PaddingLeft = UDim.new(4 / 300, 0),
-				PaddingRight = UDim.new(4 / 300, 0),
+				PaddingTop = UDim.new(yPadding, 0),
+				PaddingBottom = UDim.new(yPadding, 0),
+				PaddingLeft = UDim.new(sidesPadding / 2, 0),
+				PaddingRight = UDim.new(sidesPadding / 2, 0),
 			}),
 
 			Layout = Roact.createElement("UIListLayout", {
 				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(2 / 300, 0),
-                SortOrder = Enum.SortOrder.LayoutOrder
+				Padding = UDim.new(sidesPadding / 2, 0),
+				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 
 			-- LEFT (1fr)
@@ -57,25 +65,35 @@ local function InventoryUI()
 				Size = UDim2.fromScale(1 / 4, 1),
 				LayoutOrder = 1,
 				Image = images.ColumnPreview,
+				BackgroundTransparency = 1,
 			}, {
 				Padding = Roact.createElement("UIPadding", {
-					PaddingTop = UDim.new(2 / 165, 0),
-					PaddingBottom = UDim.new(2 / 165, 0),
-					PaddingLeft = UDim.new(4 / 300, 0),
-					PaddingRight = UDim.new(4 / 300, 0),
+					PaddingTop = UDim.new(yPadding / 2, 0),
+					PaddingBottom = UDim.new(yPadding / 2, 0),
+					PaddingLeft = UDim.new(sidesPadding / 2, 0),
+					PaddingRight = UDim.new(sidesPadding / 2, 0),
 				}),
+				-- Layout = Roact.createElement("UIListLayout", {
+				-- 	FillDirection = Enum.FillDirection.Horizontal,
+				-- 	Padding = UDim.new(sidesPadding / 2, yPadding / 2),
+				-- 	SortOrder = Enum.SortOrder.LayoutOrder,
+				-- }),
 
 				Content = Roact.createElement("ImageLabel", {
-					Size = UDim2.fromScale(1, 1),
+					Size = UDim2.fromScale(1 - sidesPadding, 1 - yPadding),
 					Image = images.ColumnBg,
+					Position = UDim2.fromScale(sidesPadding / 2, yPadding / 2), -- Center horizontally and vertically
+
+					BackgroundTransparency = 1,
 				}),
 			}),
 
 			-- CENTER (2fr)
 			CenterPanel = Roact.createElement("ImageLabel", {
-				Size = UDim2.fromScale(2 / 4, 1),
+				Size = UDim2.fromScale(2 / 4 - 4 / 300, 1),
 				Image = images.MainColumnBg,
 				LayoutOrder = 2,
+				BackgroundTransparency = 1,
 			}),
 
 			-- RIGHT (1fr, grid)
@@ -84,20 +102,21 @@ local function InventoryUI()
 				Image = images.ColumnBg,
 				ClipsDescendants = true,
 				LayoutOrder = 2,
+				BackgroundTransparency = 1,
 			}, {
 
 				Padding = Roact.createElement("UIPadding", {
-					PaddingTop = UDim.new(2 / 165, 0),
-					PaddingBottom = UDim.new(2 / 165, 0),
-					PaddingLeft = UDim.new(4 / 300, 0),
-					PaddingRight = UDim.new(4 / 300, 0),
+					PaddingTop = UDim.new(0.052, 0),
+					PaddingRight = UDim.new(-0.01, 0),
 				}),
-
 				Grid = Roact.createElement("UIGridLayout", {
-					CellSize = UDim2.fromScale(1 / 4, 0.15),
- 					CellPadding = UDim2.fromScale(2 / 300, 2 / 165),
+					CellSize = UDim2.new(0.215, 0, 0.13, 0),
+					CellPadding = UDim2.new(0.025, 0, 0.005, 0),
 					FillDirectionMaxCells = 4,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
 				}),
+				InventoryItems = Roact.createElement(InventoryItems),
 			}),
 		}),
 	})
