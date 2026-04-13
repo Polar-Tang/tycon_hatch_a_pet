@@ -13,7 +13,10 @@ module["player_inventory"] = {
     ColumnPreview = "rbxassetid://88198662638499",
     ColumnBg = "rbxassetid://118635479755068",
     InventorySlot = "rbxassetid://121356509911109",
-    MainColumnBg = "rbxassetid://125826862355916"
+    MainColumnBg = "rbxassetid://125826862355916",
+    InventoryIcon = "rbxassetid://95302802386726",
+    SpeedcoilIcon = "rbxassetid://132613015141204",
+    EggItemIcon = "rbxassetid://74386031182664"
 
 }
 

@@ -4,7 +4,7 @@ local itemTypes = require(StarterPlayer.StarterPlayerScripts.facade.itemTypes)
 local itemData = {} :: { [string]: itemTypes.itemData }
 
 itemData["SpeedCoil"] = {
-	image = assets["egg_icon"],
+	image = assets.player_inventory.SpeedcoilIcon,
 	title = "Speed Coil",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
 	price = 0,

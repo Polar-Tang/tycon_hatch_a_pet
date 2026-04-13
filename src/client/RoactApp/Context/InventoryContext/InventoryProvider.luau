@@ -10,6 +10,13 @@ function InventoryProvider:init()
 	self._maid = Maid.new()
 	self:setState({
 		items = {},
+		isPanelOpen = false,
+	})
+end
+
+function InventoryProvider:setPanelOpen(isOpen)
+	self:setState({
+		isPanelOpen = isOpen,
 	})
 end
 
@@ -17,6 +24,10 @@ function InventoryProvider:render()
 	return Roact.createElement(InventoryContext.Provider, {
 		value = {
 			items = self.state.items :: { any },
+			isPanelOpen = self.state.isPanelOpen,
+			setPanelOpen = function(isOpen)
+				self:setPanelOpen(isOpen)
+			end,
 		},
 	}, self.props[Roact.Children])
 end
