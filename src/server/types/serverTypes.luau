@@ -112,6 +112,7 @@ export type PlayerData = {
 export type PlayerInventoryInit = {
 	player: Player,
 	cash: number?,
+	items : any
 }
 
 export type PlayerInventory = {

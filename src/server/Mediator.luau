@@ -5,6 +5,7 @@ local OfflineRewards = require(ServerScriptService.Pets.MoneyGeneration.OfflineR
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 local Registry = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local MoneyCalculator = require(ServerScriptService.Player.Currency.MoneyCalculator)
+local Items = require(ServerScriptService.Player.Inventory.Items)
 -- local Items = require(ServerScriptService.Player.Inventory.Items)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local InitPlot = require(ServerScriptService.Seeds.InitPlot)
@@ -31,9 +32,13 @@ function module.PlayerAdded(player: Player, playerData)
 	if not playerData then
 		local petsInitialized = initPets(player)
 		playerData = {
-			inventory = {},
 			cash = 0,
 			pets = petsInitialized,
+			items = {
+				["asd"] = {
+					image = Items.speedCoil
+				}
+			},
 			--pets = {},
 		}
 	end
@@ -56,6 +61,7 @@ function module.PlayerAdded(player: Player, playerData)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
 		player = player,
+		items = playerData.items
 	})
 	local inventory = PlayerInventory:GetHandler(player)
 	fakeServiceBag["inventory"] = inventory
@@ -130,5 +136,13 @@ function module.PlayerRemoving(player)
 	-- CurrencyController:RemovePlayer(player)
 	return newData
 end
+
+
+ReplicatedStorage.RemoteEvents.PlayerInventory.OnServerEvent:Connect(function(player: Player, ...)  
+	local inventory = PlayerInventory:GetHandler(player)
+	print("inventory ", inventory)
+	ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(player, inventory.items)
+
+end)
 
 return module

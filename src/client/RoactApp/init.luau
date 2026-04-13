@@ -6,6 +6,7 @@ local MainAppUI = require(src.MainApp)
 local ctx = src.Context
 local PromptProvider = require(ctx.PromptContext.PromptProvider)
 local BillboardProvider = require(ctx.BillboardContext.BilldoardProvider)
+local InventoryProvider = require(ctx.InventoryContext.InventoryProvider)
 local PetRegistryProvider = require(ctx.PetRegistryContext.PetRegistryProvider)
 local HealthbarProvider = require(ctx.HealthbarContext.HealthbarProvider)
 
@@ -23,10 +24,12 @@ function App:render()
 
 		PromptProvider = Roact.createElement(PromptProvider, {}, {
 			BillboardProvider = Roact.createElement(BillboardProvider, {}, {
-				PetRegistryProvider = Roact.createElement(PetRegistryProvider, {}, {
-					HealthbarProvider = Roact.createElement(HealthbarProvider, {}, {
+				InventoryProvider = Roact.createElement(InventoryProvider, {}, {
+					PetRegistryProvider = Roact.createElement(PetRegistryProvider, {}, {
+						HealthbarProvider = Roact.createElement(HealthbarProvider, {}, {
 
-						AppUI = Roact.createElement(MainAppUI),
+							AppUI = Roact.createElement(MainAppUI),
+						}),
 					}),
 				}),
 			}),

@@ -3,6 +3,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 
 --||Nevermore Shit||--
@@ -17,7 +18,6 @@ local ServiceBag = Nevermore("ServiceBag")
 
 local serviceBag = ServiceBag.new()
 local Registry = Nevermore("BestiaryList")
-local Incomes = serviceBag:GetService(Nevermore("Incomes"))
 
 ----------------------------- init process -----------------------------
 _G.FistBag = serviceBag
@@ -32,6 +32,7 @@ _G.FistBag = nil
 _G.ServiceBag = serviceBag
 print(serviceBag, " serviceBag ")
 
+local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -240,5 +241,6 @@ PetStat.OnServerEvent:Connect(function(player, data)
 		PetClicked:FireClient(player, petData)
 	end
 end)
+
 
 local _ = require(script.Parent.Pets.petMediator)

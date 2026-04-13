@@ -15,6 +15,7 @@ function PlayerInventory.new(data: serverTypes.PlayerInventoryInit): serverTypes
 	local self = setmetatable({}, PlayerInventory)
 	self.cash = cash or 0
 	self.player = data.player
+	self.items = data.items
 
 	self.lastRegisterTime = os.time()
 

@@ -1,3 +1,4 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
@@ -6,6 +7,7 @@ local InventoryItems = require(script.Parent.InventoryItems)
 local images = assets.player_inventory
 
 local function InventoryUI()
+    ReplicatedStorage.RemoteEvents.PlayerInventory:FireServer()
 	local sidesPadding = 4 / 300
 	local yPadding = 4 / 165
 	local cellPadding = Vector2.new(sidesPadding / 2, yPadding / 2)
