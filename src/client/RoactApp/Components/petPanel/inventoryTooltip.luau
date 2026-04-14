@@ -1,11 +1,15 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Roact = require(ReplicatedStorage.Roact)
+local RemoteEquipment = ReplicatedStorage.RemoteEvents.RemoteEquipment
+local sharedTypes = require(ReplicatedStorage.utils.types)
+
+type item = typeof(sharedTypes.item)
 
 local tooltip = Roact.Component:extend("tooltip")
 function tooltip:render()
 	local size = self.props.toolTipsize
 	local position = self.props.toolTipPosition
-	local item = self.props.selectedItemData
+	local item: item = self.props.selectedItemData
 	local layer = 5
 
 	return Roact.createElement("Frame", {
@@ -89,7 +93,7 @@ function tooltip:render()
 				BorderSizePixel = 0,
 				ZIndex = layer + 1,
 				[Roact.Event.Activated] = function()
-					print("Equip item:", item.itemName)
+					RemoteEquipment:FireServer({ item = item })
 				end,
 			}),
 		}),

@@ -14,6 +14,8 @@ local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local BinderProvider = require(ReplicatedStorage.Nevermore.Quenty.binder.Shared.BinderProvider)
 local ServiceBag = require(ReplicatedStorage.Nevermore.Quenty.servicebag.Shared.ServiceBag)
+local utils = require(ReplicatedStorage.utils.utils)
+local sharedTypes = require(ReplicatedStorage.utils.types)
 
 -- local initPets = require(ServerScriptService.Seeds.initPets)
 local module = {}
@@ -141,6 +143,70 @@ ReplicatedStorage.RemoteEvents.PlayerInventory.OnServerEvent:Connect(function(pl
 	local inventory = PlayerInventory:GetHandler(player)
 	print("inventory ", inventory)
 	ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(player, inventory.items)
+end)
+
+ReplicatedStorage.RemoteEvents.RemoteEquipment.OnServerEvent:Connect(function(player: Player, remoteEventData: { item: sharedTypes.item }?)
+	if not remoteEventData then
+		return
+	end
+
+	if not remoteEventData.item then
+		return
+	end
+
+	if not remoteEventData.item.itemName then
+		return
+	end
+
+	local inventory = PlayerInventory:GetHandler(player)
+	if not inventory then
+		return
+	end
+
+	if not inventory.items then
+		return
+	end
+
+	local playerItems = utils.filter(inventory.items, function(playerItem)
+		return playerItem and playerItem.itemName == remoteEventData.item.itemName
+	end)
+
+	if #playerItems == 0 then
+		return
+	end
+
+	local itemsFolder = ReplicatedStorage:FindFirstChild("items") or ReplicatedStorage:FindFirstChild("Items")
+	if not itemsFolder then
+		return
+	end
+
+	local equippedTemplate = itemsFolder:FindFirstChild(remoteEventData.item.itemName)
+	if not equippedTemplate then
+		return
+	end
+
+	if not equippedTemplate:IsA("Tool") then
+		return
+	end
+
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		return
+	end
+
+	local backpack = player:FindFirstChildOfClass("Backpack")
+	if not backpack then
+		return
+	end
+
+	local equippedTool = equippedTemplate:Clone()
+	equippedTool.Parent = backpack
+	humanoid:EquipTool(equippedTool)
 end)
 
 return module

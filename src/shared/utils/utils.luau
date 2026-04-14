@@ -2,6 +2,19 @@ local CollectionService = game:GetService("CollectionService")
 local Workspace = game:GetService("Workspace")
 
 local utils = {}
+
+utils.filter = function(tbl, predicate)
+	local filtered = {}
+
+	for key, value in pairs(tbl) do
+		if predicate(value, key) then
+			table.insert(filtered, value)
+		end
+	end
+
+	return filtered
+end
+
 utils.ScaleToLvl = function(npc: Model, LVL: number)
 	local baseScale = 1
 	local growthPerLevel = 0.007 -- 0.0134 * 150 = 2.01
