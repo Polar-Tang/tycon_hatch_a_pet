@@ -12,20 +12,9 @@ local InventoryItems = Roact.Component:extend("InventoryItems")
 
 local MAX_SLOTS = 64
 
-function InventoryItems:init()
-	-- local slotsRef = {}
-
-	-- for i = 1, MAX_SLOTS do
-	-- 	table.insert(slotsRef, Roact.createRef())
-	-- end
-	-- self.slotsRef = slotsRef
-end
-
 function InventoryItems:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
-		
-		local openToolTip = inventoryCtx.openToolTip
 		local items = inventoryCtx.items or {}
 
 		-- Sort items by timestamp (oldest to newest)
@@ -36,13 +25,10 @@ function InventoryItems:render()
 		table.sort(sortedItems, function(a, b)
 			return (a.timestamp or 0) < (b.timestamp or 0)
 		end)
-		print(sortedItems, " sortedItems")
-		local slots = {}
 
+		local slots = {}
 		for i, item in ipairs(sortedItems) do
-			if i > MAX_SLOTS then
-				break
-			end
+			if i > MAX_SLOTS then break end
 			local ref = Roact.createRef()
 			slots["Slot" .. i] = Roact.createElement("ImageLabel", {
 				Size = UDim2.fromScale(1, 1),
@@ -50,6 +36,14 @@ function InventoryItems:render()
 				Image = images.InventorySlot,
 				LayoutOrder = i,
 				[Roact.Ref] = ref,
+				-- [Roact.Event.MouseEnter] = function()
+				-- 	if item then
+				-- 		self.props.openToolTip(ref, item)
+				-- 	end
+				-- end,
+				-- [Roact.Event.MouseLeave] = function()
+				-- 	self.props.closeToolTip()
+				-- end,
 			}, {
 				Item = item and item.image and Roact.createElement("ImageButton", {
 					Size = UDim2.fromScale(0.9, 0.9),
@@ -57,7 +51,7 @@ function InventoryItems:render()
 					BackgroundTransparency = 1,
 					Image = item.image,
 					[Roact.Event.Activated] = function()
-						openToolTip(ref, item)
+						self.props.openToolTip(ref, item)
 					end,
 				}) or nil,
 			})

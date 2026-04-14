@@ -11,11 +11,6 @@ function InventoryProvider:init()
 	self:setState({
 		items = {},
 		isPanelOpen = false,
-		--==
-		isOpenTooltip = false,
-		toolTipsize = UDim2.new(0, 0, 0, 0),
-		toolTipPosition = UDim2.new(0, 0, 0, 0),
-		selectedItemData = {}, -- TODO: see item Data type
 	})
 end
 
@@ -33,35 +28,6 @@ function InventoryProvider:render()
 			setPanelOpen = function(isOpen)
 				self:setPanelOpen(isOpen)
 			end,
-
-			openToolTip = function(imageRef, item, tooltip)
-				local uiRef = self.inventoryUIRef:getValue()
-				local slotRef = imageRef:getValue()
-				if not uiRef or not slotRef then
-					return
-				end
-
-				local toolTipWidth = slotRef.AbsoluteSize.X * 2
-				local toolTipHeight = slotRef.AbsoluteSize.Y * 2
-
-				-- Calculate offset relative to the InventoryUI Frame
-				local offsetX = slotRef.AbsolutePosition.X - uiRef.AbsolutePosition.X - toolTipWidth -- Position to the left
-				local offsetY = slotRef.AbsolutePosition.Y
-					- uiRef.AbsolutePosition.Y
-					+ slotRef.AbsoluteSize.Y / 2
-					- toolTipHeight / 2 -- Center vertically
-
-				self:setState({
-					isOpenTooltip = true,
-					toolTipsize = UDim2.new(0, toolTipWidth, 0, toolTipHeight),
-					toolTipPosition = UDim2.new(0, offsetX, 0, offsetY),
-					selectedItemData = item,
-				})
-			end,
-			isOpenTooltip = self.state.isOpenTooltip,
-			toolTipsize = self.state.toolTipsize,
-			toolTipPosition = self.state.toolTipPosition,
-			selectedItemData = self.state.selectedItemData,
 		},
 	}, self.props[Roact.Children])
 end

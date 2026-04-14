@@ -12,7 +12,43 @@ local withCtx = useContext({ InventoryContext = InventoryContext })
 local images = assets.player_inventory
 
 local InventoryUI = Roact.Component:extend("InventoryUI")
-function InventoryItems:init()
+
+function InventoryUI:init()
+	self.inventoryUIRef = Roact.createRef()
+	self:setState({
+		isOpenTooltip = false,
+		toolTipsize = UDim2.new(0, 0, 0, 0),
+		toolTipPosition = UDim2.new(0, 0, 0, 0),
+		selectedItemData = {},
+	})
+end
+
+function InventoryUI:openToolTip(imageRef, item)
+	local uiRef = self.inventoryUIRef:getValue()
+	local slotRef = imageRef:getValue()
+	if not uiRef or not slotRef then
+		return
+	end
+
+	local toolTipWidth = slotRef.AbsoluteSize.X * 2
+	local toolTipHeight = slotRef.AbsoluteSize.Y * 2
+
+	-- Calculate offset relative to the InventoryUI Frame
+	local offsetX = slotRef.AbsolutePosition.X - uiRef.AbsolutePosition.X - toolTipWidth -- Position to the left
+	local offsetY = slotRef.AbsolutePosition.Y
+		- uiRef.AbsolutePosition.Y
+		+ slotRef.AbsoluteSize.Y / 2
+		- toolTipHeight / 2 -- Center vertically
+
+	self:setState({
+		isOpenTooltip = true,
+		toolTipsize = UDim2.new(0, toolTipWidth, 0, toolTipHeight),
+		toolTipPosition = UDim2.new(0, offsetX, 0, offsetY),
+		selectedItemData = item,
+	})
+end
+
+function InventoryUI:closeToolTip()
 	self:setState({
 		isOpenTooltip = false,
 	})
@@ -33,6 +69,7 @@ function InventoryUI:render()
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+			[Roact.Ref] = self.inventoryUIRef, -- Ref for position calculations
 		}, {
 
 			-- Aspect ratio to preserve 300x165 proportions
@@ -59,11 +96,16 @@ function InventoryUI:render()
 					end,
 				}),
 			}),
-			Tooltip = inventoryCtx.isOpenTooltip and Roact.createElement(inventoryTooltip, {
-				toolTipsize = inventoryCtx.toolTipsize,
-				toolTipPosition = inventoryCtx.toolTipPosition,
-				selectedItemData = inventoryCtx.selectedItemData,
+
+			Tooltip = self.state.isOpenTooltip and Roact.createElement(inventoryTooltip, {
+				closeToolTip = function()
+					self:closeToolTip()
+				end,
+				selectedItemData = self.state.selectedItemData,
+				toolTipPosition = self.state.toolTipPosition,
+				toolTipsize = self.state.toolTipsize,
 			}),
+
 			-- Content
 			Content = Roact.createElement("ImageLabel", {
 				Size = UDim2.fromScale(1, 1 - (16 / 165)),
@@ -128,7 +170,6 @@ function InventoryUI:render()
 					ClipsDescendants = true,
 					LayoutOrder = 2,
 					BackgroundTransparency = 1,
-					-- ZIndex = 1,
 				}, {
 
 					Padding = Roact.createElement("UIPadding", {
@@ -145,7 +186,6 @@ function InventoryUI:render()
 						ZIndex = 2,
 						BorderSizePixel = 0,
 					}, {
-						-- Gradient transparency effect
 						Gradient = Roact.createElement("UIGradient", {
 							Rotation = 90,
 							Color = ColorSequence.new({
@@ -164,7 +204,7 @@ function InventoryUI:render()
 						Size = UDim2.fromScale(1, 1),
 						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 						ScrollBarThickness = 1,
-						CanvasSize = UDim2.new(0, 0, 0, 0), -- Auto-calculated by UIGridLayout
+						CanvasSize = UDim2.new(0, 0, 0, 0),
 						BackgroundTransparency = 1,
 						BorderSizePixel = 0,
 						ZIndex = 3,
@@ -173,12 +213,18 @@ function InventoryUI:render()
 							CellSize = UDim2.new(0.215, 0, 0.13, 0),
 							CellPadding = UDim2.new(0.025, 0, 0.005, 0),
 							FillDirectionMaxCells = 4,
-
 							HorizontalAlignment = Enum.HorizontalAlignment.Center,
 							VerticalAlignment = Enum.VerticalAlignment.Top,
 						}),
 
-						InventoryItems = Roact.createElement(InventoryItems),
+						InventoryItems = Roact.createElement(InventoryItems, {
+							openToolTip = function(ref, item)
+								self:openToolTip(ref, item)
+							end,
+							closeToolTip = function()
+								self:closeToolTip()
+							end,
+						}),
 					}),
 				}),
 			}),
