@@ -8,7 +8,8 @@ local useContext = require(context.Utils.useContext)
 
 local withCtx = useContext({ InventoryContext = InventoryContext })
 
-local function InventoryItems()
+local InventoryItems = Roact.Component:extend("InventoryItems")
+function InventoryItems:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		local items = inventoryCtx.items or {}

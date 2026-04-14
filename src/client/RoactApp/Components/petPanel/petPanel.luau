@@ -1,4 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local _ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
@@ -11,7 +11,12 @@ local withCtx = useContext({ InventoryContext = InventoryContext })
 
 local images = assets.player_inventory
 
-local function InventoryUI()
+local function createToolTip(slot: ImageLabel)
+			
+end
+
+local InventoryUI = Roact.Component:extend("InventoryUI")
+function InventoryUI:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		if not inventoryCtx.isPanelOpen then
@@ -21,7 +26,12 @@ local function InventoryUI()
 
 		local sidesPadding = 4 / 300
 		local yPadding = 4 / 165
-		local cellPadding = Vector2.new(sidesPadding / 2, yPadding / 2)
+		local _cellPadding = Vector2.new(sidesPadding / 2, yPadding / 2)
+
+		local tooltip = nil
+		if inventoryCtx.isTooltipVisible and inventoryCtx.tooltipItem then
+			
+		end
 
 		return Roact.createElement("Frame", {
 			Size = UDim2.fromScale(0.9, 0.9), -- container scales to screen
@@ -172,6 +182,9 @@ local function InventoryUI()
 					}),
 				}),
 			}),
+
+			-- Tooltip
+			Tooltip = tooltip,
 		})
 	end)
 end

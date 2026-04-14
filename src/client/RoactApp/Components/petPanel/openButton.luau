@@ -8,7 +8,8 @@ local InventoryContext = require(context.InventoryContext.InventoryContext)
 local useContext = require(context.Utils.useContext)
 local withCtx = useContext({ InventoryContext = InventoryContext })
 
-local function OpenButton()
+local OpenButton = Roact.Component:extend("OpenButton")
+function OpenButton:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 
