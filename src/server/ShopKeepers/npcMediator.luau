@@ -123,9 +123,15 @@ Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend
 	if not itemData then
 		return
 	end
+
+	if itemData.price > playerInventory.cash then
+		return
+	end
+
 	local ItemsTemplate = rs.Items:FindFirstChild(data.itemName):Clone()
 
 	playerInventory:DecreaseMoney(itemData.price)
+	playerInventory:AddItem(itemData)
 
 	ItemsTemplate.Parent = player.Backpack
 end)

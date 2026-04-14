@@ -36,8 +36,8 @@ function module.PlayerAdded(player: Player, playerData)
 			pets = petsInitialized,
 			items = {
 				["asd"] = {
-					image = Items.speedCoil
-				}
+					image = Items.speedCoil,
+				},
 			},
 			--pets = {},
 		}
@@ -61,11 +61,10 @@ function module.PlayerAdded(player: Player, playerData)
 	PlayerInventory:InitPlayer(player, {
 		cash = totalMoney,
 		player = player,
-		items = playerData.items
+		items = playerData.items,
 	})
 	local inventory = PlayerInventory:GetHandler(player)
 	fakeServiceBag["inventory"] = inventory
-
 
 	Incomes:InitPlayer(player, bestiaryList, inventory)
 	local playerIncomes = Incomes:GetHandler(player)
@@ -120,6 +119,7 @@ function module.PlayerRemoving(player)
 	local allTheCash = playerInventory.cash
 	-- --print("last monet ", playerInventory.cash, "all the cash earned ", allTheCash)
 	newData.cash = allTheCash
+	newData.items = playerInventory.items
 
 	newData.pets = bestiaryHandler.pets
 
@@ -137,12 +137,10 @@ function module.PlayerRemoving(player)
 	return newData
 end
 
-
-ReplicatedStorage.RemoteEvents.PlayerInventory.OnServerEvent:Connect(function(player: Player, ...)  
+ReplicatedStorage.RemoteEvents.PlayerInventory.OnServerEvent:Connect(function(player: Player, ...)
 	local inventory = PlayerInventory:GetHandler(player)
 	print("inventory ", inventory)
 	ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(player, inventory.items)
-
 end)
 
 return module

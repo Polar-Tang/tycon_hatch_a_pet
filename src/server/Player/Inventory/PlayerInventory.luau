@@ -15,7 +15,7 @@ function PlayerInventory.new(data: serverTypes.PlayerInventoryInit): serverTypes
 	local self = setmetatable({}, PlayerInventory)
 	self.cash = cash or 0
 	self.player = data.player
-	self.items = data.items
+	self.items = data.items or {}
 
 	self.lastRegisterTime = os.time()
 
@@ -68,5 +68,24 @@ function PlayerInventory:DecreaseMoney(amount): IntValue?
 	return self.cash
 end
 
+
+function PlayerInventory:AddItem(item)
+	local httpService = game:GetService("HttpService")
+	local itemId = httpService:GenerateGUID(false)
+	local timestamp = tick()
+
+	local itemRecord = {
+		id = itemId,
+		itemName = item.itemName,
+		image = item.image,
+		price = item.price,
+		timestamp = timestamp,
+	}
+
+	self.items[itemId] = itemRecord
+
+	--game.ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(self.player, self.items)
+	return itemId
+end
 
 return PlayerBinder.new(PlayerInventory) :: serverTypes.PlayerBinder<serverTypes.PlayerInventory>
