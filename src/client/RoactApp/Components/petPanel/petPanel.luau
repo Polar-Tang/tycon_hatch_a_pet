@@ -1,8 +1,8 @@
-local _ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
 local InventoryItems = require(script.Parent.InventoryItems)
+local inventoryTooltip = require(script.Parent.inventoryTooltip)
 
 local context = script.Parent.Parent.Parent.Context
 local InventoryContext = require(context.InventoryContext.InventoryContext)
@@ -11,27 +11,22 @@ local withCtx = useContext({ InventoryContext = InventoryContext })
 
 local images = assets.player_inventory
 
-local function createToolTip(slot: ImageLabel)
-			
+local InventoryUI = Roact.Component:extend("InventoryUI")
+function InventoryItems:init()
+	self:setState({
+		isOpenTooltip = false,
+	})
 end
 
-local InventoryUI = Roact.Component:extend("InventoryUI")
 function InventoryUI:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		if not inventoryCtx.isPanelOpen then
-			return Roact.createFragment({
-			})
+			return Roact.createFragment({})
 		end
 
 		local sidesPadding = 4 / 300
 		local yPadding = 4 / 165
-		local _cellPadding = Vector2.new(sidesPadding / 2, yPadding / 2)
-
-		local tooltip = nil
-		if inventoryCtx.isTooltipVisible and inventoryCtx.tooltipItem then
-			
-		end
 
 		return Roact.createElement("Frame", {
 			Size = UDim2.fromScale(0.9, 0.9), -- container scales to screen
@@ -64,7 +59,11 @@ function InventoryUI:render()
 					end,
 				}),
 			}),
-
+			Tooltip = inventoryCtx.isOpenTooltip and Roact.createElement(inventoryTooltip, {
+				toolTipsize = inventoryCtx.toolTipsize,
+				toolTipPosition = inventoryCtx.toolTipPosition,
+				selectedItemData = inventoryCtx.selectedItemData,
+			}),
 			-- Content
 			Content = Roact.createElement("ImageLabel", {
 				Size = UDim2.fromScale(1, 1 - (16 / 165)),
@@ -160,6 +159,7 @@ function InventoryUI:render()
 							}),
 						}),
 					}),
+
 					ScrollingFrame = Roact.createElement("ScrollingFrame", {
 						Size = UDim2.fromScale(1, 1),
 						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -182,9 +182,6 @@ function InventoryUI:render()
 					}),
 				}),
 			}),
-
-			-- Tooltip
-			Tooltip = tooltip,
 		})
 	end)
 end

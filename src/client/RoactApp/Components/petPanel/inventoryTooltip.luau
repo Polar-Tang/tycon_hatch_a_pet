@@ -3,13 +3,13 @@ local Roact = require(ReplicatedStorage.Roact)
 
 local tooltip = Roact.Component:extend("tooltip")
 function tooltip:render()
-    local size = self.props.size
-    local Position = self.props.Position
-    local item = self.props.item
+    local size = self.props.toolTipsize
+    local position = self.props.toolTipPosition
+    local item = self.props.selectedItemData
 
 	return Roact.createElement("Frame", {
 		Size = size, -- Relative size, adjust as needed
-		Position = Position, -- Position near the right panel
+		Position = position, -- Position near the right panel
 		BackgroundColor3 = Color3.fromRGB(50, 50, 50),
 		BorderSizePixel = 2,
 		BorderColor3 = Color3.fromRGB(100, 100, 100),
