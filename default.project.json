@@ -16,6 +16,7 @@
           "$path": "src/myNeverMoreS"
         }
       }
+      
     },
     "ServerScriptService": {
       "$path": "src/server"

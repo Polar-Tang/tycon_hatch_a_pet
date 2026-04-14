@@ -86,10 +86,14 @@ module["Egg Shop Keeper"] = {
 		end
 		gearShop.open("Egg Shop")
 		gearShop.createItem(ItemData["White_Egg"], function()
-			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
+			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
+			ItemsEvent:FireServer(ItemData["White_Egg"])
+
 		end)
 		gearShop.createItem(ItemData["Red_Egg"], function()
-			ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("red")
+			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("red")
+			ItemsEvent:FireServer(ItemData["Red_Egg"])
+
 		end)
 	end,
 	updatePrompt = function()
