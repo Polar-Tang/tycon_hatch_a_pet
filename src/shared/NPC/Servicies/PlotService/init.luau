@@ -86,6 +86,7 @@ function FenceBoundsService:_resetPlot(plot)
 end
 
 function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
+	local plots = CollectionService:GetTagged("plots")
 	for _, plot in pairs(plots) do
 		local ownerShit = plot:WaitForChild("OwnerUserId")
 		if ownerShit.Value and tostring(ownerShit.Value) == tostring(Id) then
@@ -93,6 +94,21 @@ function FenceBoundsService.GetPlotByUserId(Id: string): BasePart?
 		end
 	end
 	return
+end
+
+function FenceBoundsService.IsPositionInsideFenceBounds(plot: BasePart, position: Vector3): boolean
+	local fenceCF = plot.CFrame
+	local fenceSize = plot.Size
+
+	local offset = position - fenceCF.Position
+	local right = fenceCF.RightVector
+	local look = fenceCF.LookVector
+
+	local x = offset:Dot(right)
+	local z = offset:Dot(look)
+	local half = fenceSize * 0.5
+
+	return math.abs(x) <= half.X and math.abs(z) <= half.Z
 end
 
 function FenceBoundsService:ClampToBounds(plot, position)
@@ -152,4 +168,4 @@ function FenceBoundsService:GetRandPosition(plot: BasePart, YOffset): Vector3
 	return Vector3.new(x, Constants.GroundY, z)
 end
 
-return FenceBoundsService :: FenceBounds.FenceBoundsService
+return (FenceBoundsService :: any) :: FenceBounds.FenceBoundsService

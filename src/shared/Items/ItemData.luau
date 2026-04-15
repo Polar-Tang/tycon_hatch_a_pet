@@ -5,10 +5,10 @@ local itemData = {} :: { [string]: itemTypes.itemData }
 
 itemData["SpeedCoil"] = {
 	image = assets.player_inventory.SpeedcoilIcon,
-	title = "Speed Coil",
+	title = "SpeedCoil",
+	itemName = "Speed Coil",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
 	price = 0,
-	itemName = "SpeedCoil",
 	template = game.ReplicatedStorage:WaitForChild("Items"):WaitForChild("Templates"):WaitForChild("SpeedCoil"),
 	createPivot = function()
 		local modelCFrame = CFrame.new(1, 1, 0)
@@ -24,9 +24,10 @@ itemData["SpeedCoil"] = {
 	end,
 }
 
-itemData["White_Egg"] = {
+itemData["White Egg"] = {
 	image = assets["egg_icon"],
-	title = "White Egg",
+	itemName = "White Egg",
+	title = "SpeedCoil",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
 	template = game.ReplicatedStorage
 		:WaitForChild("Items")
@@ -44,8 +45,9 @@ itemData["White_Egg"] = {
 	end,
 }
 
-itemData["Red_Egg"] = {
+itemData["Red Egg"] = {
 	image = assets["egg_icon"],
+	itemName = "Red Egg",
 	title = "Red Egg",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
 	template = game.ReplicatedStorage

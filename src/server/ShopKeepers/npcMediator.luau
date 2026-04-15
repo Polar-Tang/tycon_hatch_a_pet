@@ -115,9 +115,9 @@ local ItemType = require(ServerScriptService.Player.Inventory.ItemType)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local ItemData = require(ReplicatedStorage.Items.ItemData)
 
-local Items = rs.RemoteEvents.ItemsEvent
+local ItemsEvent = rs.RemoteEvents.ItemsEvent
 
-Items.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
+ItemsEvent.OnServerEvent:Connect(function(player: Player, data: ItemType.ItemFrontend)
 	local playerInventory = PlayerInventory:GetHandler(player)
 	local itemData = ItemData[data.itemName]
 	if not itemData then

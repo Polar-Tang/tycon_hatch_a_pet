@@ -115,10 +115,9 @@ function InventoryUI:render()
 			}, {
 
 				Padding = Roact.createElement("UIPadding", {
-					PaddingTop = UDim.new(yPadding, 0),
-					PaddingBottom = UDim.new(yPadding, 0),
-					PaddingLeft = UDim.new(sidesPadding / 2, 0),
-					PaddingRight = UDim.new(sidesPadding / 2, 0),
+					PaddingTop = UDim.new(0.019, 0),
+					PaddingRight = UDim.new(-0.01, 0),
+					PaddingBottom = UDim.new(0.019, 0),
 				}),
 
 				Layout = Roact.createElement("UIListLayout", {
@@ -140,11 +139,7 @@ function InventoryUI:render()
 						PaddingLeft = UDim.new(sidesPadding / 2, 0),
 						PaddingRight = UDim.new(sidesPadding / 2, 0),
 					}),
-					-- Layout = Roact.createElement("UIListLayout", {
-					-- 	FillDirection = Enum.FillDirection.Horizontal,
-					-- 	Padding = UDim.new(sidesPadding / 2, yPadding / 2),
-					-- 	SortOrder = Enum.SortOrder.LayoutOrder,
-					-- }),
+					
 
 					Content = Roact.createElement("ImageLabel", {
 						Size = UDim2.fromScale(1 - sidesPadding, 1 - yPadding),

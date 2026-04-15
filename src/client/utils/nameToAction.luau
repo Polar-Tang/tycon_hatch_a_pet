@@ -85,14 +85,14 @@ module["Egg Shop Keeper"] = {
 			return
 		end
 		gearShop.open("Egg Shop")
-		gearShop.createItem(ItemData["White_Egg"], function()
+		gearShop.createItem(ItemData["White Egg"], function()
 			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
-			ItemsEvent:FireServer(ItemData["White_Egg"])
+			ItemsEvent:FireServer(ItemData["White Egg"])
 
 		end)
-		gearShop.createItem(ItemData["Red_Egg"], function()
+		gearShop.createItem(ItemData["Red Egg"], function()
 			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("red")
-			ItemsEvent:FireServer(ItemData["Red_Egg"])
+			ItemsEvent:FireServer(ItemData["Red Egg"])
 
 		end)
 	end,
