@@ -17,7 +17,7 @@ local function onEquip()
 		eggPreviewHandler = nil
 	end
 
-	eggPreviewHandler = previewHandler.new(tool, player)
+	eggPreviewHandler = previewHandler.new(tool, player, "red")
 end
 
 local function onUnequip()

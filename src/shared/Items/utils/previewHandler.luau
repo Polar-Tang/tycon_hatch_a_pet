@@ -28,9 +28,8 @@ export type EggPreviewHandlerType = {
 local EggPreviewHandler = {}
 EggPreviewHandler.__index = EggPreviewHandler
 
--- script-level global handler reference for equip/unequip lifecycle
 
-function EggPreviewHandler.new(toolRef: Tool, playerRef: Player): EggPreviewHandlerType
+function EggPreviewHandler.new(toolRef: Tool, playerRef: Player, eggTypeColor): EggPreviewHandlerType
 	local self = setmetatable({}, EggPreviewHandler) :: any
 	self.tool = toolRef
 	self.player = playerRef
@@ -40,6 +39,7 @@ function EggPreviewHandler.new(toolRef: Tool, playerRef: Player): EggPreviewHand
 	self.previewHandle = nil
 	self.originalColor = Color3.new(1, 1, 1)
 	self.maid = Maid.new()
+	self.eggTypeColor = eggTypeColor
 
 	self:_createPreviewHandle()
 
@@ -96,7 +96,6 @@ function EggPreviewHandler:_getRaycastParams(): RaycastParams
 	table.insert(filterInstances, self.tool)
 	table.insert(filterInstances, self.character)
 
-
 	params.FilterDescendantsInstances = filterInstances
 	return params
 end
@@ -135,9 +134,21 @@ function EggPreviewHandler:updatePreview(mousePosition: Vector2)
 	else
 		preview.Color = Color3.fromRGB(255, 0, 0)
 	end
-
+	local isDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+	
+	if isDown and isInside then
+		ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer({
+			color = self.eggTypeColor,
+			position = placementPosition,
+		})
+		self:Destroy()
+	end
 end
 
+
+-- TODO need to suscribe to the tool and call some kind of predicate that do unequip the tool.
+-- TODO: text the pet spawn from the eggs
+-- TODO: implement the items ids, use the id for items as a server sign. Probably will also need a handler for every item 
 function EggPreviewHandler:Destroy()
 	self:_destroyPreview()
 	self.maid:DoCleaning()
