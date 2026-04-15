@@ -25,7 +25,7 @@ function InventoryItems:render()
 		table.sort(sortedItems, function(a, b)
 			return (a.timestamp or 0) < (b.timestamp or 0)
 		end)
-
+		print("sortedItems ", sortedItems)
 		local slots = {}
 		for i, item in ipairs(sortedItems) do
 			if i > MAX_SLOTS then break end

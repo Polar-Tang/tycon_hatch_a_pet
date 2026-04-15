@@ -1,4 +1,5 @@
 local CollectionService = game:GetService("CollectionService")
+local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -134,6 +135,7 @@ function EggPreviewHandler:updatePreview(mousePosition: Vector2)
 	else
 		preview.Color = Color3.fromRGB(255, 0, 0)
 	end
+
 end
 
 function EggPreviewHandler:Destroy()

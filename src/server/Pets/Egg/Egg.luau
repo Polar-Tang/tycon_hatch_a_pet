@@ -50,9 +50,6 @@ function Egg:Spawn(position: Vector3)
 		self:CloneModel()
 	end
 
-	position = Vector3.new(position.X, Constants.GroundY, position.Z)
-	self.position = position
-
 	self.model.Parent = workspace
 	self.model:MoveTo(position)
 	npcUtils.createBillboard(self.model, {

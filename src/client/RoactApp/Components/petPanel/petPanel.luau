@@ -55,6 +55,7 @@ function InventoryUI:closeToolTip()
 end
 
 function InventoryUI:render()
+	
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		if not inventoryCtx.isPanelOpen then
@@ -152,7 +153,7 @@ function InventoryUI:render()
 
 				-- CENTER (2fr)
 				CenterPanel = Roact.createElement("ImageLabel", {
-					Size = UDim2.fromScale(2 / 4 - 4 / 300, 1),
+					Size = UDim2.fromScale(2 / 4 - sidesPadding*2, 1),
 					Image = images.MainColumnBg,
 					LayoutOrder = 2,
 					BackgroundTransparency = 1,
@@ -201,6 +202,7 @@ function InventoryUI:render()
 						ScrollBarThickness = 1,
 						CanvasSize = UDim2.new(0, 0, 0, 0),
 						BackgroundTransparency = 1,
+						AutomaticCanvasSize = Enum.AutomaticSize.Y,
 						BorderSizePixel = 0,
 						ZIndex = 3,
 					}, {
@@ -208,6 +210,7 @@ function InventoryUI:render()
 							CellSize = UDim2.new(0.215, 0, 0.13, 0),
 							CellPadding = UDim2.new(0.025, 0, 0.005, 0),
 							FillDirectionMaxCells = 4,
+							SortOrder = Enum.SortOrder.LayoutOrder,
 							HorizontalAlignment = Enum.HorizontalAlignment.Center,
 							VerticalAlignment = Enum.VerticalAlignment.Top,
 						}),

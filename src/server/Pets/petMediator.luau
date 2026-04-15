@@ -16,7 +16,9 @@ local remotes = ReplicatedStorage.RemoteEvents
 
 local BuyEggRemote: RemoteEvent = remotes.BuyEggRemote
 
-BuyEggRemote.OnServerEvent:Connect(function(player: Player, color: string)
+BuyEggRemote.OnServerEvent:Connect(function(player: Player, data : {color: string, position: Vector3})
+	local color = data.color
+
 	if typeof(color) ~= "string" then
 		return
 	end
@@ -35,17 +37,22 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, color: string)
 		return
 	end
 
+	local position = data.position
+	
+	local isValidPos = PlotService.IsPositionInsideFenceBounds(plot, position)
+	if not isValidPos then 
+		return
+	end
 	-- optional: check currency here
 	-- if not CurrencyService:CanAfford(player, color) then return end
 
 	-- create egg domain object
 	local egg = Egg.new(player, plot, our_egg_color, 10)
 
-	-- random position inside plot
-	local randPos = PlotService:GetRandPosition(plot)
+	
 
 	egg:CloneModel()
-	egg:Spawn(randPos)
+	egg:Spawn(position)
 	egg:StartHatching()
 end)
 
