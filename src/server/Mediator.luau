@@ -205,7 +205,7 @@ ReplicatedStorage.RemoteEvents.RemoteEquipment.OnServerEvent:Connect(function(pl
 	end
 
 	local equippedTool = equippedTemplate:Clone()
-	equippedTool.Parent = backpack
+	-- equippedTool.Parent = backpack
 	humanoid:EquipTool(equippedTool)
 end)
 

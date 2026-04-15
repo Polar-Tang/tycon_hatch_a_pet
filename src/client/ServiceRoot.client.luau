@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
@@ -13,6 +14,12 @@ local Nevermore = require(loader).bootstrapGame(NeverMorePackages)
 local Index = require(StarterPlayer.StarterPlayerScripts.facade.Index)
 local IndexButton = require(StarterPlayer.StarterPlayerScripts.facade.IndexButton)
 local Constants = require(ReplicatedStorage.utils.Constants)
+
+do
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+	StarterGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor
+	
+end
 
 local ServiceBag = Nevermore("ServiceBag")
 local serviceBag = ServiceBag.new()
