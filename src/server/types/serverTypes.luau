@@ -130,6 +130,7 @@ export type PlayerInventory = {
 	Destroy: (self: PlayerInventory) -> (),
 	IncreaseMoney: (self: PlayerInventory, amount: number) -> number,
 	DecreaseMoney: (self: PlayerInventory, amount: number) -> number?,
+	RemoveItemById: (self: PlayerInventory, itemId: string) -> boolean,
 } & PlayerInventoryInit
 
 -- Pet Controller Type

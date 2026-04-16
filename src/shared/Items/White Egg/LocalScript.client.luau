@@ -11,6 +11,16 @@ local player = Players.LocalPlayer
 
 local eggPreviewHandler: previewHandler.EggPreviewHandlerType? = nil
 
+
+local function onUnequip()
+	local playerHumanod: Humanoid = (player.Character or player.CharacterAdded:Wait()):WaitForChild("Humanoid")
+	if eggPreviewHandler then
+		eggPreviewHandler:Destroy()
+		eggPreviewHandler = nil
+		playerHumanod:UnequipTools()
+	end
+end
+
 local function onEquip()
 	if eggPreviewHandler then
 		eggPreviewHandler:Destroy()
@@ -18,13 +28,8 @@ local function onEquip()
 	end
 
 	eggPreviewHandler = previewHandler.new(tool, player, "white")
-end
+	eggPreviewHandler:ConnectBrio(onUnequip)
 
-local function onUnequip()
-	if eggPreviewHandler then
-		eggPreviewHandler:Destroy()
-		eggPreviewHandler = nil
-	end
 end
 
 tool.Equipped:Connect(onEquip)

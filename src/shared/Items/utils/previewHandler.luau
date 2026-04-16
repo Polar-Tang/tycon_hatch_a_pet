@@ -6,6 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
+local Brio = require(ReplicatedStorage.Nevermore.Quenty.brio.Shared.Brio)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 
 export type EggPreviewHandlerType = {
@@ -18,16 +19,18 @@ export type EggPreviewHandlerType = {
 	originalColor: Color3,
 	maid: Maid.Maid,
 
+	_brio: Brio.Brio<boolean>,
+
 	_createPreviewHandle: (self: EggPreviewHandlerType) -> BasePart,
 	_getRaycastParams: (self: EggPreviewHandlerType) -> RaycastParams,
 	_destroyPreview: (self: EggPreviewHandlerType) -> (),
 	updatePreview: (self: EggPreviewHandlerType, mousePosition: Vector2) -> (),
 	Destroy: (self: EggPreviewHandlerType) -> (),
+	ConnectBrio: (self: EggPreviewHandlerType, cb: () -> ()) -> (),
 }
 
 local EggPreviewHandler = {}
 EggPreviewHandler.__index = EggPreviewHandler
-
 
 function EggPreviewHandler.new(toolRef: Tool, playerRef: Player, eggTypeColor): EggPreviewHandlerType
 	local self = setmetatable({}, EggPreviewHandler) :: any
@@ -48,6 +51,8 @@ function EggPreviewHandler.new(toolRef: Tool, playerRef: Player, eggTypeColor): 
 	end)
 
 	self:updatePreview(UserInputService:GetMouseLocation())
+
+	self._brio = Brio.new()
 
 	return self :: EggPreviewHandlerType
 end
@@ -135,23 +140,28 @@ function EggPreviewHandler:updatePreview(mousePosition: Vector2)
 		preview.Color = Color3.fromRGB(255, 0, 0)
 	end
 	local isDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-	
+
 	if isDown and isInside then
 		ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer({
 			color = self.eggTypeColor,
 			position = placementPosition,
+			itemId = self.tool:GetAttribute("itemId"),
 		})
 		self:Destroy()
 	end
 end
 
+function EggPreviewHandler.ConnectBrio(self: EggPreviewHandlerType, cb: () -> ())
+	self._brio:GetDiedSignal():Connect(cb)
+end
 
 -- TODO need to suscribe to the tool and call some kind of predicate that do unequip the tool.
--- TODO: text the pet spawn from the eggs
--- TODO: implement the items ids, use the id for items as a server sign. Probably will also need a handler for every item 
-function EggPreviewHandler:Destroy()
+-- TODO: implement the items ids, use the id for items as a server sign. Probably will also need a handler for every item
+-- TODO: test the pet spawn from the eggs
+function EggPreviewHandler.Destroy(self: EggPreviewHandlerType)
 	self:_destroyPreview()
 	self.maid:DoCleaning()
+	self._brio:Kill()
 end
 
 return EggPreviewHandler

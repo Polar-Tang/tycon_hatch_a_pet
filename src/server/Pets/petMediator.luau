@@ -16,10 +16,15 @@ local remotes = ReplicatedStorage.RemoteEvents
 
 local BuyEggRemote: RemoteEvent = remotes.BuyEggRemote
 
-BuyEggRemote.OnServerEvent:Connect(function(player: Player, data : {color: string, position: Vector3})
+BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: string, position: Vector3, itemId: string })
 	local color = data.color
+	local itemId = data.itemId
 
 	if typeof(color) ~= "string" then
+		return
+	end
+
+	if typeof(itemId) ~= "string" or itemId == "" then
 		return
 	end
 
@@ -41,6 +46,33 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, data : {color: strin
 	
 	local isValidPos = PlotService.IsPositionInsideFenceBounds(plot, position)
 	if not isValidPos then 
+		return
+	end
+
+	local inventory = PlayerInventory:GetHandler(player)
+	if not inventory then
+		return
+	end
+
+	local inventoryItem = inventory.items[itemId]
+	if not inventoryItem then
+		return
+	end
+
+	local expectedItemNameByColor = {
+		white = "White Egg",
+		red = "Red Egg",
+	}
+
+	local expectedItemName = expectedItemNameByColor[our_egg_color]
+	if expectedItemName and inventoryItem.itemName ~= expectedItemName then
+		warn("Item color mismatch", player, itemId, color, inventoryItem.itemName)
+		return
+	end
+
+	local removedItem = inventory:RemoveItemById(itemId)
+	if not removedItem then
+		warn("Could not consume egg item", player, itemId)
 		return
 	end
 	-- optional: check currency here

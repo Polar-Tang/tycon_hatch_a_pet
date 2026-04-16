@@ -88,4 +88,27 @@ function PlayerInventory:AddItem(item)
 	return itemId
 end
 
+function PlayerInventory:RemoveItemById(itemId: string): boolean
+	if typeof(itemId) ~= "string" or itemId == "" then
+		return false
+	end
+
+	local currentItem = self.items[itemId]
+	if currentItem ~= nil then
+		self.items[itemId] = nil
+		game.ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(self.player, self.items)
+		return true
+	end
+
+	for key, item in pairs(self.items) do
+		if item and item.id == itemId then
+			self.items[key] = nil
+			game.ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(self.player, self.items)
+			return true
+		end
+	end
+
+	return false
+end
+
 return PlayerBinder.new(PlayerInventory) :: serverTypes.PlayerBinder<serverTypes.PlayerInventory>
