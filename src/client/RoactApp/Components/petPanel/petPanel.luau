@@ -2,6 +2,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
 local InventoryItems = require(script.Parent.InventoryItems)
+local LeftColumn = require(script.Parent.LeftColumn)
 local inventoryTooltip = require(script.Parent.inventoryTooltip)
 
 local context = script.Parent.Parent.Parent.Context
@@ -130,65 +131,11 @@ function InventoryUI:render()
 				}),
 
 				-- LEFT (1fr)
-				LeftPanel = Roact.createElement("ImageLabel", {
-					Size = UDim2.fromScale(1 / 4, 1),
+				LeftPanel = Roact.createElement(LeftColumn, {
 					LayoutOrder = 1,
-					Image = images.ColumnBg,
-					BackgroundTransparency = 1,
-				}, {
-					Padding = Roact.createElement("UIPadding", {
-						PaddingRight = UDim.new(sidesPadding * 2, 0),
-						PaddingLeft = UDim.new(sidesPadding * 2, 0),
-						PaddingTop = UDim.new(0.019, 0),
-						PaddingBottom = UDim.new(0.019, 0),
-					}),
-
-					Header = Roact.createElement("ImageLabel", {
-						Size = UDim2.fromScale(1 - sidesPadding, yPadding * 4),
-						Image = images.LeftHeader,
-						Position = UDim2.fromScale(sidesPadding / 2, 0),
-
-						BackgroundTransparency = 1,
-					}, {
-						Padding = Roact.createElement("UIPadding", {
-							PaddingTop = UDim.new(yPadding / 2, 0),
-							PaddingBottom = UDim.new(yPadding / 2, 0),
-							PaddingLeft = UDim.new(sidesPadding / 2, 0),
-							PaddingRight = UDim.new(sidesPadding / 2, 0),
-						}),
-					}),
-
-					Content = Roact.createElement("ImageLabel", {
-						Size = UDim2.fromScale(1 - sidesPadding, 1 - (yPadding/2 + yPadding * 4)),
-						Image = images.ColumnPreview, --
-						Position = UDim2.fromScale(sidesPadding / 2, yPadding/2 + yPadding * 4),
-
-						BackgroundTransparency = 1,
-					}, {
-						Content = Roact.createElement("ScrollingFrame", {
-							Size = UDim2.fromScale(1, 1),
-							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-							ScrollBarThickness = 1,
-							CanvasSize = UDim2.new(0, 0, 0, 0),
-							BackgroundTransparency = 1,
-							AutomaticCanvasSize = Enum.AutomaticSize.Y,
-							BorderSizePixel = 0,
-							ZIndex = 3,
-						}, {
-							Layout = Roact.createElement("UIListLayout", {
-								FillDirection = Enum.FillDirection.Vertical,
-								SortOrder = Enum.SortOrder.LayoutOrder,
-								Padding = UDim.new(0, 4),
-							}),
-
-							Padding = Roact.createElement("UIPadding", {
-								PaddingTop = UDim.new(yPadding / 2, 0),
-								PaddingBottom = UDim.new(yPadding / 2, 0),
-								PaddingLeft = UDim.new(sidesPadding / 2, 0),
-								PaddingRight = UDim.new(sidesPadding / 2, 0),
-							}),
-						}),
-					}),
+					images = images,
+					sidesPadding = sidesPadding,
+					yPadding = yPadding,
 				}),
 
 				-- CENTER (2fr)
