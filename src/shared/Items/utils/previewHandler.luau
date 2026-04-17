@@ -1,5 +1,4 @@
 local CollectionService = game:GetService("CollectionService")
-local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -155,9 +154,6 @@ function EggPreviewHandler.ConnectBrio(self: EggPreviewHandlerType, cb: () -> ()
 	self._brio:GetDiedSignal():Connect(cb)
 end
 
--- TODO need to suscribe to the tool and call some kind of predicate that do unequip the tool.
--- TODO: implement the items ids, use the id for items as a server sign. Probably will also need a handler for every item
--- TODO: test the pet spawn from the eggs
 function EggPreviewHandler.Destroy(self: EggPreviewHandlerType)
 	self:_destroyPreview()
 	self.maid:DoCleaning()

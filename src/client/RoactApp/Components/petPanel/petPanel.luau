@@ -55,7 +55,6 @@ function InventoryUI:closeToolTip()
 end
 
 function InventoryUI:render()
-	
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		if not inventoryCtx.isPanelOpen then
@@ -117,8 +116,11 @@ function InventoryUI:render()
 
 				Padding = Roact.createElement("UIPadding", {
 					PaddingTop = UDim.new(0.019, 0),
-					PaddingRight = UDim.new(-0.01, 0),
+					PaddingLeft = UDim.new(yPadding / 2),
+					--PaddingRight = UDim.new(-0.01, 0),
 					PaddingBottom = UDim.new(0.019, 0),
+
+					-- PaddingRight = UDim.new(sidesPadding * 2, 0),
 				}),
 
 				Layout = Roact.createElement("UIListLayout", {
@@ -131,29 +133,67 @@ function InventoryUI:render()
 				LeftPanel = Roact.createElement("ImageLabel", {
 					Size = UDim2.fromScale(1 / 4, 1),
 					LayoutOrder = 1,
-					Image = images.ColumnPreview,
+					Image = images.ColumnBg,
 					BackgroundTransparency = 1,
 				}, {
 					Padding = Roact.createElement("UIPadding", {
-						PaddingTop = UDim.new(yPadding / 2, 0),
-						PaddingBottom = UDim.new(yPadding / 2, 0),
-						PaddingLeft = UDim.new(sidesPadding / 2, 0),
-						PaddingRight = UDim.new(sidesPadding / 2, 0),
+						PaddingRight = UDim.new(sidesPadding * 2, 0),
+						PaddingLeft = UDim.new(sidesPadding * 2, 0),
+						PaddingTop = UDim.new(0.019, 0),
+						PaddingBottom = UDim.new(0.019, 0),
 					}),
-					
 
-					Content = Roact.createElement("ImageLabel", {
-						Size = UDim2.fromScale(1 - sidesPadding, 1 - yPadding),
-						Image = images.ColumnBg,
-						Position = UDim2.fromScale(sidesPadding / 2, yPadding / 2), -- Center horizontally and vertically
+					Header = Roact.createElement("ImageLabel", {
+						Size = UDim2.fromScale(1 - sidesPadding, yPadding * 4),
+						Image = images.LeftHeader,
+						Position = UDim2.fromScale(sidesPadding / 2, 0),
 
 						BackgroundTransparency = 1,
+					}, {
+						Padding = Roact.createElement("UIPadding", {
+							PaddingTop = UDim.new(yPadding / 2, 0),
+							PaddingBottom = UDim.new(yPadding / 2, 0),
+							PaddingLeft = UDim.new(sidesPadding / 2, 0),
+							PaddingRight = UDim.new(sidesPadding / 2, 0),
+						}),
+					}),
+
+					Content = Roact.createElement("ImageLabel", {
+						Size = UDim2.fromScale(1 - sidesPadding, 1 - (yPadding/2 + yPadding * 4)),
+						Image = images.ColumnPreview, --
+						Position = UDim2.fromScale(sidesPadding / 2, yPadding/2 + yPadding * 4),
+
+						BackgroundTransparency = 1,
+					}, {
+						Content = Roact.createElement("ScrollingFrame", {
+							Size = UDim2.fromScale(1, 1),
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							ScrollBarThickness = 1,
+							CanvasSize = UDim2.new(0, 0, 0, 0),
+							BackgroundTransparency = 1,
+							AutomaticCanvasSize = Enum.AutomaticSize.Y,
+							BorderSizePixel = 0,
+							ZIndex = 3,
+						}, {
+							Layout = Roact.createElement("UIListLayout", {
+								FillDirection = Enum.FillDirection.Vertical,
+								SortOrder = Enum.SortOrder.LayoutOrder,
+								Padding = UDim.new(0, 4),
+							}),
+
+							Padding = Roact.createElement("UIPadding", {
+								PaddingTop = UDim.new(yPadding / 2, 0),
+								PaddingBottom = UDim.new(yPadding / 2, 0),
+								PaddingLeft = UDim.new(sidesPadding / 2, 0),
+								PaddingRight = UDim.new(sidesPadding / 2, 0),
+							}),
+						}),
 					}),
 				}),
 
 				-- CENTER (2fr)
 				CenterPanel = Roact.createElement("ImageLabel", {
-					Size = UDim2.fromScale(2 / 4 - sidesPadding*2, 1),
+					Size = UDim2.fromScale(2 / 4 - sidesPadding * 2, 1),
 					Image = images.MainColumnBg,
 					LayoutOrder = 2,
 					BackgroundTransparency = 1,
@@ -170,8 +210,8 @@ function InventoryUI:render()
 
 					Padding = Roact.createElement("UIPadding", {
 						PaddingTop = UDim.new(0.019, 0),
-						PaddingRight = UDim.new(-0.01, 0),
 						PaddingBottom = UDim.new(0.019, 0),
+						-- PaddingRight = UDim.new(-0.01, 0),
 					}),
 
 					gradientTransparencyFrame = Roact.createElement("Frame", {

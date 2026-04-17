@@ -16,8 +16,8 @@ module["player_inventory"] = {
     MainColumnBg = "rbxassetid://125826862355916",
     InventoryIcon = "rbxassetid://95302802386726",
     SpeedcoilIcon = "rbxassetid://132613015141204",
-    EggItemIcon = "rbxassetid://74386031182664"
-
+    EggItemIcon = "rbxassetid://74386031182664",
+    LeftHeader = "rbxassetid://117084391734330",
 }
 
 return module
