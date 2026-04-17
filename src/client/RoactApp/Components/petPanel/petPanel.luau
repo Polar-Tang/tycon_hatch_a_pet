@@ -80,7 +80,7 @@ function InventoryUI:render()
 
 			-- Topbar
 			Topbar = Roact.createElement("ImageLabel", {
-				Size = UDim2.fromScale(1, 16 / 165),
+				Size = UDim2.new(1, 0, 0.095,0),
 				BackgroundTransparency = 1,
 				ScaleType = Enum.ScaleType.Stretch,
 				Image = images.Header,
@@ -136,6 +136,8 @@ function InventoryUI:render()
 					images = images,
 					sidesPadding = sidesPadding,
 					yPadding = yPadding,
+					petRegistry = _G["pets_registry"],
+					selectPetData = inventoryCtx.setSelectedPetData,
 				}),
 
 				-- CENTER (2fr)
