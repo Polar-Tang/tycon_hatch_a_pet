@@ -73,6 +73,7 @@ function LeftColumn:render()
 	local sidesPadding = self.props.sidesPadding or (4 / 300)
 	local yPadding = self.props.yPadding or (4 / 165)
 	local petRegistry = self.props.petRegistry or (_G["pets_registry"] or {}) :: PetTypes.PetsDataStore
+	local is2dPreview = if self.props.is2dPreview == nil then true else self.props.is2dPreview
 
 	local itemList = {}
 	local itemOrder = 0
@@ -151,18 +152,32 @@ function LeftColumn:render()
 					PaddingRight = UDim.new(0.156, 0),
 				}),
 
-				Image1 = Roact.createElement("ImageLabel", {
+				two_D_preview = Roact.createElement("ImageButton", {
 					Size = UDim2.fromScale(0.5, 1),
 					Image = "rbxassetid://117960101708858",
 					BackgroundTransparency = 1,
+					ImageTransparency = if is2dPreview then 0 else 0.5,
 					LayoutOrder = 1,
+					[Roact.Event.Activated] = function()
+						local setIs2dPreview = self.props.setIs2dPreview
+						if setIs2dPreview then
+							setIs2dPreview(true)
+						end
+					end,
 				}),
 
-				Image2 = Roact.createElement("ImageLabel", {
+				three_D_preview = Roact.createElement("ImageButton", {
 					Size = UDim2.fromScale(0.5, 1),
 					Image = "rbxassetid://81664351080568",
 					BackgroundTransparency = 1,
+					ImageTransparency = if is2dPreview then 0.5 else 0,
 					LayoutOrder = 2,
+					[Roact.Event.Activated] = function()
+						local setIs2dPreview = self.props.setIs2dPreview
+						if setIs2dPreview then
+							setIs2dPreview(false)
+						end
+					end,
 				}),
 			}),
 		}),

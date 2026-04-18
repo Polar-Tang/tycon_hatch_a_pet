@@ -12,6 +12,7 @@ function InventoryProvider:init()
 	self:setState({
 		items = {},
 		isPanelOpen = false,
+		is2dPreview = true,
 		selectedPetData = nil :: PetTypes.PetData?,
 	})
 end
@@ -28,17 +29,27 @@ function InventoryProvider:setSelectedPetData(petData: PetTypes.PetData?)
 	})
 end
 
+function InventoryProvider:setIs2dPreview(is2dPreview: boolean)
+	self:setState({
+		is2dPreview = is2dPreview,
+	})
+end
+
 function InventoryProvider:render()
 	return Roact.createElement(InventoryContext.Provider, {
 		value = {
 			items = self.state.items :: { any },
 			isPanelOpen = self.state.isPanelOpen,
+			is2dPreview = self.state.is2dPreview,
 			selectedPetData = self.state.selectedPetData,
 			setPanelOpen = function(isOpen)
 				self:setPanelOpen(isOpen)
 			end,
 			setSelectedPetData = function(petData)
 				self:setSelectedPetData(petData)
+			end,
+			setIs2dPreview = function(is2dPreview)
+				self:setIs2dPreview(is2dPreview)
 			end,
 		},
 	}, self.props[Roact.Children])

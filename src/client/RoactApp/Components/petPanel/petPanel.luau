@@ -136,6 +136,8 @@ function InventoryUI:render()
 					yPadding = yPadding,
 					petRegistry = _G["pets_registry"],
 					selectPetData = inventoryCtx.setSelectedPetData,
+					is2dPreview = inventoryCtx.is2dPreview,
+					setIs2dPreview = inventoryCtx.setIs2dPreview,
 				}),
 
 				-- CENTER (2fr)

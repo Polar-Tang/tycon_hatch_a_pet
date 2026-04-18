@@ -78,14 +78,10 @@ function CenterPanel:createViewport()
 	local viewport = self.viewportRef and self.viewportRef:getValue()
 	local camera = self.camRef and self.camRef:getValue()
 	local selectedPetData = self.selectedPetData
+	local is2dPreview = if self.is2dPreview == nil then true else self.is2dPreview
 
 	if not viewport or not camera or not selectedPetData then
 		self:_clearViewport()
-		return
-	end
-
-	-- Pet selected is the same
-	if self.currentPetId == selectedPetData.petId and self.currentViewportModel then
 		return
 	end
 
@@ -97,39 +93,48 @@ function CenterPanel:createViewport()
 		return
 	end
 
-	local itemClone: Model = template:Clone()
-	local rootpart = itemClone:WaitForChild("Rootpart")
-    itemClone.PrimaryPart = rootpart
-	local worldModel = Instance.new("WorldModel", self.viewportRef:getValue())
-	worldModel.PrimaryPart = itemClone.PrimaryPart
-	itemClone.Parent = worldModel
+	local petClone: Model = template:Clone()
+	local rootpart = petClone:FindFirstChild("Rootpart")
+	if rootpart and rootpart:IsA("BasePart") then
+		petClone.PrimaryPart = rootpart
+	end
 
-    do
-        local IdleAnimId = require(ReplicatedStorage.Animations.animationsData)[petName].idle
-        local anim = Instance.new("Animation", itemClone)
-        anim.AnimationId = IdleAnimId
-    
-        local animator = itemClone:WaitForChild("AnimationController"):WaitForChild("Animator")
-        local track = animator:LoadAnimation(anim)
-        track.Looped = true
-        track:Play()
-    end
+	if is2dPreview then
+		petClone.Parent = viewport
+	else
+		local worldModel = Instance.new("WorldModel")
+		worldModel.Parent = viewport
+		petClone.Parent = worldModel
+	end
 
-	local _modelCFrame, modelSize = itemClone:GetBoundingBox()
-	itemClone:PivotTo(self:_getPivotCFrame(petName, modelSize))
+	do
+		local IdleAnimId = require(ReplicatedStorage.Animations.animationsData)[petName].idle
+		local anim = Instance.new("Animation", petClone)
+		anim.AnimationId = IdleAnimId
+
+		local animator = petClone:WaitForChild("AnimationController"):WaitForChild("Animator")
+		local track = animator:LoadAnimation(anim)
+		track.Looped = true
+		track:Play()
+	end
+
+	local _modelCFrame, modelSize = petClone:GetBoundingBox()
+	petClone:PivotTo(self:_getPivotCFrame(petName, modelSize))
 	camera.CFrame = self:_getCameraRotation(petName, modelSize)
 	camera.FieldOfView = 70
 	viewport.CurrentCamera = camera
 
 	self.currentPetId = selectedPetData.petId
-	self.currentViewportModel = itemClone
+	self.currentViewportModel = petClone
 end
 
 function CenterPanel:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		local selectedPetData = inventoryCtx.selectedPetData
+		local is2dPreview = inventoryCtx.is2dPreview
 		self.selectedPetData = selectedPetData
+		self.is2dPreview = is2dPreview
 
 		local titleText = selectedPetData and tostring(selectedPetData.petName) or ""
 
@@ -185,6 +190,7 @@ function CenterPanel:render()
 end
 
 function CenterPanel:didMount()
+    print("self.is2dPreview ", self.is2dPreview)
 	self:createViewport()
 end
 
