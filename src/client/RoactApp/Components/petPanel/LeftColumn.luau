@@ -20,7 +20,8 @@ function LeftColumn:_renderItemList(layoutOrder: number, petId: string, petInfor
 	-- local titleText = tostring(petInformation.petName) .. " - " .. tostring(petInformation.petId)
 	local petName = tostring(petInformation.petName)
 	local textSize = TextService:GetTextSize(petName, 23, Enum.Font.FredokaOne, Vector2.new(math.huge, math.huge))
-	local scaleFactor = math.min(1, (petInformation.petName:len() * 11) / textSize.X)
+	print("textSize ", textSize)
+	-- local scaleFactor = math.min(1, (petInformation.petName:len() * 11) / textSize.X)
 
 	return Roact.createElement("ImageButton", {
 		Size = UDim2.fromScale(1, 0.18),
@@ -37,13 +38,15 @@ function LeftColumn:_renderItemList(layoutOrder: number, petId: string, petInfor
 	}, {
 		Padding = Roact.createElement("UIPadding", {
 			PaddingTop = UDim.new(0.01, 0),
-			PaddingBottom = UDim.new(0.01, 0),
+			PaddingBottom = UDim.new(0.02, 0),
 			PaddingLeft = UDim.new(0.04, 0),
 			PaddingRight = UDim.new(0.02, 0),
 		}),
 		Title = Roact.createElement("TextLabel", {
-			Size = UDim2.new(0, scaleFactor, 0, textSize),
-			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0, 0.5),
+            Size = UDim2.new(0, textSize.X, 0, textSize.Y),
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundTransparency = 1,
 			Font = Enum.Font.FredokaOne,
 			TextScaled = true,
 			Text = petName,
@@ -187,8 +190,8 @@ function LeftColumn:render()
 				}),
 
 				Padding = Roact.createElement("UIPadding", {
-					PaddingRight = UDim.new(sidesPadding * 2, 0),
-					PaddingLeft = UDim.new(sidesPadding * 2, 0),
+					PaddingRight = UDim.new(sidesPadding / 2 + sidesPadding * 2, 0),
+					PaddingLeft = UDim.new(sidesPadding / 2 + sidesPadding * 2, 0),
 					PaddingTop = UDim.new(0.019, 0),
 					PaddingBottom = UDim.new(0.019, 0),
 				}),

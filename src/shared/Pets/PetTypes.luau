@@ -39,6 +39,7 @@ export type petInitFrontend = {
 	YOffset: number?,
 	rarity: rarity,
 	CameraDistanceFactor: number,
+	CameraDistanceFactorPetPanel: number,
 	radPivot: number?,
 	ZradPivot: number?,
 	walkSpeed: number?,

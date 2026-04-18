@@ -13,6 +13,8 @@ The eat interval + eat duration >= eat_interval
 module["Fox"] =  {
 ["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+
 
 	["eat_interval"] = 2,
 	["eat_duration"] = 3,
@@ -29,6 +31,8 @@ module["Fox"] =  {
 module["Panda"] = {
 ["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+
 
 	["eat_interval"] = 5,
 	["eat_duration"] = 4,
@@ -45,6 +49,8 @@ module["Panda"] = {
 module["Hippo"] = {
 ["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+
 
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
@@ -60,6 +66,8 @@ module["Hippo"] = {
 module["Rhino"] = {
 ["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+
 
 	["eat_interval"] = 6,
 	["eat_duration"] = 5,
@@ -103,6 +111,8 @@ module["Fox"] = merge({
 	["rarity"] = "common",
 	CameraDistanceFactor = 0.8,
 
+	CameraDistanceFactorPetPanel = 1,
+
 	["velocity"] = 4,
 	["speed"] = 2,
 	["animationRunSpeed"] = 2.5,
@@ -114,6 +124,7 @@ module["Giraffe"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "rare",
 	CameraDistanceFactor = 0.8,
+	CameraDistanceFactorPetPanel = 1,
 
 	["velocity"] = 4,
 	["speed"] = 2,
@@ -126,6 +137,7 @@ module["Panda"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	-- ["eat_interval"] = 5,
 	-- ["eat_duration"] = 4,
@@ -144,6 +156,7 @@ module["Elephant"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.1,
+	CameraDistanceFactorPetPanel = 1,
 
 	-- ["eat_interval"] = 6,
 	-- ["eat_duration"] = 3,
@@ -163,6 +176,7 @@ module["Hippo"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	["velocity"] = 8,
 
@@ -175,6 +189,7 @@ module["Pig"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "rare",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	["velocity"] = 8,
 
@@ -187,6 +202,7 @@ module["Lion"] = merge({
 	walkSpeed = 10,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 0.9,
 
 	["velocity"] = 6,
 
@@ -204,6 +220,7 @@ module["Cat"] = merge({
 	["velocity"] = 6,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	["speed"] = 1,
 	["adorneeOffset"] = Vector3.new(0, 5, 0),
@@ -216,6 +233,7 @@ module["Dog"] = merge({
 	["velocity"] = 8,
 	["rarity"] = "uncommon",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	["speed"] = 1.2,
 	YOffset = 0.42,
@@ -233,6 +251,7 @@ local rhino: PetTypes.petInitFrontend = merge({
 	["speed"] = 3,
 	["rarity"] = "common",
 	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
 
 	-- ["patrol_interval"] = 8,
 	-- ["patrol_duration"] = 500,

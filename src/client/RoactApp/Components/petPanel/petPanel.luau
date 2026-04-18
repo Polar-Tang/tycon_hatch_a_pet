@@ -3,6 +3,7 @@ local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local Roact = require(game.ReplicatedStorage.Roact)
 local InventoryItems = require(script.Parent.InventoryItems)
 local LeftColumn = require(script.Parent.LeftColumn)
+local CenterPanel = require(script.Parent.CenterPanel)
 local inventoryTooltip = require(script.Parent.inventoryTooltip)
 
 local context = script.Parent.Parent.Parent.Context
@@ -118,10 +119,7 @@ function InventoryUI:render()
 				Padding = Roact.createElement("UIPadding", {
 					PaddingTop = UDim.new(0.019, 0),
 					PaddingLeft = UDim.new(yPadding / 2),
-					--PaddingRight = UDim.new(-0.01, 0),
 					PaddingBottom = UDim.new(0.019, 0),
-
-					-- PaddingRight = UDim.new(sidesPadding * 2, 0),
 				}),
 
 				Layout = Roact.createElement("UIListLayout", {
@@ -141,11 +139,11 @@ function InventoryUI:render()
 				}),
 
 				-- CENTER (2fr)
-				CenterPanel = Roact.createElement("ImageLabel", {
-					Size = UDim2.fromScale(2 / 4 - sidesPadding * 2, 1),
-					Image = images.MainColumnBg,
+				CenterPanel = Roact.createElement(CenterPanel, {
 					LayoutOrder = 2,
-					BackgroundTransparency = 1,
+					images = images,
+					sidesPadding = sidesPadding,
+					yPadding = yPadding
 				}),
 
 				-- RIGHT (1fr, grid)
