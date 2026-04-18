@@ -135,6 +135,16 @@ do
 	for _, pet in petsClient do
 		setCollider(pet, fullOptimized)
 	end
+
+	-- local petsWorldModel: Folder = ReplicatedFirst.PetModels
+	-- local PetModels = petsWorldModel:GetDescendants()
+	-- for _, pet in PetModels do
+	-- 	pet:SetAttribute("AnimatorName", "Humanoid")
+	-- 	setCollider(pet, onDescendantAdded)
+	-- 	local localScript = ReplicatedFirst.PetModels.PetWorldActivated:Clone()
+	-- 	localScript.Parent = pet
+	-- 	localScript.Enabled = true
+	-- end
 end
 
 Players.PlayerAdded:Connect(function(player)
@@ -241,6 +251,5 @@ PetStat.OnServerEvent:Connect(function(player, data)
 		PetClicked:FireClient(player, petData)
 	end
 end)
-
 
 local _ = require(script.Parent.Pets.petMediator)

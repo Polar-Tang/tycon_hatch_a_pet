@@ -2,7 +2,7 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Roact = require(ReplicatedStorage.Roact)
 
-local petTemplates = ReplicatedFirst:WaitForChild("PetsTemplates")
+-- local petsPhisics =
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local petBosses = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petBosses)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
@@ -17,12 +17,14 @@ local CenterPanel = Roact.Component:extend("CenterPanel")
 function CenterPanel:init()
 	self.viewportRef = Roact.createRef()
 	self.camRef = Roact.createRef()
+	self.worldModelRef = Roact.createRef()
+
 	self.currentPetId = nil
 	self.currentViewportModel = nil
 end
 
 function CenterPanel:_getPivotCFrame(petName: PetTypes.petNames, modelSize): CFrame
-	local modelCFrame = CFrame.new(0, -modelSize.Y/4, 0)
+	local modelCFrame = CFrame.new(0, -modelSize.Y / 4, 0)
 	local rad = 120
 	local zrad = 0
 
@@ -47,11 +49,14 @@ function CenterPanel:_getPivotCFrame(petName: PetTypes.petNames, modelSize): CFr
 end
 
 function CenterPanel:_getCameraRotation(petName: PetTypes.petNames, extendSize: Vector3): CFrame
-	print(extendSize.Magnitude , "extendSize")
-    local distance = extendSize.Magnitude * 0.8
+	print(extendSize.Magnitude, "extendSize")
+	local distance = extendSize.Magnitude * 0.8
 
-	return CFrame.new(0.6, 0.6, 0) * CFrame.new(0, 0, -distance) * CFrame.Angles(math.rad(0), math.rad(170), math.rad(0))
+	return CFrame.new(0.6, 0.6, 0)
+		* CFrame.new(0, 0, -distance)
+		* CFrame.Angles(math.rad(0), math.rad(170), math.rad(0))
 end
+--WorldModel
 
 function CenterPanel:_clearViewport()
 	local viewport = self.viewportRef and self.viewportRef:getValue()
@@ -87,18 +92,32 @@ function CenterPanel:createViewport()
 	self:_clearViewport()
 
 	local petName = selectedPetData.petName
-	local template = petTemplates:FindFirstChild(petName)
+	local template: Model = ReplicatedFirst.PetModels:FindFirstChild(petName)
 	if not template then
 		return
 	end
 
 	local itemClone: Model = template:Clone()
-	itemClone.Parent = viewport
+	local rootpart = itemClone:WaitForChild("Rootpart")
+    itemClone.PrimaryPart = rootpart
+	local worldModel = Instance.new("WorldModel", self.viewportRef:getValue())
+	worldModel.PrimaryPart = itemClone.PrimaryPart
+	itemClone.Parent = worldModel
+
+    do
+        local IdleAnimId = require(ReplicatedStorage.Animations.animationsData)[petName].idle
+        local anim = Instance.new("Animation", itemClone)
+        anim.AnimationId = IdleAnimId
+    
+        local animator = itemClone:WaitForChild("AnimationController"):WaitForChild("Animator")
+        local track = animator:LoadAnimation(anim)
+        track.Looped = true
+        track:Play()
+    end
 
 	local _modelCFrame, modelSize = itemClone:GetBoundingBox()
 	itemClone:PivotTo(self:_getPivotCFrame(petName, modelSize))
-    local extendSize = itemClone:GetExtentsSize()
-	camera.CFrame = self:_getCameraRotation(petName, extendSize)
+	camera.CFrame = self:_getCameraRotation(petName, modelSize)
 	camera.FieldOfView = 70
 	viewport.CurrentCamera = camera
 
@@ -110,7 +129,7 @@ function CenterPanel:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
 		local selectedPetData = inventoryCtx.selectedPetData
-        self.selectedPetData = selectedPetData
+		self.selectedPetData = selectedPetData
 
 		local titleText = selectedPetData and tostring(selectedPetData.petName) or ""
 
