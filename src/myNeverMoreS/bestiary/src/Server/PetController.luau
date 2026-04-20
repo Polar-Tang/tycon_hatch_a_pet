@@ -19,10 +19,24 @@ function PetController.new(petId: string, data: PetData.PetData): serverTypes.Pe
 end
 
 
-function PetController:spendPoint(abillityName: string): boolean
+function PetController:spendPoint(abillityName: string, action: string?): boolean
+	if not self._data.petStats[abillityName] then
+		return false
+	end
+
+	if action == "subtract" then
+		if self._data.petStats[abillityName] <= 0 then
+			return false
+		end
+		self._data.petStats[abillityName] = self._data.petStats[abillityName] - 1
+		self._data.avaiblePoints = self._data.avaiblePoints + 1
+		return true
+	end
+
 	if self._data.avaiblePoints <= 0 then
 		return false
 	end
+
 	self._data.avaiblePoints = self._data.avaiblePoints - 1
 	self._data.petStats[abillityName] = self._data.petStats[abillityName] + 1
 	return true

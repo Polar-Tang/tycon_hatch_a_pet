@@ -25,7 +25,7 @@ function CenterPanel:init()
 end
 
 function CenterPanel:_getPivotCFrame(petName: PetTypes.petNames, modelSize): CFrame
-	local modelCFrame = CFrame.new(0, -modelSize.Y / 4, 0)
+	local modelCFrame = CFrame.new(0, -modelSize.Y / 5, 0)
 	local rad = 120
 	local zrad = 0
 
@@ -51,7 +51,7 @@ end
 
 function CenterPanel:_getCameraRotation(petName: PetTypes.petNames, extendSize: Vector3): CFrame
 	print(extendSize.Magnitude, "extendSize")
-	local distance = extendSize.Magnitude * 0.8
+	local distance = extendSize.Magnitude * 0.7
 
 	return CFrame.new(0.6, 0.6, 0)
 		* CFrame.new(0, 0, -distance)
@@ -153,7 +153,7 @@ function CenterPanel:render()
 			}),
 
 			TopHalf = Roact.createElement("Frame", {
-				Size = UDim2.fromScale(1, 0.5),
+				Size = UDim2.fromScale(1, 0.4),
 				BackgroundTransparency = 1,
 				LayoutOrder = 1,
 			}, {
@@ -181,19 +181,37 @@ function CenterPanel:render()
 			}),
 
 			BottomHalf = Roact.createElement("Frame", {
-				Size = UDim2.fromScale(1, 0.5),
-				Position = UDim2.fromScale(0, 0.5),
+				Size = UDim2.fromScale(1, 0.6),
+				Position = UDim2.fromScale(0, 0.4),
 				BackgroundTransparency = 1,
 				LayoutOrder = 2,
 			}, {
-				UpgradeSet = Roact.createElement(UpgradeSet)
+				Layout = Roact.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Vertical,
+					SortOrder = Enum.SortOrder.LayoutOrder,
+				}),
+				HealthSet = Roact.createElement(UpgradeSet, {
+					LayoutOrder = 1,
+					Title = "Health",
+					statTitle = "Health",
+				}),
+				MeleeSet = Roact.createElement(UpgradeSet, {
+					LayoutOrder = 2,
+					Title = "Melee",
+					statTitle = "Melee",
+				}),
+				StaminaSet = Roact.createElement(UpgradeSet, {
+					LayoutOrder = 3,
+					Title = "Stamina",
+					statTitle = "Stamina",
+				}),
 			}),
 		})
 	end)
 end
 
 function CenterPanel:didMount()
-    print("self.is2dPreview ", self.is2dPreview)
+	print("self.is2dPreview ", self.is2dPreview)
 	self:createViewport()
 end
 

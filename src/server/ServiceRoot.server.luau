@@ -234,11 +234,12 @@ PetStat.OnServerEvent:Connect(function(player, data)
 
 	local petId = data.petId
 	local stat = data.stat
+	local action = data.action
 
 	----print(" bestiaryHandler.pets ",  bestiaryHandler.pets)
 	----print("petId ", petId)
 	-- NEED to figure out how to create the XP based in the npc
-	local newPests = bestiaryHandler:spendPoint(petId, stat)
+	local newPests = bestiaryHandler:spendPoint(petId, stat, action)
 	if not newPests then
 		return
 	end

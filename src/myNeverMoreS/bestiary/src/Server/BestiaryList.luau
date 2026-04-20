@@ -108,12 +108,12 @@ function BestiaryList.getPetRarity(self: BestiaryList, petId: string): PetTypes.
 	return pet.rarity
 end
 
-function BestiaryList.spendPoint(self: BestiaryList, petId: string, abillityName: string): PetData.PetsDataStore | nil
+function BestiaryList.spendPoint(self: BestiaryList, petId: string, abillityName: string, action: string?): PetData.PetsDataStore | nil
 	local controller = self._petControllers[petId]
 	if not controller then
 		return nil
 	end
-	if controller:spendPoint(abillityName) then
+	if controller:spendPoint(abillityName, action) then
 		self.pets[petId] = controller:getData()
 		self.PetsValue.Changed:Fire(self.pets)
 		return self.pets
