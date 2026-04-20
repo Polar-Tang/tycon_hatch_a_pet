@@ -18,6 +18,11 @@ module["player_inventory"] = {
     SpeedcoilIcon = "rbxassetid://132613015141204",
     EggItemIcon = "rbxassetid://74386031182664",
     LeftHeader = "rbxassetid://117084391734330",
+    
+    PlusIcon ="rbxassetid://89956997140887",
+    MinusIcon = "rbxassetid://130615117334258",
+    BlankUpgrade = "rbxassetid://136390617017327",
+    DoneUpgrade = "rbxassetid://97653661578451",
 }
 
 return module

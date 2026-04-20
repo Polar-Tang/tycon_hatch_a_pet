@@ -1,5 +1,6 @@
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UpgradeSet = require(script.Parent.UpgradeSet)
 local Roact = require(ReplicatedStorage.Roact)
 
 -- local petsPhisics =
@@ -184,6 +185,8 @@ function CenterPanel:render()
 				Position = UDim2.fromScale(0, 0.5),
 				BackgroundTransparency = 1,
 				LayoutOrder = 2,
+			}, {
+				UpgradeSet = Roact.createElement(UpgradeSet)
 			}),
 		})
 	end)

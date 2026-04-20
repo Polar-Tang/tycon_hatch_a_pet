@@ -20,7 +20,6 @@ function LeftColumn:_renderItemList(layoutOrder: number, petId: string, petInfor
 	-- local titleText = tostring(petInformation.petName) .. " - " .. tostring(petInformation.petId)
 	local petName = tostring(petInformation.petName)
 	local textSize = TextService:GetTextSize(petName, 23, Enum.Font.FredokaOne, Vector2.new(math.huge, math.huge))
-	print("textSize ", textSize)
 	-- local scaleFactor = math.min(1, (petInformation.petName:len() * 11) / textSize.X)
 
 	return Roact.createElement("ImageButton", {
