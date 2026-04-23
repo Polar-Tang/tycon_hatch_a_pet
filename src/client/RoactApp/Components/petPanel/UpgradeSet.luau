@@ -34,7 +34,13 @@ function UpgradeSet:_getStatValue(selectedPetData, statTitle: string): number
 	return value
 end
 
-function UpgradeSet:_setSelectedPetOptimistic(inventoryCtx, selectedPetData, statTitle: string, newValue: number, availablePoints: number)
+function UpgradeSet:_setSelectedPetOptimistic(
+	inventoryCtx,
+	selectedPetData,
+	statTitle: string,
+	newValue: number,
+	availablePoints: number
+)
 	if not inventoryCtx or not inventoryCtx.setSelectedPetData or not selectedPetData then
 		return
 	end
@@ -47,7 +53,7 @@ function UpgradeSet:_setSelectedPetOptimistic(inventoryCtx, selectedPetData, sta
 end
 
 function UpgradeSet:render()
-    local props = self.props
+	local props = self.props
 
 	local title = props.Title or "Speed"
 	local statTitle = props.statTitle or title
@@ -130,121 +136,149 @@ function UpgradeSet:render()
 			Size = UDim2.new(1, 0, 0.3333333333334, 0),
 		}, {
 
-		Layout = Roact.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Vertical,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-			VerticalFlex = Enum.UIFlexAlignment.Fill,
-		}),
-
-		-- TITLE
-		Title = Roact.createElement("TextLabel", {
-			BackgroundTransparency = 1,
-			Text = title,
-			Font = font,
-			-- TextSize = textSize,
-			TextColor3 = Color3.fromRGB(235, 235, 235),
-			Size = UDim2.new(0, textSize.X, 0, textSize.Y),
-			LayoutOrder = 1,
-			TextScaled = true,
-			TextStrokeTransparency = 0.8,
-			TextWrapped = true,
-		}, {
-			Outline = Roact.createElement("UIStroke", {
-				Thickness = 2,
-				Color = Color3.fromRGB(0, 0, 0),
+			Layout = Roact.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Vertical,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				VerticalFlex = Enum.UIFlexAlignment.Fill,
 			}),
 
-			Shadow = Roact.createElement("UIShadow", {
-				BlurRadius = UDim.new(0, 0),
-				Transparency = 0.5,
-				Offset = UDim2.new(0, 2, 0, 2),
-			}),
-		}),
+			-- TITLE
+			Title = Roact.createElement("TextLabel", {
+				BackgroundTransparency = 1,
+				Text = title,
+				Font = font,
+				-- TextSize = textSize,
+				TextColor3 = Color3.fromRGB(235, 235, 235),
+				Size = UDim2.new(0, textSize.X, 0, textSize.Y),
+				LayoutOrder = 1,
+				TextScaled = true,
+				TextStrokeTransparency = 0.8,
+				TextWrapped = true,
+			}, {
+				Outline = Roact.createElement("UIStroke", {
+					Thickness = 2,
+					Color = Color3.fromRGB(0, 0, 0),
+				}),
 
-		--[[
+				Shadow = Roact.createElement("UIShadow", {
+					BlurRadius = UDim.new(0, 0),
+					Transparency = 0.5,
+					Offset = UDim2.new(0, 2, 0, 2),
+				}),
+			}),
+
+			--[[
             0/264 , 0/171 - 7
             SCREENWIDTH - X
         ]]
-		-- ROW
-		Row = Roact.createElement("Frame", {
-			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 2.6,0 ),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 2,
-		}, {
-
-			RowLayout = Roact.createElement("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				Padding = UDim.new(5 / refSize.Y, 0),
-				VerticalAlignment = Enum.VerticalAlignment.Center,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				HorizontalFlex = Enum.UIFlexAlignment.SpaceAround,
-			}),
-
-			Padding = Roact.createElement("UIPadding", {
-				PaddingTop = UDim.new(0, 0),
-				PaddingBottom = UDim.new(0.019, 0),
-				PaddingLeft = UDim.new(0.007, 0),
-				PaddingRight = UDim.new(0.007, 0),
-			}),
-
-			-- MINUS
-			Minus = Roact.createElement("ImageButton", {
-				Size = UDim2.fromScale(21 / 300, 56 / 165),
+			-- ROW
+			Row = Roact.createElement("Frame", {
 				BackgroundTransparency = 1,
-				Image = assets.player_inventory.MinusIcon,
-				LayoutOrder = 1,
-				AutoButtonColor = false,
-				[Roact.Event.Activated] = onMinus,
-			}),
-
-			-- UPGRADES
-			Upgrades = Roact.createElement("Frame", {
-				BackgroundTransparency = 1,
-				Size = UDim2.new(1 - (buttonWidth / 300 * 4), 0, 56 / 165, 0),
+				Size = UDim2.new(1, 0, 2.6, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				LayoutOrder = 2,
-			}, { --0.672
+			}, {
+
+				RowLayout = Roact.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					Padding = UDim.new(5 / refSize.Y, 0),
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					HorizontalFlex = Enum.UIFlexAlignment.SpaceAround,
+				}),
 
 				Padding = Roact.createElement("UIPadding", {
-					PaddingRight = UDim.new(0.037, 0),
+					PaddingTop = UDim.new(0, 0),
+					PaddingBottom = UDim.new(0.019, 0),
+					PaddingLeft = UDim.new(0.007, 0),
+					PaddingRight = UDim.new(0.007, 0),
 				}),
 
-				List = Roact.createElement("UIListLayout", {
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 2),
+				-- MINUS
+				Minus = Roact.createElement("ImageButton", {
+					Size = UDim2.fromScale(21 / 300, 56 / 165),
+					BackgroundTransparency = 1,
+					Image = assets.player_inventory.MinusIcon,
+					LayoutOrder = 1,
+					AutoButtonColor = false,
+					[Roact.Event.Activated] = onMinus,
 				}),
 
-				Icons = Roact.createFragment((function()
-					local children = {}
+				-- UPGRADES
+				Upgrades = Roact.createElement("Frame", {
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1 - (buttonWidth / 300 * 4), 0, 56 / 165, 0),
+					LayoutOrder = 2,
+				}, { --0.672
 
-					for i = 1, maxLevel do
-						children["U" .. i] = Roact.createElement("ImageLabel", {
-							Size = UDim2.new(1 / maxLevel, 0, 1, 0),
+					Padding = Roact.createElement("UIPadding", {
+						PaddingRight = UDim.new(0.037, 0),
+					}),
 
-							BackgroundTransparency = 1,
-							Image = i <= level and assets.player_inventory.DoneUpgrade
-								or assets.player_inventory.BlankUpgrade,
-						})
-					end
+					List = Roact.createElement("UIListLayout", {
+						FillDirection = Enum.FillDirection.Horizontal,
+						Padding = UDim.new(0, 2),
+					}),
 
-					return children
-				end)()),
+					Icons = Roact.createFragment((function()
+						local children = {}
+						local filledColor = Color3.fromRGB(0, 200, 255) -- #00c8ff
+
+						local statValue = self:_getStatValue(selectedPetData, statTitle)
+						print("statValue for ", statTitle, ": ", statValue)
+						local cellsNumPerFrame = 4
+
+						for i = 1, maxLevel do
+							children["U" .. i] = Roact.createElement("ImageLabel", {
+								Size = UDim2.new(1 / maxLevel, 0, 1, 0),
+								BackgroundTransparency = 1,
+								Image = assets.player_inventory.BlankUpgrade,
+							}, {
+								VerticalList = Roact.createElement("UIListLayout", {
+									FillDirection = Enum.FillDirection.Vertical,
+									SortOrder = Enum.SortOrder.LayoutOrder,
+									HorizontalAlignment = Enum.HorizontalAlignment.Center,
+								}),
+
+								Quarters = Roact.createFragment((function()
+									local quarters = {}
+									for q = 1, cellsNumPerFrame do
+										statValue -= 1
+										local isFilled = q <= statValue
+										print("q ", q)
+										print(" statValue", statValue)
+
+										quarters["Q" .. q] = Roact.createElement("Frame", {
+											Size = UDim2.new(1, 0, 0.25, 0),
+											BackgroundColor3 = isFilled and filledColor
+												or Color3.fromRGB(255, 255, 255),
+
+											LayoutOrder = q,
+										})
+									end
+									return quarters
+								end)()),
+							})
+						end
+
+						return children
+					end)()),
+				}),
+
+				-- PLUS
+				Plus = Roact.createElement("ImageButton", {
+					Size = UDim2.fromScale(21 / 300, 56 / 165),
+					BackgroundTransparency = 1,
+					Image = assets.player_inventory.PlusIcon,
+					LayoutOrder = 3,
+					AutoButtonColor = false,
+					[Roact.Event.Activated] = onPlus,
+				}),
 			}),
-
-			-- PLUS
-			Plus = Roact.createElement("ImageButton", {
-				Size = UDim2.fromScale(21 / 300, 56 / 165),
-				BackgroundTransparency = 1,
-				Image = assets.player_inventory.PlusIcon,
-				LayoutOrder = 3,
-				AutoButtonColor = false,
-				[Roact.Event.Activated] = onPlus,
-			}),
-		}),
-	})
+		})
 	end)
 end
 
