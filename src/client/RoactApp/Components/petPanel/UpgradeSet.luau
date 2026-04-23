@@ -72,6 +72,7 @@ function UpgradeSet:render()
 		if self.state.boundPetId == selectedPetId and self.state.boundStat == statTitle then
 			level = self.state.statLevel
 		end
+		local maxPoints = maxLevel * 4
 
 		local availablePoints = selectedPetData and selectedPetData.avaiblePoints or 0
 
@@ -83,7 +84,7 @@ function UpgradeSet:render()
 				return
 			end
 
-			local nextLevel = math.clamp(level + 1, 0, maxLevel)
+			local nextLevel = math.clamp(level + 1, 0, maxPoints)
 			if nextLevel == level then
 				return
 			end
@@ -111,7 +112,7 @@ function UpgradeSet:render()
 				return
 			end
 
-			local nextLevel = math.clamp(level - 1, 0, maxLevel)
+			local nextLevel = math.clamp(level - 1, 0, maxPoints)
 			if nextLevel == level then
 				return
 			end
@@ -226,41 +227,35 @@ function UpgradeSet:render()
 					Icons = Roact.createFragment((function()
 						local children = {}
 						local filledColor = Color3.fromRGB(0, 200, 255) -- #00c8ff
-
-						local statValue = self:_getStatValue(selectedPetData, statTitle)
-						print("statValue for ", statTitle, ": ", statValue)
 						local cellsNumPerFrame = 4
+						local statPoints = math.max(0, level)
 
 						for i = 1, maxLevel do
+							local quarters = {}
+							for q = 1, cellsNumPerFrame do
+								local cellIndex = (i - 1) * cellsNumPerFrame + q
+								local isFilled = cellIndex <= statPoints
+								quarters["Q" .. q] = Roact.createElement("Frame", {
+									Size = UDim2.new(0.22, 0, 0.73, 0),
+									BackgroundColor3 = isFilled and filledColor or Color3.fromRGB(255, 255, 255),
+									LayoutOrder = q,
+									BorderSizePixel = 0,
+								})
+							end
+
 							children["U" .. i] = Roact.createElement("ImageLabel", {
 								Size = UDim2.new(1 / maxLevel, 0, 1, 0),
 								BackgroundTransparency = 1,
 								Image = assets.player_inventory.BlankUpgrade,
 							}, {
 								VerticalList = Roact.createElement("UIListLayout", {
-									FillDirection = Enum.FillDirection.Vertical,
+									FillDirection = Enum.FillDirection.Horizontal,
 									SortOrder = Enum.SortOrder.LayoutOrder,
 									HorizontalAlignment = Enum.HorizontalAlignment.Center,
+									VerticalAlignment = Enum.VerticalAlignment.Center,
 								}),
 
-								Quarters = Roact.createFragment((function()
-									local quarters = {}
-									for q = 1, cellsNumPerFrame do
-										statValue -= 1
-										local isFilled = q <= statValue
-										print("q ", q)
-										print(" statValue", statValue)
-
-										quarters["Q" .. q] = Roact.createElement("Frame", {
-											Size = UDim2.new(1, 0, 0.25, 0),
-											BackgroundColor3 = isFilled and filledColor
-												or Color3.fromRGB(255, 255, 255),
-
-											LayoutOrder = q,
-										})
-									end
-									return quarters
-								end)()),
+								Quarters = Roact.createFragment(quarters),
 							})
 						end
 
