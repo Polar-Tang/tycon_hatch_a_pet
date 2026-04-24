@@ -67,7 +67,7 @@ function InventoryUI:render()
 		local yPadding = 4 / 165
 
 		return Roact.createElement("Frame", {
-			Size = UDim2.fromScale(0.9, 0.9), -- container scales to screen
+			Size = UDim2.fromScale(0.85, 0.85), -- container scales to screen
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
@@ -81,15 +81,15 @@ function InventoryUI:render()
 
 			-- Topbar
 			Topbar = Roact.createElement("ImageLabel", {
-				Size = UDim2.new(1, 0, 0.095,0),
+				Size = UDim2.new(1, 0, 0.1,0),
 				BackgroundTransparency = 1,
 				ScaleType = Enum.ScaleType.Stretch,
 				Image = images.Header,
 			}, {
 
 				Close = Roact.createElement("ImageButton", {
-					Size = UDim2.fromScale(10 / 300, 0.75),
-					Position = UDim2.fromScale(1 - sidesPadding / 2, 0.125),
+					Size = UDim2.fromScale(10 / 300, 0.65),
+					Position = UDim2.fromScale(1 - sidesPadding / 2, 0.175),
 					AnchorPoint = Vector2.new(1, 0),
 					Image = images.Close,
 					BackgroundTransparency = 1,

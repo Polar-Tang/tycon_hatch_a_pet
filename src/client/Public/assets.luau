@@ -7,7 +7,7 @@ module["egg_icon"] = "rbxassetid://94550472158485"
 --rbxassetid://98247422760487
 
 module["player_inventory"] = {
-    Header = "rbxassetid://134606047526485",
+    Header = "rbxassetid://82544807800578",
     Close = "rbxassetid://122808360377559",
     MainFrame = "rbxassetid://110673420325187",
     ColumnPreview = "rbxassetid://88198662638499",
