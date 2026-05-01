@@ -134,6 +134,7 @@ function Income.GetDoubleCoins(self: Income, boosters: incomeUtils.boosterList)
 end
 
 function Income.GetEggFactor(self: Income)
+	print("self.Luck.Value ", self.Luck.Value)
 	return self.Luck.Value * self.EggRNG.Value
 end
 

@@ -16,10 +16,8 @@ export type bonusType = "passive" | "active"
 module["Pig"] = {
 	bonus = function(incomes: serverTypes.Income)
 		local extraCoins = utils.getPercentage(incomes.inventory.cash, 10)
-		print("incomes.ExtraCoinBoss.Value ", extraCoins)
 
 		incomes.ExtraCoinBoss.Value = incomes:_checkIncreases(extraCoins)
-		print("incomes.ExtraCoinBoss.Value ", incomes.ExtraCoinBoss.Value)
 
 	end,
 	passive = function(incomes: serverTypes.Income)
@@ -49,10 +47,11 @@ module["Elephant"] = {
 module["Panda"] = {
 	bonus = function(incomes: serverTypes.Income)
 		incomes._slightlyIncreased.Value += 1
+		incomes.Luck.Value += 0.25
 	end,
 	destroy = function(incomes: serverTypes.Income)
 		incomes._slightlyIncreased.Value -= 1
-		print("incomes._slightlyIncreased.Value ", incomes._slightlyIncreased.Value)
+		incomes.Luck.Value -= 0.5
 	end,
 	bonusType = "passive",
 	GetRandTime = function()

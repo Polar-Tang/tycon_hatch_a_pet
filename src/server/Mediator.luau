@@ -37,9 +37,6 @@ function module.PlayerAdded(player: Player, playerData)
 			cash = 0,
 			pets = petsInitialized,
 			items = {
-				["asd"] = {
-					image = Items.speedCoil,
-				},
 			},
 			--pets = {},
 		}
@@ -141,7 +138,6 @@ end
 
 ReplicatedStorage.RemoteEvents.PlayerInventory.OnServerEvent:Connect(function(player: Player, ...)
 	local inventory = PlayerInventory:GetHandler(player)
-	print("inventory ", inventory)
 	ReplicatedStorage.RemoteEvents.PlayerInventory:FireClient(player, inventory.items)
 end)
 

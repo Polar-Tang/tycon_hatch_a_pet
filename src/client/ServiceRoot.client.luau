@@ -112,7 +112,7 @@ PetNew.OnClientEvent:Connect(function(data)
 	end
 	_G.pets_registry_value.Value = _G["pets_registry"]
 	_G.pets_registry_value.Changed:Fire(_G["pets_registry"] :: PetTypes.PetsDataStore)
-	print("_G['pets_registry'] ", _G["pets_registry"])
+	-- print("_G['pets_registry'] ", _G["pets_registry"])
 end)
 
 -- REPLICATE THE PETS TO OTHER PLAYERS

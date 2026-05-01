@@ -41,7 +41,6 @@ function BillboardProvider:didMount()
 		self:setState({
 			billboards = billboardsClone,
 		})
-		print("self.state.billboards ", self.state.billboards)
 	end)
 	self._maid:GiveTask(billboardCreator)
 end

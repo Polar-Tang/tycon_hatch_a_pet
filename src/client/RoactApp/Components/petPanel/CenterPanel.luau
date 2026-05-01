@@ -50,7 +50,6 @@ function CenterPanel:_getPivotCFrame(petName: PetTypes.petNames, modelSize): CFr
 end
 
 function CenterPanel:_getCameraRotation(petName: PetTypes.petNames, extendSize: Vector3): CFrame
-	print(extendSize.Magnitude, "extendSize")
 	local distance = extendSize.Magnitude * 0.7
 
 	return CFrame.new(0.6, 0.6, 0)
@@ -211,7 +210,6 @@ function CenterPanel:render()
 end
 
 function CenterPanel:didMount()
-	print("self.is2dPreview ", self.is2dPreview)
 	self:createViewport()
 end
 

@@ -17,26 +17,34 @@ function ultiBar:init()
 end
 
 function ultiBar:didMount()
-	local player = Players.LocalPlayer
-	local player_char = player.Character or player.CharacterAdded:Wait()
+    local player = Players.LocalPlayer
+    local player_char = player.Character or player.CharacterAdded:Wait()
 
-	self._increaseConnection = game:GetService("RunService").Heartbeat:Connect(function()
-		local newPercentage = math.max(0, self.state.percentage + 1)
-		if tick() % 1 < 0.016 then
-			self:setState({
-				percentage = newPercentage,
-			})
-			if newPercentage <= 0 then
-				player_char:SetAttribute("IsTransformed", false)
-			end
-		end
-	end)
-	local parent: Model = self.props.model
-	self._ancestryConnection = parent.AncestryChanged:Connect(function(a0: Instance, a1: Instance?)
-		if not a0.Parent then
-			self:unMount()
-		end
-	end)
+    local startTime = tick()
+    local duration = 10 -- total duration in seconds
+    local increment = 2 -- percentage increment every 0.1 seconds
+
+    self._increaseConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        local elapsedTime = tick() - startTime
+        local newPercentage = math.min(100, elapsedTime / duration * 100) -- calculate percentage based on elapsed time
+
+        if tick() % 0.1 < 0.016 then
+            self:setState({
+                percentage = newPercentage,
+            })
+            if newPercentage >= 100 then
+                player_char:SetAttribute("IsTransformed", false)
+                self._increaseConnection:Disconnect() -- stop updating when complete
+            end
+        end
+    end)
+
+    local parent: Model = self.props.model
+    self._ancestryConnection = parent.AncestryChanged:Connect(function(a0: Instance, a1: Instance?)
+        if not a0.Parent then
+            self:unMount()
+        end
+    end)
 end
 
 function ultiBar:unMount()
