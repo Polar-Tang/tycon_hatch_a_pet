@@ -1,8 +1,17 @@
 local module = {}
 
-export type petNames = "Fox" | "Hippo" | "Rhino" | "Elephant" | "Panda" | "Lion" | "Cat" | "Dog" | "Pig" | "Giraffe"
+export type petNames = "Fox" | "Hippo" | "Rhino" | "Elephant" | "Panda" | "Lion" | "Cat" | "Dog" | "Pig" | "Giraffe" | "Wolf" | "Bear" | "Turtle" | "Alpaca" | "Bull" | "Gorilla" | "Bunny" | "Elk" | "Parrot" | "Tiger"
 
-module.allPetNames = { "Fox", "Hippo", "Rhino", "Elephant", "Panda", "Lion", "Cat", "Dog", "Pig", "Giraffe" }
+module.allPetNames = { "Fox", "Hippo", "Rhino", "Elephant", "Panda", "Lion", "Cat", "Dog", "Pig", "Giraffe", "Wolf",
+"Bear",
+"Turtle",
+"Alpaca",
+"Bull",
+"Gorilla",
+"Bunny",
+"Elk",
+"Parrot",
+"Tiger" }
 
 export type petStats = {
 	Health: number,
@@ -48,7 +57,7 @@ export type petInitFrontend = {
 
 export type petsInitFrontend = { petNames: petInitFrontend }
 
-export type rarity = "common" | "uncommon" | "rare" | "epic" | "legendary"
+export type rarity = "common" | "rare" | "epic" | "legendary"
 
 module.isPetName = function(name: string)
 	if not name or typeof(name) ~= "string" then

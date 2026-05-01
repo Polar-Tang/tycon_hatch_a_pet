@@ -69,6 +69,7 @@ export type Income = {
 	new: (self: Income) -> Income,
 	Init: (self: Income, serviceBag: any) -> (),
 	_setCoinIncome: (self: Income, serviceBag: any) -> (),
+	GetEggFactor: (self: Income) -> number,
 	_checkIncreases: (self: Income, input: number) -> number,
 	Destroy: (self: Income) -> (),
 }

@@ -1,26 +1,39 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
+local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
+local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
+local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local EggTypes = require(script.Parent.EggTypes)
+local rngUtils = require(script.Parent.rng.rngUtils)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 
 local EggsFolder = ReplicatedStorage.Items.Templates.Eggs
 type EggColor = EggTypes.EggColor
+type rarity = PetTypes.rarity
+type petNames = PetTypes.petNames
+type classification = "Carnivore" | "Herbivore"
 
 local Egg = {}
 Egg.__index = Egg
 
--- pet pools per egg color
-local PetPools: { [EggColor]: { string } } = {
-	white = { "Dog", "Cat", "Lion", "Fox", "Rhino", "Hippo" },
-	red = { "Elephant", "Panda", "Giraffe", "Pig" },
+local EggColorToRarity: { [string]: rarity } = {
+	white = "common",
+	blue = "rare",
+	purple = "epic",
+	orange = "legendary",
+}
+
+local EggColorToClassification: { [string]: classification } = {
+	red = "Carnivore",
+	green = "Herbivore",
 }
 
 -- constructor
 function Egg.new(player: Player, plot: BasePart, color: EggColor, hatchTime: number)
-	assert(PetPools[color], "Invalid egg color")
+	assert(EggColorToRarity[color] or EggColorToClassification[color], "Invalid egg color")
 
 	local self = setmetatable({} :: EggTypes.EggData, Egg)
 	self.color = color
@@ -67,20 +80,37 @@ end
 
 -- hatch logic
 function Egg:Hatch()
-	local petCategories = PetPools[self.color]
-	if not petCategories then
+	local incomes = Incomes:GetHandler(self.player)
+	if not incomes then
 		return
 	end
 
-	local index = math.random(1, #petCategories)
-	local petName = petCategories[index]
-	local petData = petData[petName]
-	if not petData then
-		print("wtf?")
+	local drop = rngUtils.getDrop()
+	local eggDropFactor = incomes:GetEggFactor()
+	local scaledDrop = drop * eggDropFactor
+	local rarity = rngUtils.getRarity(scaledDrop)
+
+	local petsSameRarity: { petNames }?
+	local classification = EggColorToClassification[self.color]
+	if classification then
+		petsSameRarity = PetsByClassification[classification][rarity]
+	else
+		local mappedRarity: rarity? = EggColorToRarity[self.color]
+		if mappedRarity then
+			petsSameRarity = PetsByRarity[mappedRarity]
+		end
+	end
+
+	if not petsSameRarity or #petsSameRarity == 0 then
+		warn("No pets available for egg color", self.color, "and rarity", rarity)
 		return
 	end
 
+	local index = math.random(1, #petsSameRarity)
+	local petName = petsSameRarity[index]
+	
 	PetService.createPet(self.player, petName, self.position)
+	
 	-- destroy egg model
 	if self.model then
 		self.model:Destroy()

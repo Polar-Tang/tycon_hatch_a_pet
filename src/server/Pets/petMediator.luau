@@ -129,6 +129,7 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 			return
 		end
 
+		-- TODO: [Pet Family] get pet rarity should be an utils method from another table
 		local petRarity = petLists:getPetRarity(petId)
 
 		local price = calculatePriceByStats(petStats, petRarity)

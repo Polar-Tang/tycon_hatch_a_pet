@@ -5,14 +5,12 @@ local ServerScriptService = game:GetService("ServerScriptService")
 ]]
 
 local PetBonuses = require(ServerScriptService.Pets.Pet.PetBonuses)
-local PetData = require(ServerScriptService.types.PetData)
 local serverTypes = require(ServerScriptService.types.serverTypes)
 local PlayerBinder = require(ReplicatedStorage.Nevermore.Custom.playerBinder.src.Server.PlayerBinder)
 local bonusBase = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.bonuses.bonusBase)
 local Brio = require(ReplicatedStorage.Nevermore.Quenty.brio.Shared.Brio)
 
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
-local Rx = require(ReplicatedStorage.Nevermore.Quenty.rx.Shared.Rx)
 local ValueObject = require(ReplicatedStorage.Nevermore.Quenty.valueobject.Shared.ValueObject)
 local incomeUtils = require(ReplicatedStorage.utils.incomeUtils)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -133,6 +131,10 @@ function Income.GetDoubleCoins(self: Income, boosters: incomeUtils.boosterList)
 		return false
 	end
 	return self.DoubledCoin.Value
+end
+
+function Income.GetEggFactor(self: Income)
+	return self.Luck.Value * self.EggRNG.Value
 end
 
 function Income._checkIncreases(self, input)
