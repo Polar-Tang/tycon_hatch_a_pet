@@ -78,7 +78,7 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: strin
 	-- if not CurrencyService:CanAfford(player, color) then return end
 
 	-- create egg domain object
-	local egg = Egg.new(player, plot, our_egg_color, 10)
+	local egg = Egg.new(player, plot, our_egg_color, 3)
 
 	
 

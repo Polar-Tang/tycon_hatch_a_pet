@@ -20,10 +20,15 @@ local orderedRarities: { { rarity: rarity, maxPercentage: number } } = {
 	{ rarity = "legendary", maxPercentage = rngUtils.DropPercentages.legendary },
 }
 
-function rngUtils.getDrop()
-	local drop = math.random(0, 99999)
-	local percentage = drop / 1000
-	return percentage
+function rngUtils.getDrop(bias: number?): number
+	local luck = bias or 1
+	local L = math.clamp(luck, 1, 5)
+
+    local u = math.random()
+    -- core idea
+    local skewed = u ^ (1 / L)
+
+    return skewed * 100
 end
 
 function rngUtils.getRarity(percentage: number): rarity

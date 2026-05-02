@@ -173,6 +173,66 @@ addPet("Rhino", {
 	YOffset = 0.994,
 })
 
+addPet("Wolf", {
+	walkSpeed = 10,
+	["velocity"] = 8,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1.2,
+	YOffset = 0.42,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+})
+
+addPet("Bear", {
+	walkSpeed = 10,
+	["velocity"] = 8,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1.2,
+	YOffset = 0.42,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+})
+
+addPet("Turtle", {
+	walkSpeed = 10,
+	["velocity"] = 6,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.726 + 0.725 - 0.208,
+})
+
+addPet("Alpaca", {
+	walkSpeed = 10,
+	["velocity"] = 6,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.726 + 0.725 - 0.208,
+})
+
+addPet("Bull", {
+	walkSpeed = 10,
+	["velocity"] = 6,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.726 + 0.725 - 0.208,
+})
+
+addPet("Gorilla", {
+	walkSpeed = 10,
+	["velocity"] = 6,
+	CameraDistanceFactor = 1.2,
+	CameraDistanceFactorPetPanel = 1,
+	["speed"] = 1,
+	["adorneeOffset"] = Vector3.new(0, 5, 0),
+	YOffset = 0.726 + 0.725 - 0.208,
+})
+
 -- This is to detect if the table is rewrited by accident
 table.freeze(module)
 

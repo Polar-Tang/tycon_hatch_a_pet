@@ -140,6 +140,7 @@ function EggPreviewHandler:updatePreview(mousePosition: Vector2)
 	end
 	local isDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
 
+	-- TODO: [There's a ghost tooltip]
 	if isDown and isInside then
 		ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer({
 			color = self.eggTypeColor,

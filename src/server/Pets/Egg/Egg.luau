@@ -87,13 +87,12 @@ function Egg:Hatch()
 		return
 	end
 
-	local drop = rngUtils.getDrop()
-	print("Random drop: " .. drop)
 	local eggDropFactor = incomes:GetEggFactor()
-	local scaledDrop = drop * eggDropFactor
-	local rarity = rngUtils.getRarity(scaledDrop)
-	print("ScaledDrop: " .. scaledDrop)
-	print("rarity: " .. rarity )
+	local drop = rngUtils.getDrop(eggDropFactor)
+	print("Random drop: " .. drop)
+	print("Luck: " ..eggDropFactor)
+	local rarity = rngUtils.getRarity(drop)
+	print("Rarity: " .. rarity )
 
 	local petsSameRarity: { petNames }?
 	local classification = EggColorToClassification[self.color]

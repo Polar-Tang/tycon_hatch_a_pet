@@ -34,7 +34,7 @@ local PetsByRarity: { [rarity]: { petNames } } = {
 	legendary = {
 		"Rhino",
 		"Lion",
-		"Tiger",
+		-- "Tiger",
 	},
 }
 

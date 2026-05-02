@@ -60,21 +60,3 @@ function OfflineRewards:CalculateOfflineEarnings(petStats, offlineTime)--: numbe
 	local totalMoney = totalEats * base
 	return totalMoney, totalEats
 end
-
-
-local Panda = {
-	["eat_interval"] = 5,
-	["eat_duration"] = 4,
-	["patrol_interval"] = 6,
-	["patrol_duration"] = 3,
-	["range"] = 30,
-	["velocity"] = 8,
-	["speed"] = 1.25,
-	["base"] = 4, -- money generation
-}
-
-
-local money, eats = OfflineRewards:CalculateOfflineEarnings(Panda, 30)
-
-print("money earned " .. money)
-print("Eats counted " .. eats)

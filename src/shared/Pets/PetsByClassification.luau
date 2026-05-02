@@ -17,7 +17,8 @@ local PetsByClassification: petsByClassification = {
 		rare = { "Cat" },
 		--"Parrot"
 		epic = { "Dog", "Bear", "Wolf" },
-		legendary = { "Lion", "Tiger" },
+		--"Tiger"
+		legendary = { "Lion" },
 	},
 	Herbivore = {
 		--"Elk"

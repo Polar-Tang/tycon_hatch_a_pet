@@ -5,7 +5,7 @@ local Roact = require(ReplicatedStorage.Roact)
 
 local ultiBar = Roact.Component:extend("ultiBar")
 
-local PERCENTAGE = 10
+local PERCENTAGE = 100
 
 function ultiBar:init()
 	self.initialized = false
@@ -17,7 +17,6 @@ function ultiBar:init()
 end
 
 function ultiBar:didMount()
-	print("Here should be duration ", self.props)
 	local duration = tonumber(self.props.duration) or 60
     self._elapsed = 0
 
@@ -73,7 +72,7 @@ function ultiBar:render()
 				Thickness = 1,
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
 			}),
-
+			
 			Bar = Roact.createElement("Frame", {
 				BackgroundColor3 = Color3.fromRGB(0, 225, 255),
 				BackgroundTransparency = 0.2,
