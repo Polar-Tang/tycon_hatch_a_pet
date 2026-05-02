@@ -130,21 +130,19 @@ do
 		end
 	end
 
-	local petsClientFolder = ReplicatedFirst.PetsTemplates
+	local petsClientFolder = ServerStorage.Pets:Clone()
+	petsClientFolder.Name = "PetsTemplates"
+	
 	local petsClient = petsClientFolder:GetDescendants()
 	for _, pet in petsClient do
 		setCollider(pet, fullOptimized)
 	end
+	petsClientFolder.Parent = ReplicatedFirst
 
-	-- local petsWorldModel: Folder = ReplicatedFirst.PetModels
-	-- local PetModels = petsWorldModel:GetDescendants()
-	-- for _, pet in PetModels do
-	-- 	pet:SetAttribute("AnimatorName", "Humanoid")
-	-- 	setCollider(pet, onDescendantAdded)
-	-- 	local localScript = ReplicatedFirst.PetModels.PetWorldActivated:Clone()
-	-- 	localScript.Parent = pet
-	-- 	localScript.Enabled = true
-	-- end
+	-- CLoning the server authorative pets in replicated storage for havin pets with animation controller avaible for rendering
+	local petModels = ServerStorage.Pets:Clone()
+	petModels.Name = "PetModels"
+	petModels.Parent = ReplicatedFirst
 end
 
 Players.PlayerAdded:Connect(function(player)

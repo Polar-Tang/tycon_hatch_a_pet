@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Table = require(ReplicatedStorage.Nevermore.Quenty.table.Shared.Table)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local module = {}
 
@@ -171,5 +172,8 @@ addPet("Rhino", {
 	["adorneeOffset"] = Vector3.new(0, 9, 0),
 	YOffset = 0.994,
 })
---
+
+-- This is to detect if the table is rewrited by accident
+table.freeze(module)
+
 return module :: { [PetTypes.petNames]: PetTypes.petInitFrontend }

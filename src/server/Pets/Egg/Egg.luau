@@ -6,6 +6,7 @@ local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Inc
 local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local types = require(ReplicatedStorage.utils.types)
 local EggTypes = require(script.Parent.EggTypes)
 local rngUtils = require(script.Parent.rng.rngUtils)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
@@ -64,11 +65,12 @@ function Egg:Spawn(position: Vector3)
 	self.model.Parent = workspace
 	self.model:MoveTo(position)
 	self.position = position
-
-	npcUtils.createBillboard(self.model, {
+	local billboardContract: types.billBoardContract = {
 		componentName = "ProgresBar",
-		npc = self.model,
-	})
+		model = self.model,
+		duration = self.time
+	}
+	npcUtils.createBillboard(self.model, billboardContract)
 end
 
 -- start hatching timer

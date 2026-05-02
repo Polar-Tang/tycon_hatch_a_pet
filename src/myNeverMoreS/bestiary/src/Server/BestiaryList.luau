@@ -44,8 +44,6 @@ export type BestiaryList = {
 
 	unsetPetClicked: (self: BestiaryList) -> (),
 
-	getPetRarity: (self: BestiaryList, petId: string) -> PetTypes.rarity?,
-
 	removePet: (self: BestiaryList, petId: string) -> (),
 
 	-- ===== Internal Methods =====
@@ -98,14 +96,6 @@ function BestiaryList.removePet(self: BestiaryList, petId: string)
 	self._petControllers[petId]:Destroy()
 	self._petControllers[petId] = nil
 	self.PetsValue.Changed:Fire(self.pets)
-end
-
-function BestiaryList.getPetRarity(self: BestiaryList, petId: string): PetTypes.rarity?
-	local pet = self.pets[petId]
-	if not pet then
-		return
-	end
-	return pet.rarity
 end
 
 function BestiaryList.spendPoint(self: BestiaryList, petId: string, abillityName: string, action: string?): PetData.PetsDataStore | nil

@@ -16,7 +16,7 @@ function OpenButton:render()
 		return Roact.createElement("ImageButton", {
 			Size = UDim2.new(0.1, 0, 0.2, 0),
 			AnchorPoint = Vector2.new(0, 0.5),
-			Position = UDim2.new(0, 16 / 300, 0.5, 0),
+			Position = UDim2.new(0, 16 / 300, 0.75, 0),
 			BackgroundTransparency = 1,
 			Image = assets.player_inventory.InventoryIcon,
 			BorderSizePixel = 0,

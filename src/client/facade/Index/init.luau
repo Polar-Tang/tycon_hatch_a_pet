@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
-local petTemplates = ReplicatedFirst.PetsTemplates
+local petTemplates = ReplicatedFirst:WaitForChild("PetsTemplates") -- We wait for child because this instance is create by the server at runtime
 
 local FightButton = require(script.FightButton)
 local petBosses = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petBosses)
@@ -12,6 +12,7 @@ local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local stringUtils = require(ReplicatedStorage.utils.stringUtils)
+local utils = require(ReplicatedStorage.utils.utils)
 local slotButtonHandler = require(script.slotButtonHandler)
 
 local player = Players.LocalPlayer
@@ -173,7 +174,6 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 		local gradient = Instance.new("UIGradient")
 
 		local color_seq = ColorSequence.new(clientUtils.getRarityColorSecuence(rarity))
-		print("color seq", color_seq)
 		--[[
 		 [1] = 0 0.862745 0.862745 0.862745 0 ,
                     [2] = 1 0.705882 0.705882 0.705882 0 
@@ -190,7 +190,9 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 		currentUiStroke = stroke
 	end
 
-	local rariry_camelCase = stringUtils.toUpperCamelCase(data.rarity)
+	-- TODO: [Epic Bosses] think if there's a cleanest way for handling this
+	local rarety = utils.getPetRarity(data.petName) or (petBosses[data.petName] and petBosses[data.petName].rarity)
+	local rariry_camelCase = stringUtils.toUpperCamelCase(rarety)
 
 	if not isBoss and data == _G["petToFight"] then
 		petDetails.open()

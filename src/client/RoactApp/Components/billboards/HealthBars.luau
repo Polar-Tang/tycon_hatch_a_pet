@@ -1,5 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local types = require(ReplicatedStorage.utils.types)
 local HealthBar = require(script.Parent.HealthBar)
-local billboardTypes = require(script.Parent.billboardTypes)
 local Roact = require(game.ReplicatedStorage:WaitForChild("Roact"))
 local HealthBars = Roact.Component:extend("HealthBars")
 
@@ -12,7 +13,7 @@ function HealthBars:render()
 
 	return withCtx(function(ctx)
 		local clone = {}
-		for id, data: billboardTypes.HealthbarComponentData in pairs(ctx.HealthbarContext.HealthbarComponents) do
+		for id, data: types.HealthbarComponentData in pairs(ctx.HealthbarContext.HealthbarComponents) do
 			if data.type == "Destroy" then
 				clone[data.petId] = nil
 			end

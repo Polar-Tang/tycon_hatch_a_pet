@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local types = require(script.Parent.types)
 
 local npcUtils = {}
 
@@ -39,12 +40,8 @@ function npcUtils.createProximityPrompt(model: Model, data: proximityPromptInfo)
 	prompt.Parent = model
 end
 
-export type chupala = { componentName: string }
-function npcUtils.createBillboard(model: Model, data: chupala)
-	game.ReplicatedStorage.RemoteEvents.Biilboard:FireAllClients({
-		npc = model,
-		componentName = data.componentName,
-	})
+function npcUtils.createBillboard(model: Model, data: types.billBoardContract)
+	game.ReplicatedStorage.RemoteEvents.Biilboard:FireAllClients(data)
 end
 
 return npcUtils

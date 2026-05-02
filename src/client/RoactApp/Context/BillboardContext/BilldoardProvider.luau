@@ -1,9 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
 local repStore = game:getService("ReplicatedStorage")
 
-local billboardTypes = require(StarterPlayer.StarterPlayerScripts.RoactApp.Components.billboards.billboardTypes)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
+local types = require(ReplicatedStorage.utils.types)
 local Roact = require(repStore.Roact)
 
 local BillboardContext = require(script.Parent.BilldoardContext)
@@ -21,7 +20,7 @@ end
 function BillboardProvider:render()
 	return Roact.createElement(BillboardContext.Provider, {
 		value = {
-			billboards = self.state.billboards :: { billboardTypes.billboardShit },
+			billboards = self.state.billboards :: { types.billBoardContract },
 		},
 	}, self.props[Roact.Children])
 end
@@ -30,14 +29,10 @@ function BillboardProvider:DisconnectPrompt(prompty) end
 
 function BillboardProvider:didMount()
 	-- Here we can blindly trust
-	local billboardCreator = Biilboard.OnClientEvent:Connect(function(data)
+	local billboardCreator = Biilboard.OnClientEvent:Connect(function(data: types.billBoardContract)
 		local billboardsClone = table.clone(self.state.billboards)
-		local billboardData: billboardTypes.billboardShit = {
-			componentName = data.componentName,
-			model = data.npc,
-		}
 
-		table.insert(billboardsClone, billboardData)
+		table.insert(billboardsClone, data)
 		self:setState({
 			billboards = billboardsClone,
 		})

@@ -1,9 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
-local PetInformation = require(script.Parent.PetInformation)
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local BestiaryList = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
@@ -87,7 +85,19 @@ function PetService.createPet(Owner: Player, maybePetName: string, position: Vec
 	end
 
 	local bestiaryHandler = BestiaryList:GetHandler(Owner)
-	local newPet = table.clone(PetInformation[petName])
+	local newPet = {
+		petProg = 0,
+		avaiblePoints = 0,
+		petName = petName,
+		petLvl = 1,
+		petStats = {
+			["Health"] = 1,
+			["Melee"] = 1,
+			["Stamina"] = 1,
+		},
+		rarity = utils.getPetRarity(petName),
+	}
+
 	assert(newPet, "Pet '" .. petName .. "' is not registered")
 	local petId = HttpService:GenerateGUID(false)
 	newPet.petId = petId

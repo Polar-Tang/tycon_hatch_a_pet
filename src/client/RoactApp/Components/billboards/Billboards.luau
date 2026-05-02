@@ -1,4 +1,5 @@
-local billboardTypes = require(script.Parent.billboardTypes)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local types = require(ReplicatedStorage.utils.types)
 local Roact = require(game.ReplicatedStorage:WaitForChild("Roact"))
 local CustomProximityPrompts = Roact.Component:extend("CustomProximityPrompts")
 
@@ -12,15 +13,13 @@ function CustomProximityPrompts:render()
 	return withCtx(function(ctx)
 		local billboardCtx = ctx.BillboardContext
 		local billboards = {}
-		for id, billboard: billboardTypes.billboardShit in ipairs(billboardCtx.billboards) do
+		for id, billboard: types.billBoardContract in ipairs(billboardCtx.billboards) do
 			local component = require(script.Parent:FindFirstChild(billboard.componentName))
 			if not component then
 				print(billboard.componentName, "Not found")
 				return
 			else
-				billboards[id] = Roact.createElement(component, {
-					model = billboard.model,
-				})
+				billboards[id] = Roact.createElement(component, billboard)
 			end
 		end
 		return Roact.createFragment(billboards)

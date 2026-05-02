@@ -1,5 +1,8 @@
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
+local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 
 local utils = {}
 
@@ -167,6 +170,13 @@ utils.bossCoins = function(cash)
 					0.5 -> 100/(1000*0.5)
 				]]
 	return utils.getPercentage(cash, 15)
+end
+
+utils.getPetRarity = function(petName: PetTypes.petNames)
+	if not petData[petName] then 
+		return
+	end
+	return petData[petName].rarity
 end
 
 return utils

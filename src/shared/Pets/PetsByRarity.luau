@@ -9,13 +9,13 @@ local PetsByRarity: { [rarity]: { petNames } } = {
 	common = {
 		"Turtle",
 		"Alpaca",
-		"Elk",
+		-- "Elk",
 		"Gorilla",
 		"Fox",
 	},
 
 	rare = {
-		"Bunny",
+		-- "Bunny",
 		"Elephant",
 		"Panda",
 		"Cat",
@@ -25,7 +25,7 @@ local PetsByRarity: { [rarity]: { petNames } } = {
 		"Pig",
 		"Giraffe",
 		"Bull",
-		"Parrot",
+		-- "Parrot",
 		"Dog",
 		"Bear",
 		"Wolf",

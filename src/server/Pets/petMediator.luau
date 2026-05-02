@@ -117,20 +117,21 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 		if not petSellContract then
 			return
 		end
-		if not petSellContract.petData then
+
+		local petData = petSellContract.petData
+		if not petData then
 			return
 		end
 
 		local petLists = Registry:GetHandler(player)
-		local petId = petSellContract.petData.petId
+		local petId = petData.petId
 		local petStats = petLists:getPetStats(petId)
 		if not petStats then
-			warn(petSellContract.petData, " not found")
+			warn(petData, " not found")
 			return
 		end
 
-		-- TODO: [Pet Family] get pet rarity should be an utils method from another table
-		local petRarity = petLists:getPetRarity(petId)
+		local petRarity = utils.getPetRarity(petData.petName)
 
 		local price = calculatePriceByStats(petStats, petRarity)
 		petLists:removePet(petId)

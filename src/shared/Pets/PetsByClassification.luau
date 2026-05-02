@@ -15,12 +15,15 @@ local PetsByClassification: petsByClassification = {
 	Carnivore = {
 		common = { "Gorilla", "Fox" },
 		rare = { "Cat" },
-		epic = { "Parrot", "Dog", "Bear", "Wolf" },
+		--"Parrot"
+		epic = { "Dog", "Bear", "Wolf" },
 		legendary = { "Lion", "Tiger" },
 	},
 	Herbivore = {
-		common = { "Turtle", "Alpaca", "Elk" },
-		rare = { "Bunny", "Elephant", "Panda" },
+		--"Elk"
+		common = { "Turtle", "Alpaca" },
+		--"Bunny"
+		rare = { "Elephant", "Panda" },
 		epic = { "Pig", "Giraffe", "Bull" },
 		legendary = { "Rhino" },
 	},
