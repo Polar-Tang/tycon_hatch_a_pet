@@ -7,9 +7,9 @@ type rarity = PetTypes.rarity
 local rngUtils = {}
 
 rngUtils.DropPercentages = {
-	common = 70,
-	rare = 90,
-	epic = 95.5,
+	common = 0,
+	rare = 70,
+	epic = 90,
 	legendary = 99.99,
 }
 
@@ -32,13 +32,15 @@ function rngUtils.getDrop(bias: number?): number
 end
 
 function rngUtils.getRarity(percentage: number): rarity
+	local rarity = "common"
 	for _, rarityInfo in ipairs(orderedRarities) do
-		if percentage <= rarityInfo.maxPercentage then
-			return rarityInfo.rarity
+		
+		if percentage >= rarityInfo.maxPercentage then
+			rarity = rarityInfo.rarity
 		end
 	end
 
-	return "legendary"
+	return rarity
 end
 
 return rngUtils

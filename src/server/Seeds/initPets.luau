@@ -19,7 +19,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "579ef0e3-ddaa-4f92-8aef-cde22480a7dd",
 		["petLvl"] = 101,
-		["petName"] = "Panda",
+		["petName"] = "Bear",
 		["petProg"] = 0,
 		["petStats"] = {
 			["Health"] = 3,
@@ -33,7 +33,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "9ba5e89d-d21b-4884-88fc-a949ec52ae88",
 		["petLvl"] = 97,
-		["petName"] = "Panda",
+		["petName"] = "Wolf",
 		["petProg"] = 0,
 		["petStats"] = {
 			["Health"] = 2,
@@ -47,7 +47,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "aee2a7bf-06f7-4d46-8a70-bf9b9dc2b8e6",
 		["petLvl"] = 116,
-		["petName"] = "Panda",
+		["petName"] = "Turtle",
 		["petProg"] = 0,
 		["petStats"] = {
 			["Health"] = 21,
@@ -61,7 +61,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "db56a6a8-5c4d-4a9c-ac00-8ae3d10e8cf6",
 		["petLvl"] = 150,
-		["petName"] = "Panda",
+		["petName"] = "Alpaca",
 		["petProg"] = 18,
 		["petStats"] = {
 			["Health"] = 20,
@@ -75,7 +75,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "e7bb3293-6a1f-4486-b11f-c3552a0c0128",
 		["petLvl"] = 124,
-		["petName"] = "Panda",
+		["petName"] = "Bull",
 		["petProg"] = 0,
 		["petStats"] = {
 			["Health"] = 3,
@@ -89,7 +89,7 @@ local init_data = {
 		["isInvoked"] = false,
 		["petId"] = "fe5b484e-b68e-4a1b-ba0e-45869a7e79b3",
 		["petLvl"] = 94,
-		["petName"] = "Panda",
+		["petName"] = "Pig",
 		["petProg"] = 0,
 		["petStats"] = {
 			["Health"] = 0,
@@ -98,6 +98,46 @@ local init_data = {
 		},
 		["rarity"] = "rare",
 	},
+	[HttpService:GenerateGUID(false)] = {
+		["avaiblePoints"] = 93,
+		["isInvoked"] = false,
+		["petLvl"] = 94,
+		["petName"] = "Pig",
+		["petProg"] = 0,
+		["petStats"] = {
+			["Health"] = 0,
+			["Melee"] = 5,
+			["Stamina"] = 0,
+		},
+		["rarity"] = "rare",
+	},
+	[HttpService:GenerateGUID(false)] = {
+		["avaiblePoints"] = 93,
+		["isInvoked"] = false,
+		["petLvl"] = 94,
+		["petName"] = "Gorilla",
+		["petProg"] = 0,
+		["petStats"] = {
+			["Health"] = 0,
+			["Melee"] = 5,
+			["Stamina"] = 0,
+		},
+		["rarity"] = "rare",
+	},
+	[HttpService:GenerateGUID(false)] = {
+		["avaiblePoints"] = 93,
+		["isInvoked"] = false,
+		["petLvl"] = 94,
+		["petName"] = "Giraffe",
+		["petProg"] = 0,
+		["petStats"] = {
+			["Health"] = 0,
+			["Melee"] = 5,
+			["Stamina"] = 0,
+		},
+		["rarity"] = "rare",
+	},
+	--Giraffe
 }
 
 return function(player)

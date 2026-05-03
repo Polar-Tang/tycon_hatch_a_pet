@@ -55,39 +55,39 @@ module["Giraffe"] = {
 }
 
 module["Pig"] = {
-	["eat"] = "rbxassetid://90033018265726",
-	["walk"] = "rbxassetid://81039232530623",
-	["idle"] = "rbxassetid://117125246536726",
+	["eat"] = "rbxassetid://83992983172882",
+	["walk"] = "rbxassetid://117600027398734",
+	["idle"] = "rbxassetid://134316309453527",
 }
 
 module["Wolf"] = {
-	["eat"] = "rbxassetid://123925830389511",
-	["walk"] = "rbxassetid://121961323426089",
+	["eat"] = "rbxassetid://98714864714163",
+	["walk"] = "rbxassetid://129921003228936",
 	["idle"] = "rbxassetid://138170148158633",
 }
 
 module["Bear"] = {
-	["eat"] = "rbxassetid://98526147909348",
+	["eat"] = "rbxassetid://126226106967967",
 	["walk"] = "rbxassetid://93568895370677",
 	["idle"] = "rbxassetid://125630019437580",
 }
 
 module["Turtle"] = {
-	["eat"] = "rbxassetid://90531389721731",
-	["walk"] = "rbxassetid://132066009209282",
+	["eat"] = "rbxassetid://129663288706084",
+	["walk"] = "rbxassetid://81398486527009",
 	["idle"] = "rbxassetid://72147769370608",
 }
 
 module["Alpaca"] = {
-	["eat"] = "rbxassetid://74096106674229",
-	["walk"] = "rbxassetid://130278237623830",
-	["idle"] = "rbxassetid://113676526438394",
+	["eat"] = "rbxassetid://130749357313271",
+	["walk"] = "rbxassetid://73618337312617",
+	["idle"] = "rbxassetid://126656585379718",
 }
 
 module["Bull"] = {
-	["eat"] = "rbxassetid://96776376562849",
-	["walk"] = "rbxassetid://90033018265726",
-	["idle"] = "rbxassetid://105347026105262",
+	["eat"] = "rbxassetid://118474208100491",
+	["walk"] = "rbxassetid://78167051289170",
+	["idle"] = "rbxassetid://137037722945256",
 }
 
 module["Gorilla"] = {
@@ -97,9 +97,17 @@ module["Gorilla"] = {
 }
 
 module["Giraffe"] = {
-	["eat"] = "rbxassetid://114907492987749",
-	["walk"] = "rbxassetid://126984968619362",
-	["idle"] = "rbxassetid://121010171967813",
+	["eat"] = "rbxassetid://133181977803394",
+	["walk"] = "rbxassetid://102435050981033",
+	["idle"] = "rbxassetid://77647037845686",
 }
+
+--[[
+alpaca: .2 ~
+pig: 0.9 (subir walkspeed a 6) ~
+bear: 1~
+wolf: 1 90 anticlockwise~
+rotate girafe 90 anticlockwise~
+]]
 
 return module

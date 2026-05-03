@@ -51,7 +51,7 @@ module["Panda"] = {
 	end,
 	destroy = function(incomes: serverTypes.Income)
 		incomes._slightlyIncreased.Value -= 1
-		incomes.Luck.Value -= 0.5
+		incomes.Luck.Value -= 0.25
 	end,
 	bonusType = "passive",
 	GetRandTime = function()

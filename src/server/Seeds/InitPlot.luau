@@ -14,6 +14,11 @@ return function(player: Player, playerPets: PetData.PetsDataStore)
 	FenceBoundsService:AssignPlot(plot, player)
 
 	for petId, petInfo in pairs(playerPets) do
+		-- This is due some forced initialization through initPets.luau
+		if not petInfo.petId then 
+			petInfo.petId = petId
+		end
+		assert(petInfo.petId == petId, "petId corruption")
 		PetService.fromDataToWorld(player, petInfo)
 	end
 end

@@ -270,6 +270,10 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 		else
 			petTemplate:ScaleTo(referenceScale)
 		end
+
+		local humanoid : Humanoid = petTemplate:WaitForChild("Humanoid")
+		humanoid.WalkSpeed = 6
+
 		local hrp = petTemplate.PrimaryPart
 		hrp.Anchored = false
 		-- Copy attributes from the reference pet
@@ -284,7 +288,7 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 
 		petTemplate.Parent = workspace
 
-		local nearPlayer = clientUtils.petGoal(Players.LocalPlayer.Character, 3)
+		local nearPlayer = clientUtils.petGoal(Players.LocalPlayer.Character, 3) + Vector3.new(0, humanoid.HipHeight, 0)
 		nearPlayer = CFrame.new(nearPlayer) * Players.LocalPlayer.Character.PrimaryPart.CFrame.Rotation
 		petTemplate:PivotTo(nearPlayer)
 
