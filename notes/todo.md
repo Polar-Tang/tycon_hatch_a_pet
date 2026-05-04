@@ -6,7 +6,8 @@
 -[.] Refactor progressBar for using custon progresion by props
 -[.] Tape video
 #### Sunday
--[] All the rigs avaible with no bugs
+-[.] All the rigs avaible with no bugs
+### monday
 -[] Egg got a proximity prompt to call a remote
 -[] Calling Egg:Hatch through a remote event
 -[] Use cooldown utility to get the time to create a pet in server Time, 

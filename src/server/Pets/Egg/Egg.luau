@@ -76,7 +76,8 @@ end
 -- start hatching timer
 function Egg:StartHatching()
 	task.delay(self.time, function()
-		self:Hatch()
+		npcUtils.createProximityPrompt(self.model, {})
+		-- self:Hatch()
 	end)
 end
 
