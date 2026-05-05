@@ -138,6 +138,35 @@ do
 	end
 	petsClientFolder.Parent = ReplicatedFirst
 
+
+	local function fullOptimizedAndTransparency(descendant)
+		-- Set collision group for any part descendant
+
+		if descendant:IsA("BasePart") then
+			local descendantPar: BasePart = descendant
+			descendantPar.CanCollide = false
+			descendantPar.CanQuery = false
+			descendantPar.CanTouch = false
+			descendantPar.CanTouch = false
+			descendantPar.AudioCanCollide = false
+			descendantPar.CastShadow = false
+			descendantPar.Anchored = true
+			if descendant.Name ~= "HumanoidRootPart" or descendant.Name ~= "Rootpart" then
+				descendantPar.Transparency = 0.5
+				
+			end
+		end
+	end
+
+	local petsClientGhostFolder = ServerStorage.Pets:Clone()
+	petsClientGhostFolder.Name = "PetsTransparentTemplates"
+	
+	local petsClientGhost = petsClientGhostFolder:GetDescendants()
+	for _, pet in petsClientGhost do
+		setCollider(pet, fullOptimizedAndTransparency)
+	end
+	petsClientGhostFolder.Parent = ReplicatedFirst
+
 	-- CLoning the server authorative pets in replicated storage for havin pets with animation controller avaible for rendering
 	local petModels = ServerStorage.Pets:Clone()
 	petModels.Name = "PetModels"

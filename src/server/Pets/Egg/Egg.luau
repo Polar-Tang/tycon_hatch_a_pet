@@ -4,7 +4,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
-local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
+local EggsByColor = require(ReplicatedStorage.Pets.EggsByColor)
+local PetsByClassificationArray = require(ReplicatedStorage.Pets.PetsByClassificationArray)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local Constants = require(ReplicatedStorage.utils.Constants)
@@ -62,6 +63,7 @@ function Egg:CloneModel(): Model
 	local clone = template:Clone()
 	self.model = clone
 	self.model.Name = "Egg"
+	self.model:SetAttribute(Constants.EggCategory, self.color)
 	eggByModel[clone] = self
 	return clone
 end
@@ -116,14 +118,11 @@ function Egg:Hatch()
 	print("Rarity: " .. rarity )
 
 	local petsSameRarity: { petNames }?
-	local classification = EggColorToClassification[self.color]
-	if classification then
-		petsSameRarity = PetsByClassification[classification][rarity]
-	else
-		local mappedRarity: rarity? = EggColorToRarity[self.color]
-		if mappedRarity then
-			petsSameRarity = PetsByRarity[mappedRarity]
-		end
+	local eggData = EggsByColor[self.color]
+	if eggData and eggData.classification then
+		petsSameRarity = PetsByClassificationArray[eggData.classification][rarity]
+	elseif eggData and eggData.rarity then
+		petsSameRarity = PetsByRarity[eggData.rarity]
 	end
 
 	if not petsSameRarity or #petsSameRarity == 0 then

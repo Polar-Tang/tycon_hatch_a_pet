@@ -8,7 +8,7 @@ export type nameToAction = {
 	image: string,
 	greetings: (selfParent: Model) -> (),
 	imageSize: UDim2,
-	promptTrigger: (Player, Model) -> (),
+	promptTrigger: (Player, Model, number?) -> (),
 	updatePrompt: () -> (),
 	finishPrompt: () -> (),
 	default: boolean?,

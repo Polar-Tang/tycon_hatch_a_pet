@@ -11,6 +11,7 @@ module.animationHandler = "AnimationHandler"
 
 module.hatchEgg = "EggReady"
 module.playerEggId = "PleyerId"
+module.EggCategory = "EggCategory"
 
 module.GroundY = 22.887 --1.506 -- --1.506 -- --
 

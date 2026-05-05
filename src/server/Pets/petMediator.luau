@@ -88,8 +88,12 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: strin
 	egg:StartHatching()
 end)
 
-HatchEggRemote.OnServerEvent:Connect(function(player: Player, eggModel: Instance)
+HatchEggRemote.OnServerEvent:Connect(function(player: Player, eggModel: Instance, startTime: number)
 	if not eggModel or not eggModel:IsA("Model") then
+		return
+	end
+
+	if typeof(startTime) ~= "number" then
 		return
 	end
 
@@ -102,7 +106,10 @@ HatchEggRemote.OnServerEvent:Connect(function(player: Player, eggModel: Instance
 		return
 	end
 
-	egg:Hatch()
+	local delaySeconds = math.max(0, (startTime + 5) - workspace:GetServerTimeNow())
+	task.delay(delaySeconds, function()
+		egg:Hatch()
+	end)
 end)
 
 local function calculatePriceByStats(petStats: PetTypes.petStats, petRarity: PetTypes.rarity)
