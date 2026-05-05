@@ -195,7 +195,7 @@ addPet("Bear", {
 
 addPet("Turtle", {
 	walkSpeed = 10,
-	["velocity"] = 6,
+	["velocity"] = 4,
 	CameraDistanceFactor = 1.2,
 	CameraDistanceFactorPetPanel = 1,
 	["speed"] = 1,

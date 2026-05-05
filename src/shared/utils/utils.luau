@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local testPart = require(script.Parent.testPart)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 
@@ -35,16 +36,7 @@ utils.fixPetY = function(model: Model, root: BasePart)
 	return root.Position.Y
 end
 
-function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: number)
-	assert(model.PrimaryPart, "Model must have a PrimaryPart")
-
-	local primaryPart = model.PrimaryPart
-
-	-- Start ray above the pet
-	-- 1.325
-	local origin = primaryPart.Position + Vector3.new(0, rayHeight, 0)
-	local direction = Vector3.new(0, -rayDepth, 0)
-
+function utils.CastRay(origin: Vector3, direction: Vector3): RaycastResult?
 	local params: RaycastParams = RaycastParams.new()
 	params.FilterDescendantsInstances = CollectionService:GetTagged("NPC")
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -55,12 +47,27 @@ function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: num
 	if not result then
 		return nil -- no ground found
 	end
+	return result
+end
+
+function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: number)
+	assert(model.PrimaryPart, "Model must have a PrimaryPart")
+
+	local primaryPart = model.PrimaryPart
+	-- Start ray above the pet
+	-- 1.325
+
 	-- Get model bounding box
 	local _, size = model:GetBoundingBox()
 
+	local origin = primaryPart.Position + Vector3.new(0, rayHeight, 0)
+	local direction = Vector3.new(0, -rayDepth, 0)
+
+	local result = utils.CastRay(origin, direction)
+
 	-- Calculate correct Y (ground + half height)
 	local correctedY = result.Position.Y
-
+	print("is failing the correctedY ? ", correctedY)
 	return correctedY, result
 end
 
@@ -172,7 +179,7 @@ utils.bossCoins = function(cash)
 end
 
 utils.getPetRarity = function(petName: PetTypes.petNames)
-	if not petData[petName] then 
+	if not petData[petName] then
 		return
 	end
 	return petData[petName].rarity

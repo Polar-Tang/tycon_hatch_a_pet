@@ -27,8 +27,14 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	-- pet.PrimaryPart.Position = position or PlotService:GetRandPosition(plot)
 	local endPos = position or PlotService:GetRandPosition(plot)
+	local origin = endPos + Vector3.new(0, 20, 0)
+	local direction = Vector3.new(0, -100, 0)
+
+	local result = utils.CastRay(origin, direction)
+	endPos = Vector3.new(endPos.X, result.Position.Y, endPos.Z)
 
 	pet.Parent = workspace
+	pet:MoveTo(endPos)
 	-- pet.PrimaryPart.Position = endPos
 
 	CollectionService:AddTag(pet, "NPC")
@@ -38,7 +44,6 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	CollectionService:AddTag(pet, "pets_" .. userId)
 	utils.ScaleToLvl(pet, petInfo.petLvl)
 	pet:SetAttribute("Level", petInfo.petLvl)
-	utils.ArrangeYPosition(pet, endPos)
 end
 
 function PetService.getPlayerPets(player: Player): { Model }
