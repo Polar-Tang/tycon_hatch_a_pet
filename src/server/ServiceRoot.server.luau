@@ -30,7 +30,6 @@ serviceBag:Init()
 serviceBag:Start()
 _G.FistBag = nil
 _G.ServiceBag = serviceBag
-print(serviceBag, " serviceBag ")
 
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local Env = require(script.Parent.Env)

@@ -55,7 +55,6 @@ function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: num
 	if not result then
 		return nil -- no ground found
 	end
-
 	-- Get model bounding box
 	local _, size = model:GetBoundingBox()
 
