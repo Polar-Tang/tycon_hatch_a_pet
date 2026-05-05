@@ -43,44 +43,6 @@ Events.ProximityPrompt.OnServerEvent:Connect(function(player, promptInfo)
 	local prompt = promptInfo.prompt
 	local inputType = promptInfo.inputType
 
-	-- EZ anti exploits checks
-	do
-		if not npcModel then
-			print("npc model exists in only in the client")
-			return
-		end
-		local theNpcInfo: npcTypes.npcMap = npcMap[(npcModel.Name or npcName)]
-		if not theNpcInfo then
-			print("no theNpcInfo")
-			return
-		end
-		if theNpcInfo.id ~= id then
-			print("no id")
-			return
-		end
-		local RealNPC = theNpcInfo.model
-		if not RealNPC then
-			print("npc model not found")
-			return
-		end
-		if RealNPC ~= npcModel then
-			print("npc model false")
-			return
-		end
-		local RealPrompt = RealNPC:FindFirstChildOfClass("ProximityPrompt")
-
-		if RealPrompt ~= prompt then
-			print("np prompt found in NPC")
-			return
-		end
-		-- Validate distance (anti-teleport exploit)
-		-- local distance = (player.Character.HumanoidRootPart.Position - npcModel.PrimaryPart.Position).Magnitude
-		-- if distance > prompt.MaxActivationDistance + 5 then
-		-- 	print("Too far from the npc")
-		-- 	return
-		-- end
-	end
-
 	local prompt_contract: promptyInfo = {
 		id = id,
 		npc = npcModel,

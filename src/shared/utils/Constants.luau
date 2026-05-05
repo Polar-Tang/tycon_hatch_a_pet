@@ -9,6 +9,9 @@ module.spawnPoitSuffix = "boss_point_"
 module.PetFollower = "PetFollower"
 module.animationHandler = "AnimationHandler"
 
+module.hatchEgg = "EggReady"
+module.playerEggId = "PleyerId"
+
 module.GroundY = 22.887 --1.506 -- --1.506 -- --
 
 return module

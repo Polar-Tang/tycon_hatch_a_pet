@@ -77,7 +77,7 @@ function PromptProvider:didMount()
 	local promptCreator = ProximityPrompt.OnClientEvent:Connect(function(data)
 		local npc: Model = data.npc
 		local id = data.id
-		local prompty: ProximityPrompt = data.prompt
+		local prompty: ProximityPrompt = data.prompt or npc:FindFirstChildOfClass("ProximityPrompt")
 
 		if
 			(Players.LocalPlayer.Character.PrimaryPart.Position - data.npc.PrimaryPart.Position).Magnitude
@@ -87,7 +87,9 @@ function PromptProvider:didMount()
 		end
 
 		local npcInterface: npcTypes.nameToAction = nameToAction[npc.Name]
-
+		if not npcInterface then 
+			return
+		end
 		if npcInterface.default then
 			npcInterface.greetings(npc)
 			DefaultProximityPrompt(prompty, data.inputType, npcInterface)

@@ -5,6 +5,7 @@ local StarterGui = game:GetService("StarterGui")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 --||Nevermore Shit||--
 ----------------------------- getting servicebag and loader -----------------------------
 
@@ -100,7 +101,7 @@ _G.pets_registry_value = _G.pets_registry_value or ValueObject.new(_G["pets_regi
 local PetNew = ReplicatedStorage.RemoteEvents.PetNew
 PetNew.OnClientEvent:Connect(function(data)
 	--print("data ", data)
-	local oldPets = _G["pets_registry"]
+	local _oldPets = _G["pets_registry"]
 	if data.allPets then
 		_G["pets_registry"] = data.allPets
 	elseif data.newPet then
@@ -152,6 +153,33 @@ do
 end
 
 local _ = require(script.Parent.RoactApp)
+
+do
+	local HatchEggRemote: RemoteEvent = ReplicatedStorage.RemoteEvents.HatchEgg
+
+	local function setupEggPrompt(instance: Instance)
+		if not instance:IsA("Model") then
+			return
+		end
+
+		if instance:GetAttribute(Constants.playerEggId) ~= Players.LocalPlayer.UserId then
+			return
+		end
+
+		npcUtils.createProximityPrompt(instance, {
+			npcId = "Egg",
+			Name = "Egg",
+			ActionText = "Hatch",
+			
+		})
+	end
+
+	CollectionService:GetInstanceAddedSignal(Constants.hatchEgg):Connect(setupEggPrompt)
+
+	for _, instance in CollectionService:GetTagged(Constants.hatchEgg) do
+		setupEggPrompt(instance)
+	end
+end
 
 local function getInputType(): EnumItem
 	local lastInput = UserInputService:GetLastInputType()

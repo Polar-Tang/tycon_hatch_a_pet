@@ -57,6 +57,26 @@ module["Kibly Shop Keeper"] = {
 	end,
 }
 
+module["Egg"] = {
+	name = "Egg",
+	greetings = function(selfParent: Model)
+		
+	end,
+	promptTrigger = function(_, egg)
+		ReplicatedStorage.RemoteEvents.HatchEgg:FireServer(egg)
+
+	end,
+	
+	finishPrompt = function()
+		kibly_primaryPart.CFrame = kibly_original_CF
+	end,
+	imageSize = UDim2.fromOffset(128, 86),
+	default = true,
+	checkIsOpen = function()
+		return gearShop.isOpen()
+	end,
+}
+
 local egg = workspace:WaitForChild("ShopKeepers"):WaitForChild("Egg Shop Keeper")
 
 local egg_primaryPart = egg.PrimaryPart or egg:WaitForChild("HumanoidRootPart")

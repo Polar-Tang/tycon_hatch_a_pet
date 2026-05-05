@@ -1,4 +1,5 @@
 --!strict
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
@@ -6,6 +7,7 @@ local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Inc
 local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local Constants = require(ReplicatedStorage.utils.Constants)
 local types = require(ReplicatedStorage.utils.types)
 local EggTypes = require(script.Parent.EggTypes)
 local rngUtils = require(script.Parent.rng.rngUtils)
@@ -19,6 +21,12 @@ type classification = "Carnivore" | "Herbivore"
 
 local Egg = {}
 Egg.__index = Egg
+
+local eggByModel: { [Model]: any } = {}
+
+function Egg.getByModel(model: Model)
+	return eggByModel[model]
+end
 
 local EggColorToRarity: { [string]: rarity } = {
 	white = "common",
@@ -53,6 +61,8 @@ function Egg:CloneModel(): Model
 
 	local clone = template:Clone()
 	self.model = clone
+	self.model.Name = "Egg"
+	eggByModel[clone] = self
 	return clone
 end
 
@@ -71,13 +81,19 @@ function Egg:Spawn(position: Vector3)
 		duration = self.time
 	}
 	npcUtils.createBillboard(self.model, billboardContract)
+
 end
 
 -- start hatching timer
 function Egg:StartHatching()
+	self.startTime = tick()
 	task.delay(self.time, function()
-		npcUtils.createProximityPrompt(self.model, {})
-		-- self:Hatch()
+		if not self.model then
+			return
+		end
+
+		self.model:SetAttribute(Constants.playerEggId, (self.player :: Player).UserId)
+		CollectionService:AddTag(self.model, Constants.hatchEgg)
 	end)
 end
 
@@ -86,6 +102,10 @@ function Egg:Hatch()
 	local incomes = Incomes:GetHandler(self.player)
 	if not incomes then
 		return
+	end
+	
+	if tick() - (self.startTime :: number) < self.time then
+		return 
 	end
 
 	local eggDropFactor = incomes:GetEggFactor()
@@ -114,10 +134,12 @@ function Egg:Hatch()
 	local index = math.random(1, #petsSameRarity)
 	local petName = petsSameRarity[index]
 	
-	PetService.createPet(self.player, petName, self.position)
+	local pos = Vector3.new(self.position.X, Constants.GroundY, self.position.Z)
+	PetService.createPet(self.player, petName, pos)
 	
 	-- destroy egg model
 	if self.model then
+		eggByModel[self.model] = nil
 		self.model:Destroy()
 	end
 end

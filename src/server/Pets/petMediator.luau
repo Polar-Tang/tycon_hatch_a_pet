@@ -14,6 +14,7 @@ local utils = require(ReplicatedStorage.utils.utils)
 local remotes = ReplicatedStorage.RemoteEvents
 
 local BuyEggRemote: RemoteEvent = remotes.BuyEggRemote
+local HatchEggRemote: RemoteEvent = remotes:WaitForChild("HatchEgg") :: RemoteEvent
 
 BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: string, position: Vector3, itemId: string })
 	local color = data.color
@@ -85,6 +86,23 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: strin
 	egg:CloneModel()
 	egg:Spawn(position)
 	egg:StartHatching()
+end)
+
+HatchEggRemote.OnServerEvent:Connect(function(player: Player, eggModel: Instance)
+	if not eggModel or not eggModel:IsA("Model") then
+		return
+	end
+
+	if eggModel:GetAttribute(Constants.playerEggId) ~= player.UserId then
+		return
+	end
+
+	local egg = Egg.getByModel(eggModel)
+	if not egg then
+		return
+	end
+
+	egg:Hatch()
 end)
 
 local function calculatePriceByStats(petStats: PetTypes.petStats, petRarity: PetTypes.rarity)

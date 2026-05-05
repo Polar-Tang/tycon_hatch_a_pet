@@ -390,8 +390,8 @@ local function createPrompt(prompt: ProximityPrompt, inputType, data: npcTypes.n
 		end)
 	end
 
-	triggeredConnection = prompt.Triggered:Connect(function()
-		data.promptTrigger()
+	triggeredConnection = prompt.Triggered:Connect(function(player)
+		data.promptTrigger(player, prompt.Parent)
 		for _, tween in ipairs(tweensForFadeOut) do
 			tween:Play()
 			-- HERE IT GOES

@@ -23,6 +23,7 @@ export type proximityPromptInfo = {
 	npcId: string,
 	Name: string,
 	ActionText: string,
+	cb: ((model: Model) -> ())?,
 }
 
 function npcUtils.createProximityPrompt(model: Model, data: proximityPromptInfo)
@@ -38,6 +39,12 @@ function npcUtils.createProximityPrompt(model: Model, data: proximityPromptInfo)
 	prompt.MaxActivationDistance = 24
 	prompt.ClickablePrompt = true
 	prompt.Parent = model
+
+	prompt.Triggered:Connect(function(_player)
+		if data.cb then
+			data.cb(model)
+		end
+	end)
 end
 
 function npcUtils.createBillboard(model: Model, data: types.billBoardContract)
