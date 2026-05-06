@@ -1,4 +1,4 @@
-export type EggColor = "red" | "green" | "blue" | "white"
+export type EggColor = "red" | "green" | "blue" | "white" | "purple" | "orange"
 
 export type EggData = {
 	color: EggColor,

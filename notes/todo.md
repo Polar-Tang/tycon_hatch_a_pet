@@ -13,5 +13,6 @@
 -[.] Use cooldown utility to get the time to create a pet in server Time, 
 #### monday-thursday
 -[.] Animation#1 do a for in pet same category to render different posible pets. 
--[] Animation#2 do a vfx trasure probably from the Egg:Hatch, create pet from server
+-[.] Animation#2 do a vfx trasure probably from the Egg:Hatch, create pet from server
+-[] Adding the new eggs
 -[] Finish

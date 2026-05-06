@@ -76,9 +76,9 @@ local function playEggPreview(egg: Model, startTime: number)
 	local nextSpawnTime = startTime
 	local previewConnection: RBXScriptConnection?
 
-	local createEffect = function(effect: Part, delay: number)
+	local createEffect = function(effect: Part, delay: number,position: Vector3)
 		local VFX = effect
-		effect.Position = petPos
+		effect.Position = position
 		VFX.Parent = Workspace
 		emiteParticles({ effect = VFX })
 		Debris:AddItem(VFX, delay)
@@ -89,11 +89,11 @@ local function playEggPreview(egg: Model, startTime: number)
 
 	local smoke = ReplicatedFirst.VFX.Smoke:Clone()
 	local delayNumber = endTime - startTime
-	createEffect(smoke, delayNumber)
+	createEffect(smoke, delayNumber, petPos)
 
 	task.delay(delayNumber, function()
 		local Treasure = ReplicatedFirst.VFX.Treasure:Clone()
-		createEffect(Treasure, 2)
+		createEffect(Treasure, 2, eggPivot.Position)
 	end)
 
 	local function animateClone(clone: Model)
@@ -259,14 +259,23 @@ module["Egg Shop Keeper"] = {
 			return
 		end
 		gearShop.open("Egg Shop")
-		gearShop.createItem(ItemData["White Egg"], function()
-			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("white")
-			ItemsEvent:FireServer(ItemData["White Egg"])
-		end)
-		gearShop.createItem(ItemData["Red Egg"], function()
-			-- ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer("red")
-			ItemsEvent:FireServer(ItemData["Red Egg"])
-		end)
+		local EggsNames = {
+			"White Egg",
+			"Red Egg",
+			"Green Egg",
+			"Blue Egg",
+			"Purple Egg",
+			"Orange Egg",
+		}
+		for _, eggName in ipairs(EggsNames) do
+			gearShop.createItem(ItemData[eggName], function()
+				ItemsEvent:FireServer(ItemData[eggName])
+			end)
+			-- gearShop.createItem(ItemData[eggName], function()
+			-- 	ReplicatedStorage.RemoteEvents.BuyEggRemote:FireServer(string.split(eggName, " ")[1]:lower())
+			-- end)
+		end
+		
 	end,
 	updatePrompt = function()
 		npcUtils.lookAtPlayer(egg)

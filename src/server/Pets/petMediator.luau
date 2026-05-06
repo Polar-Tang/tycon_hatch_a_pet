@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Egg = require(ServerScriptService.Pets.Egg.Egg)
+local EggShits = require(ServerScriptService.Pets.Egg.EggShits)
 local EggTypes = require(ServerScriptService.Pets.Egg.EggTypes)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
 local Registry = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
@@ -59,12 +60,9 @@ BuyEggRemote.OnServerEvent:Connect(function(player: Player, data: { color: strin
 		return
 	end
 
-	local expectedItemNameByColor = {
-		white = "White Egg",
-		red = "Red Egg",
-	}
+	
 
-	local expectedItemName = expectedItemNameByColor[our_egg_color]
+	local expectedItemName = EggShits.expectedItemNameByColor[our_egg_color]
 	if expectedItemName and inventoryItem.itemName ~= expectedItemName then
 		warn("Item color mismatch", player, itemId, color, inventoryItem.itemName)
 		return

@@ -1,4 +1,5 @@
 --||Services||--
+local CollectionService = game:GetService("CollectionService")
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
@@ -31,6 +32,7 @@ serviceBag:Start()
 _G.FistBag = nil
 _G.ServiceBag = serviceBag
 
+local Constants = require(ReplicatedStorage.utils.Constants)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
@@ -85,6 +87,7 @@ do
 			if descendant.Name == "Rootpart" then
 				descendant.Anchored = true
 			end
+			CollectionService:AddTag(descendant, Constants.PetArrangeExclue)
 		end
 	end
 

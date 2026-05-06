@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local Constants = require(script.Parent.Constants)
 local testPart = require(script.Parent.testPart)
 local petData = require(ReplicatedStorage.Nevermore.Custom.npc.src.Shared.Binder.helpers.petData)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
@@ -38,7 +39,7 @@ end
 
 function utils.CastRay(origin: Vector3, direction: Vector3): RaycastResult?
 	local params: RaycastParams = RaycastParams.new()
-	params.FilterDescendantsInstances = CollectionService:GetTagged("NPC")
+	params.FilterDescendantsInstances = CollectionService:GetTagged(Constants.PetArrangeExclue)
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.CollisionGroup = "NPCs"
 
@@ -50,32 +51,34 @@ function utils.CastRay(origin: Vector3, direction: Vector3): RaycastResult?
 	return result
 end
 
-function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: number)
+function utils.GetGroundYPosition(model: Model, rayHeight: number, rayDepth: number): (number?, RaycastResult? )
 	assert(model.PrimaryPart, "Model must have a PrimaryPart")
 
 	local primaryPart = model.PrimaryPart
+	local startPos = Vector3.new(primaryPart.Position.X, Constants.GroundY, primaryPart.Position.Z)
 	-- Start ray above the pet
 	-- 1.325
 
 	-- Get model bounding box
 	local _, size = model:GetBoundingBox()
 
-	local origin = primaryPart.Position + Vector3.new(0, rayHeight, 0)
+	local origin = startPos + Vector3.new(0, rayHeight, 0)
 	local direction = Vector3.new(0, -rayDepth, 0)
 
-	local result = utils.CastRay(origin, direction)
-
+	local result: RaycastResult? = utils.CastRay(origin, direction)
+	if not result then 
+		return nil, nil
+	end
+	
 	-- Calculate correct Y (ground + half height)
 	local correctedY = result.Position.Y
-	print("is failing the correctedY ? ", correctedY)
 	return correctedY, result
 end
 
 function utils.ArrangeYPosition(model: Model, position: Vector3?)
 	local y = utils.GetGroundYPosition(model, 20, 100)
-	local root = model.PrimaryPart
-	local currentPos = position or root.Position
-
+	local currentPos = model.PrimaryPart.Position
+	
 	if y then
 		local newPosition = Vector3.new(currentPos.X, y, currentPos.Z)
 		model:MoveTo(newPosition)

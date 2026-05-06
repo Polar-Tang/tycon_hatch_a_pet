@@ -27,6 +27,7 @@ local function onDescendantAdded(descendant)
 
 	if descendant:IsA("BasePart") then
 		descendant.CollisionGroup = "Players"
+		CollectionService:AddTag(descendant, Constants.PetArrangeExclue)
 	end
 end
 

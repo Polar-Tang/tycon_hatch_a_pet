@@ -76,18 +76,24 @@ function Egg:Spawn(position: Vector3)
 		self:CloneModel()
 	end
 
+	for _, descendant in self.model:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			CollectionService:AddTag(descendant, Constants.PetArrangeExclue)
+			descendant.CollisionGroup = "Npcs"
+		end
+	end
+
 	self.model.Parent = Workspace
-	utils.ArrangeYPosition(self.model, position)
+	self.model:MoveTo(position)
 	CollectionService:AddTag(self.model, Constants.PetArrangeExclue)
 
 	self.position = position
 	local billboardContract: types.billBoardContract = {
 		componentName = "ProgresBar",
-		model = self.model,
-		duration = self.time
+		model = (self.model::any),
+		duration = self.time,
 	}
-	npcUtils.createBillboard(self.model, billboardContract)
-
+	npcUtils.createBillboard((self.model::any), billboardContract)
 end
 
 -- start hatching timer
@@ -109,9 +115,9 @@ function Egg:Hatch()
 	if not incomes then
 		return
 	end
-	
+
 	if tick() - (self.startTime :: number) < self.time then
-		return 
+		return
 	end
 
 	local eggDropFactor = incomes:GetEggFactor()
@@ -133,10 +139,10 @@ function Egg:Hatch()
 
 	local index = math.random(1, #petsSameRarity)
 	local petName = petsSameRarity[index]
-	
+
 	local pos = Vector3.new(self.position.X, Constants.GroundY, self.position.Z)
 	PetService.createPet(self.player, petName, pos)
-	
+
 	-- destroy egg model
 	if self.model then
 		eggByModel[self.model] = nil

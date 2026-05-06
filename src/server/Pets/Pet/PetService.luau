@@ -5,8 +5,10 @@ local ServerStorage = game:GetService("ServerStorage")
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local BestiaryList = require(ReplicatedStorage.Nevermore.Custom.bestiary.src.Server.BestiaryList)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local Constants = require(ReplicatedStorage.utils.Constants)
 -- local testPart = require(ReplicatedStorage.utils.testPart)
 local utils = require(ReplicatedStorage.utils.utils)
+
 
 local PetService = {}
 PetService.__index = PetService
