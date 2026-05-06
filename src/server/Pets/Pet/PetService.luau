@@ -34,7 +34,7 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	endPos = Vector3.new(endPos.X, result.Position.Y, endPos.Z)
 
 	pet.Parent = workspace
-	pet:MoveTo(endPos)
+	pet:PivotTo(CFrame.new(endPos))
 	-- pet.PrimaryPart.Position = endPos
 
 	CollectionService:AddTag(pet, "NPC")
