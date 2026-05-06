@@ -27,7 +27,7 @@ itemData["SpeedCoil"] = {
 itemData["White Egg"] = {
 	image = assets["egg_icon"],
 	itemName = "White Egg",
-	title = "SpeedCoil",
+	title = "White Egg",
 	description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
 	template = game.ReplicatedStorage
 		:WaitForChild("Items")
@@ -65,5 +65,20 @@ itemData["Red Egg"] = {
 		return CFrame.new(1, 1, 0) * CFrame.new(0, 0, -distance) * CFrame.Angles(math.rad(180), 0, math.rad(180))
 	end,
 }
+local function createEggData(eggColor)
+	local egg = table.clone(itemData["Red Egg"])
+	egg.itemName = eggColor .. " Egg"
+	egg.template = game.ReplicatedStorage
+		:WaitForChild("Items")
+		:WaitForChild("Templates")
+		:WaitForChild("Eggs")
+		:WaitForChild(eggColor:lower())
+	return egg
+end
+
+itemData["Green Egg"] = createEggData("Green")
+itemData["Blue Egg"] = createEggData("Blue")
+itemData["Purple Egg"] = createEggData("Purple")
+itemData["Orange Egg"] = createEggData("Orange")
 
 return itemData
