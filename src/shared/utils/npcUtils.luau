@@ -24,6 +24,7 @@ export type proximityPromptInfo = {
 	Name: string,
 	ActionText: string,
 	cb: ((model: Model) -> ())?,
+	HoldDuration : number?,
 }
 
 function npcUtils.createProximityPrompt(model: Model, data: proximityPromptInfo)
@@ -33,7 +34,7 @@ function npcUtils.createProximityPrompt(model: Model, data: proximityPromptInfo)
 	prompt.Name = data.npcId --
 	prompt.ObjectText = data.Name
 	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.HoldDuration = 0
+	prompt.HoldDuration = data.HoldDuration and data.HoldDuration or 0
 	prompt.Style = Enum.ProximityPromptStyle.Custom
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = 24

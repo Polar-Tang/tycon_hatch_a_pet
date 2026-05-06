@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local PlotService = require(ReplicatedStorage.NPC.Servicies.PlotService)
@@ -14,6 +15,7 @@ local FenceBoundsService = require(ReplicatedStorage.NPC.Servicies.PlotService)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local BinderProvider = require(ReplicatedStorage.Nevermore.Quenty.binder.Shared.BinderProvider)
 local ServiceBag = require(ReplicatedStorage.Nevermore.Quenty.servicebag.Shared.ServiceBag)
+local Constants = require(ReplicatedStorage.utils.Constants)
 local utils = require(ReplicatedStorage.utils.utils)
 local sharedTypes = require(ReplicatedStorage.utils.types)
 
@@ -43,6 +45,7 @@ function module.PlayerAdded(player: Player, playerData)
 	end
 
 	local character = player.Character or player.CharacterAdded:Wait()
+	CollectionService:AddTag(character, Constants.PetArrangeExclue)
 	for _, descendant in character:GetDescendants() do
 		onDescendantAdded(descendant)
 	end

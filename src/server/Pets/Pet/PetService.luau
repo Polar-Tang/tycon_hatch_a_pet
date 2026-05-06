@@ -42,6 +42,9 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 
 	CollectionService:AddTag(pet, "plot_" .. plot:FindFirstChild("PlotId").Value)
 	CollectionService:AddTag(pet, "pets_" .. userId)
+	CollectionService:AddTag(pet, Constants.PetArrangeExclue)
+
+
 	utils.ScaleToLvl(pet, petInfo.petLvl)
 	pet:SetAttribute("Level", petInfo.petLvl)
 end

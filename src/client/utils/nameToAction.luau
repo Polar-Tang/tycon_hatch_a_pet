@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local StarterPlayer = game:GetService("StarterPlayer")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 local ItemData = require(ReplicatedStorage.Items.ItemData)
 local Constants = require(ReplicatedStorage.utils.Constants)
 local npcTypes = require(ReplicatedStorage.utils.npcTypes)
@@ -10,6 +11,7 @@ local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local EggsByColor = require(ReplicatedStorage.Pets.EggsByColor)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetsByClassificationArray = require(ReplicatedStorage.Pets.PetsByClassificationArray)
+local emiteParticles = require(ReplicatedStorage.utils.emiteParticles)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local gearShop = require(StarterPlayer.StarterPlayerScripts.facade.gearShop)
 
@@ -65,15 +67,36 @@ local function playEggPreview(egg: Model, startTime: number)
 	previewFolder.Parent = workspace
 
 	local clonedPets = {}
-	
+
 	local eggPivot = egg:GetPivot()
+	local petPos: Vector3 = eggPivot.Position + Vector3.new(0, 3, 0)
+
 	local endTime = startTime + 5
 	local timer = startTime
 	local nextSpawnTime = startTime
 	local previewConnection: RBXScriptConnection?
 
+	local createEffect = function(effect: Part, delay: number)
+		local VFX = effect
+		effect.Position = petPos
+		VFX.Parent = Workspace
+		emiteParticles({ effect = VFX })
+		Debris:AddItem(VFX, delay)
+		task.delay(delay, function()
+			emiteParticles({ effect = VFX, destroy = true })
+		end)
+	end
+
+	local smoke = ReplicatedFirst.VFX.Smoke:Clone()
+	local delayNumber = endTime - startTime
+	createEffect(smoke, delayNumber)
+
+	task.delay(delayNumber, function()
+		local Treasure = ReplicatedFirst.VFX.Treasure:Clone()
+		createEffect(Treasure, 2)
+	end)
+
 	local function animateClone(clone: Model)
-		local petPos = eggPivot.Position + Vector3.new(0,3,0)
 		clone:MoveTo(petPos)
 		clone:ScaleTo(0.5)
 
@@ -101,19 +124,19 @@ local function playEggPreview(egg: Model, startTime: number)
 
 		Debris:AddItem(clone, 1.1)
 	end
-	
+
 	local lastIndex = math.random(1, #petNames)
 	previewConnection = RunService.Heartbeat:Connect(function(deltaTime)
 		timer += deltaTime
-		
+
 		-- run task per second
-		if timer - nextSpawnTime  >= 1 then
+		if timer - nextSpawnTime >= 1 then
 			nextSpawnTime = timer
 
-			if lastIndex == #petNames then 
+			if lastIndex == #petNames then
 				lastIndex = 1
 			else
-				lastIndex+=1
+				lastIndex += 1
 			end
 			local petName = petNames[lastIndex]
 
@@ -127,9 +150,8 @@ local function playEggPreview(egg: Model, startTime: number)
 				table.insert(clonedPets, clone)
 				animateClone(clone)
 			end
-
 		end
-		
+
 		if timer > endTime then
 			if previewConnection then
 				previewConnection:Disconnect()

@@ -2,6 +2,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Workspace = game:GetService("Workspace")
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local EggsByColor = require(ReplicatedStorage.Pets.EggsByColor)
@@ -10,6 +11,7 @@ local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 local Constants = require(ReplicatedStorage.utils.Constants)
 local types = require(ReplicatedStorage.utils.types)
+local utils = require(ReplicatedStorage.utils.utils)
 local EggTypes = require(script.Parent.EggTypes)
 local rngUtils = require(script.Parent.rng.rngUtils)
 local PetService = require(ServerScriptService.Pets.Pet.PetService)
@@ -74,8 +76,10 @@ function Egg:Spawn(position: Vector3)
 		self:CloneModel()
 	end
 
-	self.model.Parent = workspace
-	self.model:MoveTo(position)
+	self.model.Parent = Workspace
+	utils.ArrangeYPosition(self.model, position)
+	CollectionService:AddTag(self.model, Constants.PetArrangeExclue)
+
 	self.position = position
 	local billboardContract: types.billBoardContract = {
 		componentName = "ProgresBar",
@@ -112,10 +116,7 @@ function Egg:Hatch()
 
 	local eggDropFactor = incomes:GetEggFactor()
 	local drop = rngUtils.getDrop(eggDropFactor)
-	print("Random drop: " .. drop)
-	print("Luck: " ..eggDropFactor)
 	local rarity = rngUtils.getRarity(drop)
-	print("Rarity: " .. rarity )
 
 	local petsSameRarity: { petNames }?
 	local eggData = EggsByColor[self.color]
