@@ -68,6 +68,7 @@ itemData["Red Egg"] = {
 local function createEggData(eggColor)
 	local egg = table.clone(itemData["Red Egg"])
 	egg.itemName = eggColor .. " Egg"
+	egg.title = eggColor .. " Egg"
 	egg.template = game.ReplicatedStorage
 		:WaitForChild("Items")
 		:WaitForChild("Templates")

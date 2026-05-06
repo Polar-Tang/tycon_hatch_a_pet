@@ -1,8 +1,4 @@
 {
-  "className": "Model",
-  "properties": {
-    "PrimaryPart": {
-      "$ref": "Handle"
-    }
-  }
+  "className": "Model"
+  
 }
