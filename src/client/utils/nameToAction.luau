@@ -55,6 +55,7 @@ end
 
 local function playEggPreview(egg: Model, startTime: number)
 	local petNames = getEggPetNames(egg)
+	print("petNames ", petNames)
 	if #petNames == 0 then
 		return
 	end
@@ -64,20 +65,7 @@ local function playEggPreview(egg: Model, startTime: number)
 	previewFolder.Parent = workspace
 
 	local clonedPets = {}
-	for _, petName in ipairs(petNames) do
-		local template = petTemplates:FindFirstChild(petName)
-		if template and template:IsA("Model") then
-			local clone = template:Clone()
-			clone.Parent = previewFolder
-			table.insert(clonedPets, clone)
-		end
-	end
-
-	if #clonedPets == 0 then
-		previewFolder:Destroy()
-		return
-	end
-
+	
 	local eggPivot = egg:GetPivot()
 	local endTime = startTime + 5
 	local timer = startTime
@@ -85,7 +73,8 @@ local function playEggPreview(egg: Model, startTime: number)
 	local previewConnection: RBXScriptConnection?
 
 	local function animateClone(clone: Model)
-		clone:PivotTo(eggPivot)
+		local petPos = eggPivot.Position + Vector3.new(0,3,0)
+		clone:MoveTo(petPos)
 		clone:ScaleTo(0.5)
 
 		local elapsed = 0
@@ -112,23 +101,35 @@ local function playEggPreview(egg: Model, startTime: number)
 
 		Debris:AddItem(clone, 1.1)
 	end
-
+	
+	local lastIndex = math.random(1, #petNames)
 	previewConnection = RunService.Heartbeat:Connect(function(deltaTime)
 		timer += deltaTime
+		
+		-- run task per second
+		if timer - nextSpawnTime  >= 1 then
+			nextSpawnTime = timer
 
-		while nextSpawnTime <= timer and nextSpawnTime < endTime do
-			local petName = petNames[math.random(1, #petNames)]
+			if lastIndex == #petNames then 
+				lastIndex = 1
+			else
+				lastIndex+=1
+			end
+			local petName = petNames[lastIndex]
+
 			local template = petTemplates:FindFirstChild(petName)
 			if template and template:IsA("Model") then
 				local clone = template:Clone()
+				local pos = clone.PrimaryPart.Position
+				clone:PivotTo(CFrame.new(pos))
+
 				clone.Parent = previewFolder
 				table.insert(clonedPets, clone)
 				animateClone(clone)
 			end
 
-			nextSpawnTime += 1
 		end
-
+		
 		if timer > endTime then
 			if previewConnection then
 				previewConnection:Disconnect()

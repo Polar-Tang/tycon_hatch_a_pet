@@ -151,9 +151,11 @@ do
 			descendantPar.AudioCanCollide = false
 			descendantPar.CastShadow = false
 			descendantPar.Anchored = true
-			if descendant.Name ~= "HumanoidRootPart" or descendant.Name ~= "Rootpart" then
+			-- BAD DESIGN, coupling here
+			if descendant.Name ~= "Rootpart" then
 				descendantPar.Transparency = 0.5
-				
+			else 
+				descendantPar:PivotTo(descendantPar.CFrame * CFrame.Angles(0, 0, 0))
 			end
 		end
 	end
@@ -164,6 +166,10 @@ do
 	local petsClientGhost = petsClientGhostFolder:GetDescendants()
 	for _, pet in petsClientGhost do
 		setCollider(pet, fullOptimizedAndTransparency)
+		if pet:IsA("Model") and pet.PrimaryPart then 
+			local pos = pet.PrimaryPart.CFrame.Position
+			pet:PivotTo(CFrame.new(pos))
+		end
 	end
 	petsClientGhostFolder.Parent = ReplicatedFirst
 
