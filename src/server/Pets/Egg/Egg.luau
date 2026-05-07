@@ -6,9 +6,9 @@ local Workspace = game:GetService("Workspace")
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local EggsByColor = require(ReplicatedStorage.Pets.EggsByColor)
-local PetsByClassificationArray = require(ReplicatedStorage.Pets.PetsByClassificationArray)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
 local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
+local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
 local Constants = require(ReplicatedStorage.utils.Constants)
 local types = require(ReplicatedStorage.utils.types)
 local utils = require(ReplicatedStorage.utils.utils)
@@ -65,6 +65,9 @@ function Egg:CloneModel(): Model
 	local clone = template:Clone()
 	self.model = clone
 	self.model.Name = "Egg"
+	-- Due i create the models from rojo and i'm not sure how to set the primary part to its model we do this
+	self.model.PrimaryPart = self.model:FindFirstChildWhichIsA("BasePart")
+
 	self.model:SetAttribute(Constants.EggCategory, self.color)
 	eggByModel[clone] = self
 	return clone
@@ -127,7 +130,10 @@ function Egg:Hatch()
 	local petsSameRarity: { petNames }?
 	local eggData = EggsByColor[self.color]
 	if eggData and eggData.classification then
-		petsSameRarity = PetsByClassificationArray[eggData.classification][rarity]
+		local HerbiOrCarni = EggColorToClassification[self.color]
+		local petsByClassification = PetsByClassification[HerbiOrCarni]
+
+		petsSameRarity = petsByClassification[rarity]
 	elseif eggData and eggData.rarity then
 		petsSameRarity = PetsByRarity[eggData.rarity]
 	end

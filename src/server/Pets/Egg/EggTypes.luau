@@ -8,16 +8,29 @@ export type EggData = {
 	plot: BasePart,
 }
 
-local VALID_EGG_COLORS: { [string]: true } = {
-	red = true,
-	green = true,
-	blue = true,
-	white = true,
-}
 
 local module = {}
+
+
+module.expectedItemNameByColor = {
+	white = "White Egg",
+	red = "Red Egg",
+	green = "Green Egg",
+	blue = "Blue Egg",
+	purple = "Purple Egg",
+	orange = "Orange Egg",
+}
+
 function module.isEggColor(value: string): boolean
-	return VALID_EGG_COLORS[value] == true
+	return module.expectedItemNameByColor[value]
 end
+module.EggsNames = {
+	"White Egg",
+	"Red Egg",
+	"Green Egg",
+	"Blue Egg",
+	"Purple Egg",
+	"Orange Egg",
+}
 
 return module

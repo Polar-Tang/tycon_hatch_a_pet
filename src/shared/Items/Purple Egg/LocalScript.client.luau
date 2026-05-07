@@ -27,7 +27,7 @@ local function onEquip()
 		eggPreviewHandler = nil
 	end
 
-	eggPreviewHandler = previewHandler.new(tool, player, "white")
+	eggPreviewHandler = previewHandler.new(tool, player, "purple")
 	eggPreviewHandler:ConnectBrio(onUnequip)
 
 end

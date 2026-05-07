@@ -170,7 +170,7 @@ do
 			npcId = "Egg",
 			Name = "Egg",
 			ActionText = "Hatch",
-			HoldDuration = 2
+			HoldDuration = 1.5
 		})
 	end
 

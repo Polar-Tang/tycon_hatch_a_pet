@@ -9,8 +9,8 @@ local Constants = require(ReplicatedStorage.utils.Constants)
 local npcTypes = require(ReplicatedStorage.utils.npcTypes)
 local npcUtils = require(ReplicatedStorage.utils.npcUtils)
 local EggsByColor = require(ReplicatedStorage.Pets.EggsByColor)
+local PetsByClassification = require(ReplicatedStorage.Pets.PetsByClassification)
 local PetsByRarity = require(ReplicatedStorage.Pets.PetsByRarity)
-local PetsByClassificationArray = require(ReplicatedStorage.Pets.PetsByClassificationArray)
 local emiteParticles = require(ReplicatedStorage.utils.emiteParticles)
 local assets = require(StarterPlayer.StarterPlayerScripts.Public.assets)
 local gearShop = require(StarterPlayer.StarterPlayerScripts.facade.gearShop)
@@ -40,7 +40,7 @@ local function getEggPetNames(egg: Model): { string }
 	end
 
 	if eggData.classification then
-		local petsByClassification = PetsByClassificationArray[eggData.classification]
+		local petsByClassification = PetsByClassification[eggData.classification]
 		if petsByClassification then
 			local pets = {}
 			for _, petList in pairs(petsByClassification) do
