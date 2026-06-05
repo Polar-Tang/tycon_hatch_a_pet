@@ -103,7 +103,7 @@ addPet("Elephant", {
 	walkSpeed = 10,
 	CameraDistanceFactor = 1.1,
 	CameraDistanceFactorPetPanel = 1,
-	["velocity"] = 4,
+	["velocity"] = 2,
 	["speed"] = 3,
 	YOffset = 1.3,
 	["animationRunSpeed"] = 4,
@@ -195,7 +195,7 @@ addPet("Bear", {
 
 addPet("Turtle", {
 	walkSpeed = 10,
-	["velocity"] = 4,
+	["velocity"] = 2,
 	CameraDistanceFactor = 1.2,
 	CameraDistanceFactorPetPanel = 1,
 	["speed"] = 1,

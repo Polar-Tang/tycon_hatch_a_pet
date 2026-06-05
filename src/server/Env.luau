@@ -1,5 +1,5 @@
 local module = {}
 
-module.DB_URI = "rise_a_pet_test44"
+module.DB_URI = "rise_a_pet_test45"
 
 return module

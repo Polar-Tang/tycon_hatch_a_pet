@@ -59,6 +59,7 @@ end
 function InventoryUI:render()
 	return withCtx(function(ctx)
 		local inventoryCtx = ctx.InventoryContext
+		print("Inventory UI rendered ", inventoryCtx.items)
 		if not inventoryCtx.isPanelOpen then
 			return Roact.createFragment({})
 		end
@@ -99,7 +100,7 @@ function InventoryUI:render()
 				}),
 			}),
 
-			Tooltip = self.state.isOpenTooltip and Roact.createElement(inventoryTooltip, {
+			Tooltip = self.state.isOpenTooltip and  Roact.createElement(inventoryTooltip, {
 				closeToolTip = function()
 					self:closeToolTip()
 				end,

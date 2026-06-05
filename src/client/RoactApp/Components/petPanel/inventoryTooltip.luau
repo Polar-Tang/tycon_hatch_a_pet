@@ -81,6 +81,8 @@ function tooltip:render()
 				ZIndex = layer + 1,
 				[Roact.Event.Activated] = function()
 					print("Sell item:", item.itemName)
+					self.props.closeToolTip()
+
 				end,
 			}),
 			EquipButton = Roact.createElement("TextButton", {
@@ -94,6 +96,8 @@ function tooltip:render()
 				ZIndex = layer + 1,
 				[Roact.Event.Activated] = function()
 					RemoteEquipment:FireServer({ item = item })
+					self.props.closeToolTip()
+
 				end,
 			}),
 		}),
