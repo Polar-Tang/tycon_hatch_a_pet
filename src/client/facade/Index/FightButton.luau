@@ -22,8 +22,10 @@ function FightButton.open()
 
 		local bossToFight = _G["bossToFight"]
 		--print("bossToFight ", bossToFight)
+		-- Send the team as an ordered array. Only one pet is selectable today, so
+		-- this is an array of one; a future multi-select UI just appends more ids.
 		local dataFight: NpcFighterTypes.combatInstanceData = {
-			petId = pet_to_fight.petId,
+			petIds = { pet_to_fight.petId },
 			bossName = bossToFight.petName,
 		}
 		game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireServer(dataFight)

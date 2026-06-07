@@ -8,6 +8,7 @@ module.teleportPointSuffix = "telepor_point_"
 module.spawnPoitSuffix = "boss_point_"
 module.PetFollower = "PetFollower"
 module.animationHandler = "AnimationHandler"
+module.CombatBand = "CombatBand"
 
 module.hatchEgg = "EggReady"
 module.playerEggId = "PleyerId"

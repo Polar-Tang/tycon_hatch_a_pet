@@ -57,7 +57,6 @@ end
 
 local function playEggPreview(egg: Model, startTime: number)
 	local petNames = getEggPetNames(egg)
-	print("petNames ", petNames)
 	if #petNames == 0 then
 		return
 	end

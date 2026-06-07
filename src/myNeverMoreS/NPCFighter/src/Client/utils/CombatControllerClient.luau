@@ -84,6 +84,7 @@ do
 		local controllerdataInint = table.clone(combatInitData)
 		controllerdataInint.pet = parent
 		controllerdataInint.maid = maid
+		controllerdataInint.band = band
 		controllerdataInint.hrp = parent.PrimaryPart or parent:FindFirstChild("RootPart")
 		controllerdataInint.player = player
 		controllerdataInint.player_character = playerCharacter
@@ -142,6 +143,8 @@ do
 		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerBoss")
 		local data = table.clone(controllerdataInint)
 		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
+		-- Hand the controller to the binder maid so NPCBase:Destroy tears it down
+		maid:GiveTask(data.DeadController)
 		return data
 	end
 
@@ -166,7 +169,9 @@ do
 		-- billboardService:resizes()
 		-- petData.billboardService = billboardService
 		-- setUpAtt(parent, petInfo, maid, current_pet_stats)
-		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, "PlayerPet")
+		-- each follower addresses its own health value via its band ("PlayerPetN")
+		local band = combatInitData.band or parent:GetAttribute(Constants.CombatBand) or "PlayerPet1"
+		local controllerdataInint = setCOntroler(parent, serviceBag, player, maid, combatInitData, band)
 
 		CollectionService:AddTag(parent, "petFollower" .. tostring(player.UserId))
 		local data = table.clone(controllerdataInint)
@@ -174,15 +179,18 @@ do
 		data.DeadController = DeadController.new(controllerdataInint, serviceBag) or nil
 		data.TargetController = TargetController.new(controllerdataInint, serviceBag, player)
 		data.MovementController = MovementController.new(controllerdataInint, serviceBag, player)
-		local big_maid = Maid.new()
-		big_maid:GiveTask(data.TargetController)
-		big_maid:GiveTask(data.MovementController)
-		local autoDestroyCon = parent.AncestryChanged:Connect(function(_, newParent)
-			if newParent == nil then
-				big_maid:DoCleaning()
-			end
-		end)
-		big_maid:GiveTask(autoDestroyCon)
+
+		-- Give every controller to the binder maid (NPCBase already :DoCleaning()s
+		-- it when the pet model is removed), instead of a parallel maid with its
+		-- own duplicate AncestryChanged connection.
+		local controllers = {
+			DeadController = data.DeadController,
+			TargetController = data.TargetController,
+			MovementController = data.MovementController,
+		}
+		for _, controller in controllers do
+			maid:GiveTask(controller)
+		end
 		return data
 	end
 end
@@ -198,6 +206,79 @@ function CombatControllerClient.cleanupInstances()
 	for _, boss in ipairs(bosses) do
 		boss:Destroy()
 	end
+end
+
+-- Clones one player pet follower from its reference model in the workspace,
+-- copies scale/attributes, stamps the band so the binder can address its health,
+-- tags it for the PetFollower binder, and parks it near the player.
+local function spawnPetFollower(petEntry: NpcFighterTypes.petStats, index: number, band: string)
+	-- Get reference pet from workspace to copy attributes and scale
+	local petToClone = workspace:FindFirstChild(petEntry.petId)
+	if not petToClone then
+		print("reference pet not found in workspace")
+		return
+	end
+
+	local petTemplateModel = ReplicatedFirst.Pets:FindFirstChild(petToClone:GetAttribute("petName"))
+	if not petTemplateModel then
+		print("pet template not found in ReplicatedFirst.Pets")
+		return
+	end
+
+	-- Clone the template
+	local petTemplate = petTemplateModel:Clone()
+	if not petTemplate then
+		print("petTemplate not found")
+		return
+	end
+
+	local MAX_SIZE_THRESHOLD = 20.0 -- studs, adjust as needed
+	-- Apply the same scale factor from the reference pet
+	local referenceScale = petToClone:GetScale()
+	local currentSize = petToClone:GetExtentsSize()
+
+	if currentSize.Magnitude > MAX_SIZE_THRESHOLD then
+		warn(
+			string.format(
+				"PetSystem: Extents magnitude %.2f exceeds threshold %.2f, skipping ScaleTo",
+				currentSize.Magnitude,
+				MAX_SIZE_THRESHOLD
+			)
+		)
+		local clampedScale = referenceScale * (MAX_SIZE_THRESHOLD / currentSize.Magnitude)
+		petTemplate:ScaleTo(clampedScale)
+	else
+		petTemplate:ScaleTo(referenceScale)
+	end
+
+	local humanoid: Humanoid = petTemplate:WaitForChild("Humanoid")
+	humanoid.WalkSpeed = 6
+
+	local hrp = petTemplate.PrimaryPart
+	hrp.Anchored = false
+	-- Copy attributes from the reference pet
+	do
+		for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
+			if attributeName == "AnimatorName" then
+				continue
+			end
+			petTemplate:SetAttribute(attributeName, attributeValue)
+		end
+	end
+
+	-- band lets the binder pick this follower's health value ("PlayerPetN")
+	petTemplate:SetAttribute(Constants.CombatBand, band)
+
+	petTemplate.Parent = workspace
+
+	-- spread the team out laterally so they don't stack on one spot
+	local nearPlayer = clientUtils.petGoal(Players.LocalPlayer.Character, 3 + (index - 1) * 2)
+		+ Vector3.new(0, humanoid.HipHeight, 0)
+	nearPlayer = CFrame.new(nearPlayer) * Players.LocalPlayer.Character.PrimaryPart.CFrame.Rotation
+	petTemplate:PivotTo(nearPlayer)
+
+	petTemplate:AddTag(Constants.PetFollower)
+	petTemplate:AddTag(Constants.animationHandler)
 end
 
 -- Clone an instance of the boss, creates it in the clinet, tagged for the binder and call init on classAdded signal
@@ -224,76 +305,11 @@ function CombatControllerClient.createInstances(data: NpcFighterTypes.FightInfo)
 		-- ourBoss:AddTag(Constants.animationHandler)
 	end
 
-	do
-		-- Get reference pet from workspace to copy attributes and scale
-		local petToClone = workspace:FindFirstChild(data.player_pet.petId)
-		if not petToClone then
-			print("reference pet not found in workspace")
-			return
-		end
-
-		-- Find template model in ReplicatedStorage.Pets.Models
-		local modelsFolder = ReplicatedFirst.Pets
-		if not modelsFolder then
-			print("Pets.Models folder not found")
-			return
-		end
-
-		local petTemplateModel = ReplicatedFirst.Pets:FindFirstChild(petToClone:GetAttribute("petName"))
-		if not petTemplateModel then
-			print("pet template not found in ReplicatedStorage.Pets.Models")
-			return
-		end
-
-		-- Clone the template
-		local petTemplate = petTemplateModel:Clone()
-		if not petTemplate then
-			print("petTemplate not found")
-			return
-		end
-
-		local MAX_SIZE_THRESHOLD = 20.0 -- studs, adjust as needed
-		-- Apply the same scale factor from the reference pet
-		local referenceScale = petToClone:GetScale()
-		local currentSize = petToClone:GetExtentsSize()
-
-		if currentSize.Magnitude > MAX_SIZE_THRESHOLD then
-			warn(
-				string.format(
-					"PetSystem: Extents magnitude %.2f exceeds threshold %.2f, skipping ScaleTo",
-					currentSize.Magnitude,
-					MAX_SIZE_THRESHOLD
-				)
-			)
-			local clampedScale = referenceScale * (MAX_SIZE_THRESHOLD / currentSize.Magnitude)
-			petTemplate:ScaleTo(clampedScale)
-		else
-			petTemplate:ScaleTo(referenceScale)
-		end
-
-		local humanoid : Humanoid = petTemplate:WaitForChild("Humanoid")
-		humanoid.WalkSpeed = 6
-
-		local hrp = petTemplate.PrimaryPart
-		hrp.Anchored = false
-		-- Copy attributes from the reference pet
-		do
-			for attributeName, attributeValue in pairs(petToClone:GetAttributes()) do
-				if attributeName == "AnimatorName" then
-					continue
-				end
-				petTemplate:SetAttribute(attributeName, attributeValue)
-			end
-		end
-
-		petTemplate.Parent = workspace
-
-		local nearPlayer = clientUtils.petGoal(Players.LocalPlayer.Character, 3) + Vector3.new(0, humanoid.HipHeight, 0)
-		nearPlayer = CFrame.new(nearPlayer) * Players.LocalPlayer.Character.PrimaryPart.CFrame.Rotation
-		petTemplate:PivotTo(nearPlayer)
-
-		petTemplate:AddTag(Constants.PetFollower)
-		petTemplate:AddTag(Constants.animationHandler)
+	-- Spawn every pet in the team. Each gets a "PlayerPetN" band attribute so the
+	-- binder can address its own health value.
+	for index, petEntry in ipairs(data.player_pets) do
+		local band = "PlayerPet" .. index
+		spawnPetFollower(petEntry, index, band)
 	end
 end
 
@@ -308,7 +324,8 @@ function CombatControllerClient.getHealth(player: Player, nameInstance: NpcFight
 		warn("invalid name instance ", nameInstance)
 		return nil
 	end
-	if not (nameInstance == "PlayerBoss" or nameInstance == "PlayerPet") then
+	-- "PlayerBoss" or "PlayerPet1".."PlayerPet3"
+	if not (nameInstance == "PlayerBoss" or string.match(nameInstance, "^PlayerPet%d+$")) then
 		warn("invalid name instance name " .. nameInstance)
 		return nil
 	end

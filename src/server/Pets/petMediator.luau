@@ -165,11 +165,14 @@ ReplicatedStorage.RemoteEvents.PetSell.OnServerEvent:Connect(
 	end
 )
 
-ReplicatedStorage.RemoteEvents.NPCFighter.OnServerEvent:Connect(function(a0: Player, ...)
-	----print("IDK ")
-end)
-
 local CombatController = require(ServerScriptService.Pets.Pet.Combat.CombatController)
+
+-- A fighter binder reports that combat has actually started (its prompt was
+-- triggered). Kick off the server-driven round loop; StartRounds is idempotent,
+-- so the boss + every pet firing this is harmless.
+ReplicatedStorage.RemoteEvents.NPCFighter.OnServerEvent:Connect(function(a0: Player, ...)
+	CombatController.startRounds(a0)
+end)
 
 local SpawnEggShop = workspace:WaitForChild("SpawnEggShop")
 local SpawnKiblyShop = workspace:WaitForChild("SpawnKiblyShop")
@@ -245,7 +248,17 @@ BossRemoteEvent.OnServerEvent:Connect(
 			warn("send return with no session")
 			return
 		end
-		local petId = data.petId
+		-- The client sends an ordered team (`petIds`). `petId` is still accepted for
+		-- back-compat and wrapped into a one-element team.
+		local petIds = data.petIds
+		if (not petIds or #petIds == 0) and data.petId then
+			petIds = { data.petId }
+		end
+		if not petIds or #petIds == 0 then
+			warn("no pets provided for fight")
+			return
+		end
+
 		local bossName = data.bossName
 
 		local folderSession = CombatController.createAFightSession(a0, data)
@@ -254,22 +267,48 @@ BossRemoteEvent.OnServerEvent:Connect(
 		end
 
 		local bestiaryHandler = Registry:GetHandler(a0)
-		local pets_stats = bestiaryHandler:getPetStats(petId)
 
 		do
-			local petInformation = {
-				healthVal = utils.HealthCalc(pets_stats.Health),
-				meleeVal = utils.MeleeCalc(pets_stats.Melee),
-				petId = petId,
-			}
+			-- Validate each id against what the player owns, cap at 3, keep order.
+			local player_pets = {}
+			for _, petId in ipairs(petIds) do
+				if #player_pets >= 3 then
+					break
+				end
+				-- ownership: pets are keyed by petId; getPetStats indexes a controller
+				-- that only exists for owned pets, so gate on the registry first.
+				local petInfo = bestiaryHandler.pets[petId]
+				if not petInfo then
+					warn("player does not own pet ", petId)
+					continue
+				end
+				local pets_stats = bestiaryHandler:getPetStats(petId)
+				if not pets_stats then
+					continue
+				end
+				table.insert(player_pets, {
+					petId = petId,
+					petName = petInfo and petInfo.petName or petId,
+					healthVal = utils.HealthCalc(pets_stats.Health),
+					meleeVal = utils.MeleeCalc(pets_stats.Melee),
+				})
+			end
+
+			if #player_pets == 0 then
+				warn("no owned pets to fight with")
+				CombatController.destroyFightSession(a0)
+				return
+			end
+
 			local bossInformation = {
 				healthVal = 500,
 				meleeVal = 200,
 				petId = bossName,
+				petName = bossName,
 			}
 
 			local fightInfo = {
-				player_pet = petInformation,
+				player_pets = player_pets,
 				player_boss = bossInformation,
 			}
 			----print("fightInfo ", fightInfo)
@@ -285,80 +324,14 @@ BossRemoteEvent.OnServerEvent:Connect(
 	end
 )
 
--- This is the event that confirms the pét player can do the damage, all the health values should be instances that lives in the Replicated storage and the server handles it while the client only renders it
+-- The client confirms that an attack animation's hit landed. The damage was
+-- computed and stored server-side when the turn was cast, so here we just hand
+-- the token back to the session, which applies the authoritative subtraction.
 ReplicatedStorage.RemoteEvents.Attacks.OnServerEvent:Connect(function(player: Player, data)
-	-- data is the state context coming from the client; it contains
-	-- `npc` (the model performing the attack) and `enemy` among other
-	-- fields.  we only care about the attacker name to know which
-	-- health to decrement.
-
-	local folderSession = CombatController.getPlayerSessionFolder(player)
-	if not folderSession then
-		warn("no combat session for player", player)
+	if typeof(data) ~= "table" then
 		return
 	end
-
-	local petFolder = folderSession:FindFirstChild("PlayerPet")
-	local bossFolder = folderSession:FindFirstChild("PlayerBoss")
-	if not petFolder or not bossFolder then
-		warn("missing pet/boss folders in session for ", player)
-		return
-	end
-
-	local petIdVal = petFolder:FindFirstChild("Id")
-	local bossIdVal = bossFolder:FindFirstChild("Id")
-	if not petIdVal or not bossIdVal then
-		warn("session ids not registered")
-		return
-	end
-
-	local targetHealth: IntValue
-	local damage = 0
-
-	if data.petId == petIdVal.Value then
-		-- player's pet dealt damage to boss
-		targetHealth = bossFolder:FindFirstChild("Health")
-
-		-- rate limit the application of damage: don't allow hits more
-		-- frequently than every 2 seconds on the same health value.
-		local last = targetHealth:GetAttribute("LastAttack") or 0
-		local now = os.time()
-		if now - last <= 2 then
-			----print("invalid interval time have passed")
-			return
-		end
-		targetHealth:SetAttribute("LastAttack", now)
-
-		-- compute pet damage from stats stored in registry
-		local bestiaryHandler = Registry:GetHandler(player)
-		local pets_stats = bestiaryHandler:getPetStats(petIdVal.Value)
-		if pets_stats then
-			damage = utils.MeleeCalc(pets_stats.Melee)
-		else
-			damage = 1
-		end
-	elseif data.petId == bossIdVal.Value then
-		-- boss hit the pet; use a hard coded value for now
-		targetHealth = petFolder:FindFirstChild("Health")
-		damage = 200
-	else
-		-- attacker not part of this session
-		return
-	end
-
-	if not targetHealth then
-		return
-	end
-	ReplicatedStorage.RemoteEvents.TextFade:FireClient(player, {
-		text = tostring(damage),
-		position = data.position,
-	})
-
-	-- subtract and clamp to zero
-	-- print("", targetHealth.Name, " health: ", targetHealth.Value)
-
-	targetHealth.Value = math.max(targetHealth.Value - damage, 0)
-	-- print("", targetHealth.Name, " new health: ", targetHealth.Value)
+	CombatController.confirmHit(player, data.hitToken, data.position)
 end)
 
 return {}

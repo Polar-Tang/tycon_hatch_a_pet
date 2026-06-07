@@ -134,7 +134,6 @@ function Income.GetDoubleCoins(self: Income, boosters: incomeUtils.boosterList)
 end
 
 function Income.GetEggFactor(self: Income)
-	print("self.Luck.Value ", self.Luck.Value)
 	return self.Luck.Value * self.EggRNG.Value
 end
 
@@ -145,7 +144,6 @@ function Income._checkIncreases(self, input)
 			increasedInt += utils.getPercentage(increasedInt, 12.5)
 		end
 	end
-	print(increasedInt, " increasedInt")
 	return increasedInt
 end
 

@@ -9,7 +9,11 @@ export type enemyData = {
 }
 
 export type combatInstanceData = {
-	petId: string,
+	-- ordered team the client wants to fight with. Currently the facade only
+	-- selects one pet, so this is an array of one, but the wire format is ready
+	-- for a multi-select UI. `petId` is kept for back-compat.
+	petIds: { string }?,
+	petId: string?,
 	bossName: string,
 }
 
@@ -22,6 +26,10 @@ export type petStats = {
 	healthVal: number,
 	meleeVal: number,
 	petId: string,
+	-- petName drives template/animation lookups; band addresses this fighter's
+	-- health value inside the session folder ("PlayerPet1".."PlayerPet3" / "PlayerBoss")
+	petName: string?,
+	band: healthBarId?,
 }
 
 export type NPCBase = {
@@ -49,7 +57,7 @@ export type NPCFighterClient = {
 } & NPCBase
 
 export type healthBarState = "Destroy" | "Init" | "Update"
-export type healthBarId = "PlayerBoss" | "PlayerPet"
+export type healthBarId = "PlayerBoss" | "PlayerPet1" | "PlayerPet2" | "PlayerPet3"
 
 export type HealthNetData = {
 	type: healthBarState,
@@ -64,6 +72,8 @@ export type controllerdataInint = {
 	healthVal: number,
 	meleeVal: number,
 	petId: string,
+	-- which health value in the session folder this fighter renders ("PlayerPet1".. / "PlayerBoss")
+	band: healthBarId?,
 	pet: Model,
 	maid: Maid.Maid,
 	hrp: BasePart,
@@ -74,8 +84,21 @@ export type controllerdataInint = {
 }
 
 export type FightInfo = {
-	player_pet: petStats,
+	-- ordered team of up to 3 pets; index aligns with the "PlayerPetN" bands
+	player_pets: { petStats },
 	player_boss: petStats,
+}
+
+-- Server -> client "perform your attack" payload. The matching fighter (by band)
+-- plays the animation/text and confirms the hit with the token.
+export type CombatTurnData = {
+	band: healthBarId,
+	attackId: string,
+	animation: string,
+	isSpecial: boolean,
+	text: string?,
+	damage: number,
+	token: number,
 }
 
 export type bossCombatConData = {

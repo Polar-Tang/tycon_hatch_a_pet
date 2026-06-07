@@ -38,11 +38,22 @@ local PetFollower = BinderProvider:Get(Constants.PetFollower)
 
 PetFollower:GetClassAddedSignal():Connect(function(machine_binder)
 	local player = Players.LocalPlayer
-	if not next(ourFightSession) or not ourFightSession.player_pet then
+	if not next(ourFightSession) or not ourFightSession.player_pets then
 		print("not boss remote recived")
 		return
 	end
-	machine_binder:Init(player, ourFightSession.player_pet)
+
+	-- Each follower carries the band it was spawned with ("PlayerPetN"); match it
+	-- to the team entry so this binder renders the right health value.
+	local band = machine_binder.char:GetAttribute(Constants.CombatBand)
+	local index = band and tonumber(string.match(band, "%d+"))
+	local entry = index and ourFightSession.player_pets[index]
+	if not entry then
+		warn("no team entry for follower band ", band)
+		return
+	end
+	entry.band = band
+	machine_binder:Init(player, entry)
 end)
 
 return {}

@@ -4,12 +4,17 @@ local packages = RS.Nevermore.Quenty
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 
 local BaseObject = require(packages.baseobject.Shared.BaseObject)
+local Maid = require(packages.maid.Shared.Maid)
 
 local DeadController = setmetatable({}, BaseObject)
 DeadController.__index = DeadController
 
 function DeadController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
 	local self = setmetatable(data, DeadController)
+	-- BaseObject.new() is never called (we adopt the shared ctx table), so seed
+	-- the _maid ourselves; otherwise the inherited BaseObject.Destroy indexes nil
+	-- when the binder maid cleans this controller up.
+	self._maid = self._maid or Maid.new()
 	self.Humanoid.BreakJointsOnDeath = true
 
 	return self

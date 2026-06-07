@@ -92,9 +92,9 @@ do
 	end
 
 	local setCollider = function(parent, cb)
-		for _, descendant in parent:GetDescendants() do
+		for _, descendant in parent:QueryDescendants("Model") do
 			if descendant:IsA("Model") then
-				for _, descendant in parent:GetDescendants() do
+				for _, descendant in parent:QueryDescendants("Model") do
 					cb(descendant)
 				end
 			end
@@ -103,14 +103,14 @@ do
 	end
 
 	local petsFolder: Folder = ServerStorage.Pets
-	local pets = petsFolder:GetDescendants()
+	local pets = petsFolder:QueryDescendants("Folder")
 
 	for _, pet in pets do
 		pet:SetAttribute("AnimatorName", "AnimationController")
 		setCollider(pet, onDescendantAdded)
 	end
 	local petsFighterFolder: Folder = ReplicatedFirst.Pets
-	local petsFighters = petsFighterFolder:GetDescendants()
+	local petsFighters = petsFighterFolder:QueryDescendants("Folder")
 
 	for _, pet in petsFighters do
 		pet:SetAttribute("AnimatorName", "Humanoid")
@@ -135,7 +135,7 @@ do
 	local petsClientFolder = ServerStorage.Pets:Clone()
 	petsClientFolder.Name = "PetsTemplates"
 	
-	local petsClient = petsClientFolder:GetDescendants()
+	local petsClient = petsClientFolder:QueryDescendants("Folder")
 	for _, pet in petsClient do
 		setCollider(pet, fullOptimized)
 	end
@@ -163,11 +163,12 @@ do
 		end
 	end
 
-	local petsClientGhostFolder = ServerStorage.Pets:Clone()
+	local petsClientGhostFolder : Folder = ServerStorage.Pets:Clone()
 	petsClientGhostFolder.Name = "PetsTransparentTemplates"
 	
-	local petsClientGhost = petsClientGhostFolder:GetDescendants()
+	local petsClientGhost = petsClientGhostFolder:QueryDescendants("Folder")
 	for _, pet in petsClientGhost do
+		
 		setCollider(pet, fullOptimizedAndTransparency)
 		if pet:IsA("Model") and pet.PrimaryPart then 
 			local pos = pet.PrimaryPart.CFrame.Position

@@ -39,8 +39,8 @@ function PetFollower:Init(player, initData: NpcFighterTypes.petStats)
 		self.combat_connection:Disconnect()
 	end)
 
-	-- pet follower should listen to the pet health bar, not the boss
-	healthBarListener(player, self.char, "PlayerPet")
+	-- pet follower should listen to its own band's health bar ("PlayerPetN"), not the boss
+	healthBarListener(player, self.char, initData.band or "PlayerPet1")
 
 	return self
 end

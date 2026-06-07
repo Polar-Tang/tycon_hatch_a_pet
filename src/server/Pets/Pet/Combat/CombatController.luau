@@ -32,6 +32,27 @@ function CombatController.GetSession(player: Player)
 	return _sessions[player.UserId]
 end
 
+-- Starts the turn-based round loop for the player's session. Fired once combat
+-- actually begins (a fighter binder reports it via the NPCFighter remote).
+-- Idempotent at the handler level.
+function CombatController.startRounds(player: Player)
+	local session = _sessions[player.UserId]
+	if not session then
+		return
+	end
+	session:StartRounds()
+end
+
+-- Applies a client-confirmed hit (server-authoritative damage was stored when
+-- the turn was cast).
+function CombatController.confirmHit(player: Player, token: number, position: Vector3?)
+	local session = _sessions[player.UserId]
+	if not session or typeof(token) ~= "number" then
+		return
+	end
+	session:ConfirmHit(token, position)
+end
+
 function CombatController.DestroySession(player: Player)
 	local handler = _sessions[player.UserId]
 	if not handler then

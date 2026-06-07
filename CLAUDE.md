@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 "Raise and Hatch" — a Roblox pet-tycoon game written in **Luau**, built with **Rojo** (7.5.1). Live: https://www.roblox.com/games/80420751886453/Raise-and-hatch
 
+## Conventions
+- **Modules**: Require via `local module = require(path)`; use `export type` for Luau types and create a different file for types often called as `serviceTypes`
+- **Events**: Define in `RS.RemoteEvents/` as model.json; Listen to this events in `serviceMediator` or main entry point (`ServiceRoot`)
+- **UI**: Use Roact components in `client/UI/`; mount to PlayerGui
+- **File Naming**: `.luau` for module scripts, `.rbxmx` for models
+
+
 ## General
 - All `require` calls must be at the top of the file.
 Group `require` blocks in this order:
@@ -135,6 +142,26 @@ Plot/world services live in `src/shared/NPC/Servicies` (note spelling): `PlotSer
 #### Non-Combat pets
 
 A tagged pet model is brought to life by `StateMachineBinder:Init(player)`, which builds the `StateMachine.new("Idle", ...)` with a context assembled by `helpers/setCtx.luau`. `setCtx` reads the pet's `petName` attribute, gathers stats/animations into a `petData` ctx table, and instantiates the per-pet controllers (`Sound`, `Eat`, `Movement`, `Targeting`, `PetAnimator`). All controllers are collected into one table and each handed to the binder's `maid` (`maid:GiveTask`) so their `:Destroy()` runs on cleanup — `MovementController` holds Heartbeat connections and leaks if not cleaned; the others get `:Destroy()` for free via Quenty `BaseObject`. `SoundController`/billboard/proximity-prompt only spawn for the local owner (`isOwnerLocal`).
+
+#### Combat pets (boss fights)
+
+A **separate, client-only** pet system used when a player is teleported to a boss fight. These rigs use a `Humanoid` and are cloned from `ReplicatedFirst.Pets` (not the `ServerStorage.Pets` flow above); the server never sees them — the server side (`src/server/Pets/Pet/Combat`: `CombatController` + `FightSessionHandler`) only runs the authoritative fight *session* (health IntValues, drops). Two binders extend `NPCBase` (`NPCBase/src/Client`): `NPCFighterClient` (the boss) and `PetFollower` (the player's pet). `NPCBase.new` wires a `char.AncestryChanged → :Destroy()` self-teardown that runs `self.maid:DoCleaning()` + `state:Destroy()`. Each binder's `:Init` builds a `StateMachine` whose context comes from `CombatControllerClient.setBossCtx`/`setPetCtx` (`NPCFighter/src/Client/utils`):
+
+- Boss ctx → `DeadController`.
+- Pet ctx → `DeadController`, `TargetController`, `MovementController` (the latter two from `PetFollower/src/Client/Machine/Controllers`).
+
+Like the non-combat pets, **every controller is handed to the binder `maid`** so it's torn down on model removal. Gotcha: these controllers `setmetatable` the shared ctx table directly (no `BaseObject.new`), so `MovementController`/`TargetController` seed their own `_maid` and define `:Destroy()`; `DeadController` must seed `_maid` too or the inherited `BaseObject.Destroy` indexes nil. The pet's `MovementController`/`TargetController` `:Destroy()` also call `self.pet:Destroy()`.
+
+##### [Duel pets] turn-based combat
+
+Combat is **server-driven and turn-based** (it is *not* client heartbeat-driven). A session holds a **team of up to 3 pets + the boss**, each with its own `Health` IntValue folder under `ReplicatedStorage.Pets.Fights/<userId>/` named by **band**: `PlayerPet1..3` and `PlayerBoss`.
+
+- **Team selection**: the client (`facade/Index/FightButton`) sends `petIds` (an ordered array — currently length 1, the multi-select UI is a future pass) via `BossRemoteEvent`. `petMediator` validates each id against the bestiary `Registry` (gate on `bestiaryHandler.pets[petId]` — `getPetStats` *errors* on an unowned pet, it doesn't return nil), caps at 3, and builds `FightInfo.player_pets`.
+- **Round loop** lives in `FightSessionHandler:StartRounds` (a `task.spawn` coroutine, kicked off by the `NPCFighter` remote when a fighter reports combat started). Each round walks the pets in order then the boss; **cadence is server-timed** — each attack `task.wait(attack.duration)`. One pet casts its *special* per round, rotating (`_specialIndex`).
+- **Attack pool**: `src/server/Pets/Pet/Combat/PetAttacks.luau` (mirrors `PetBonuses` style; `.get(petName)` with a default). `basicAttack` deals `damageMultiplier * Melee`; `specialAttack` is routed by `kind` (`"defensive"` → buff/`session.defense`, `"instant"` → resolve now, `"trap"` → consulted on the boss turn). **Special effects are stubbed (text only)** for now — the structure is the plug-in surface. Per-pet buff/debuff registry: `self.buffs[band]`.
+- **Damage handshake (server-authoritative, client-confirmed)**: `_castAttack` stores `_pendingHits[token] = {targetHealth, damage}` and fires the **`CombatTurn`** remote (server→client) with `{band, animation, isSpecial, text, token, ...}` — it does *not* write health. The matching client `Combat` state (filtered by `data.band`) plays the gesture, announces specials via `alert`, then fires `Attacks:FireServer({hitToken, position})` at the hit moment; the server's `Attacks` handler calls `FightSessionHandler:ConfirmHit`, which writes the IntValue and fires `TextFade`. This is why the client `Combat` states no longer have an `OnHeartbeat` attack — the server decides every turn.
+- There is no real "attack" animation yet (`animationsData` has only eat/walk/idle), so attacks use the `"eat"` gesture as a placeholder; the boss has no `AnimationHandler` (untagged), so the client guards `if data.animationHandler`.
+- Combat ends when the boss `Health <= 0` or no pet is alive (`_running = false`).
 
 ### Client UI
 
