@@ -95,6 +95,23 @@ return function(parent, serviceBag: any, player, maid)
 		setUpAtt(parent, petInfo, maid, current_pet_stats)
 	end
 
+	-------- Controlles --------
+	-- Keep every controller in a single table so the maid can tear each one
+	-- down on cleanup. The StateMachine destroys cleanly, but the controllers
+	-- (notably MovementController, which holds Heartbeat connections) were
+	-- never handed to the maid, so their :Destroy() never ran.
+	local controllers = {
+		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
+		EatController = EatController.new(petData, serviceBag, player),
+		MovementController = MovementController.new(petData, serviceBag),
+		TargetingController = TargetingController.new(petData, serviceBag),
+		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
+	}
+
+	for _, controller in controllers do
+		maid:GiveTask(controller)
+	end
+
 	return {
 		maid = maid,
 		pet = parent,
@@ -114,10 +131,10 @@ return function(parent, serviceBag: any, player, maid)
 		patrol_duration = current_pet_stats.patrol_duration,
 		eat_duration = current_pet_stats.eat_duration,
 		-------- Controlles --------
-		SoundController = isOwnerLocal and SoundController.new(petData, serviceBag) or nil,
-		EatController = EatController.new(petData, serviceBag, player),
-		MovementController = MovementController.new(petData, serviceBag),
-		TargetingController = TargetingController.new(petData, serviceBag),
-		PetAnimatorController = PetAnimatorController.new(petData, serviceBag),
+		SoundController = controllers.SoundController,
+		EatController = controllers.EatController,
+		MovementController = controllers.MovementController,
+		TargetingController = controllers.TargetingController,
+		PetAnimatorController = controllers.PetAnimatorController,
 	}
 end

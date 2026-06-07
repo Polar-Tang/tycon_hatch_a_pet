@@ -170,7 +170,7 @@ function MovementController:PlainMove(targetPosition)
 
 		-- CONNECT THE MOTION PIVOTING AFTER THE ROTATION
 
-		task.delay(rotateTime, function()
+		local moveAfterRotate = task.delay(rotateTime, function()
 			self.isMoving = true
 
 			-- Walking anim
@@ -201,13 +201,16 @@ function MovementController:PlainMove(targetPosition)
 					return
 				end
 
-				
 				local newPos = startPos + dir * self.velocity * elapsed
-				
+
 				local fixY = utils.fixPetY(self.Model, self._root) --+ Constants.GroundY
 
-				if elapsed - lastTime >= 0.1 then 
+				if elapsed - lastTime >= 0.1 then
 					lastTime = elapsed
+					if not self.Model then -- The connection for some reason is not disconnected
+						return
+					end
+
 					fixY = utils.GetGroundYPosition(self.Model, 20, 100)
 				end
 
@@ -220,6 +223,7 @@ function MovementController:PlainMove(targetPosition)
 
 			self._maid:GiveTask(self._moveConn)
 		end)
+		self._maid._moveAfterRotate = moveAfterRotate
 	end)
 	return timeToReach
 end

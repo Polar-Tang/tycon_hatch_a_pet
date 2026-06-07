@@ -35,7 +35,6 @@ function StateMachineBinder:Init(player)
 end
 
 function StateMachineBinder:Destroy()
-	print("State machine cleaned")
 	-- TODO: test this
 	self.maid:DoCleaning()
 	if self.state then
