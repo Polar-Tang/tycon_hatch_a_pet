@@ -32,7 +32,6 @@ serviceBag:Start()
 _G.FistBag = nil
 _G.ServiceBag = serviceBag
 
-local Constants = require(ReplicatedStorage.utils.Constants)
 local PlayerInventory = require(ServerScriptService.Player.Inventory.PlayerInventory)
 local Env = require(script.Parent.Env)
 local Mediator = require(script.Parent.Mediator)
@@ -77,6 +76,12 @@ end)
 
 -- set collisions group couse i don't feel like doing this manually from roblox studio
 do
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
+local Constants = require(ReplicatedStorage.utils.Constants)
+local ServerStorage = game:GetService("ServerStorage")
+
+
 	local function onDescendantAdded(descendant)
 		-- Set collision group for any part descendant
 
@@ -92,9 +97,9 @@ do
 	end
 
 	local setCollider = function(parent, cb)
-		for _, descendant in parent:QueryDescendants("Model") do
+		for _, descendant in parent:GetDescendants("Model") do
 			if descendant:IsA("Model") then
-				for _, descendant in parent:QueryDescendants("Model") do
+				for _, descendant in parent:GetDescendants("Model") do
 					cb(descendant)
 				end
 			end
@@ -103,14 +108,14 @@ do
 	end
 
 	local petsFolder: Folder = ServerStorage.Pets
-	local pets = petsFolder:QueryDescendants("Folder")
+	local pets = petsFolder:GetDescendants()
 
 	for _, pet in pets do
 		pet:SetAttribute("AnimatorName", "AnimationController")
 		setCollider(pet, onDescendantAdded)
 	end
 	local petsFighterFolder: Folder = ReplicatedFirst.Pets
-	local petsFighters = petsFighterFolder:QueryDescendants("Folder")
+	local petsFighters = petsFighterFolder:GetDescendants()
 
 	for _, pet in petsFighters do
 		pet:SetAttribute("AnimatorName", "Humanoid")
@@ -132,15 +137,13 @@ do
 		end
 	end
 
-	local petsClientFolder = ServerStorage.Pets:Clone()
+	local petsClientFolder: Folder = ServerStorage.Pets:Clone()
 	petsClientFolder.Name = "PetsTemplates"
-	
-	local petsClient = petsClientFolder:QueryDescendants("Folder")
+	local petsClient = petsClientFolder:GetDescendants()
 	for _, pet in petsClient do
 		setCollider(pet, fullOptimized)
 	end
 	petsClientFolder.Parent = ReplicatedFirst
-
 
 	local function fullOptimizedAndTransparency(descendant)
 		-- Set collision group for any part descendant
@@ -154,6 +157,7 @@ do
 			descendantPar.AudioCanCollide = false
 			descendantPar.CastShadow = false
 			descendantPar.Anchored = true
+
 			-- BAD DESIGN, coupling here
 			if descendant.Name ~= "Rootpart" then
 				descendantPar.Transparency = 0.5
@@ -162,11 +166,12 @@ do
 			end
 		end
 	end
+	local petsClientFolder = ReplicatedFirst.PetsTransparentTemplates
 
 	local petsClientGhostFolder : Folder = ServerStorage.Pets:Clone()
 	petsClientGhostFolder.Name = "PetsTransparentTemplates"
 	
-	local petsClientGhost = petsClientGhostFolder:QueryDescendants("Folder")
+	local petsClientGhost = petsClientGhostFolder:GetDescendants()
 	for _, pet in petsClientGhost do
 		
 		setCollider(pet, fullOptimizedAndTransparency)
