@@ -1,19 +1,24 @@
 --[=[
 	@class Boss
 
-	The boss fighter in the [Duel pets] fight. Extends [PetBase] with the trap
-	registry: pets that cast a "trap" special register it here (`AddTrap`), and
-	the boss consults/consumes it at the start of its own turn (`RunTraps`).
+	The boss fighter in the [Duel pets] fight. Extends [PetBase] but draws its
+	abilities from an ordered **pool** (keyed per boss in [PetAttacks]) that it rotates
+	through one ability per turn, rather than a basic/special pair. The pool callbacks
+	pick their own targets off the session (`_allAlivePets` / `_lowestHealthPet`).
 
-	Targeting differs from a pet: the boss attacks the first living pet on the
-	team rather than the boss itself. Trap effects are STUBBED (structure only).
+	Also owns the trap registry: pets that cast a "trap" special register it here
+	(`AddTrap`), and the boss consults/consumes it at the start of its own turn
+	(`RunTraps`). Trap effects are STUBBED (structure only).
 ]=]
 
 local PetBase = require(script.Parent.PetBase)
 local PetAttacks = require(script.Parent.PetAttacks)
 
 export type Boss = PetBase.PetBase & {
+	_pool: { PetAttacks.AttackFn },
+	_attackIndex: number,
 	_traps: { any },
+	Attack: (self: Boss, session: any) -> (),
 	AddTrap: (self: Boss, trap: any) -> (),
 	RunTraps: (self: Boss) -> (),
 }
@@ -24,21 +29,22 @@ Boss.__index = Boss
 function Boss.new(session: any, info: PetBase.FighterInfo): Boss
 	local self = setmetatable(PetBase.new(session, info), Boss)
 	self._traps = {}
+	self:Init()
 	return self :: any
 end
 
--- The boss draws from its own pool so it can later diverge from the pet pool.
-function Boss.GetAttackSet(self: Boss): PetAttacks.PetAttackSet
-	return PetAttacks.getBoss(self.petName)
+-- The boss binds its own keyed pool (a fresh copy) so each boss can later diverge.
+function Boss.Init(self: Boss)
+	self._pool = table.clone(PetAttacks.getBoss(self.petName).pool)
+	self._attackIndex = 1
 end
 
--- The boss hits the first living pet on the team.
-function Boss._resolveTargets(self: Boss, _attack: PetAttacks.Attack, _isSpecial: boolean): { PetBase.PetBase }
-	local target = self._session:_firstAlivePet()
-	if not target then
-		return {}
-	end
-	return { target }
+-- Runs the boss's turn: the current pool ability, then advance the rotation. The
+-- ability callback does the maths (targets, damage, effects) and the pacing.
+function Boss.Attack(self: Boss, session: any)
+	local attack = self._pool[self._attackIndex]
+	self._attackIndex = (self._attackIndex % #self._pool) + 1
+	attack(self, session)
 end
 
 function Boss.AddTrap(self: Boss, trap: any)

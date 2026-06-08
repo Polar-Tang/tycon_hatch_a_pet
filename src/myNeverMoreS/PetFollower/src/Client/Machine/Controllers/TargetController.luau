@@ -92,7 +92,7 @@ function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): V
 	local player_hrp = self.player_character.PrimaryPart
 	local band = tonumber(string.match(self.band or "", "%d+")) or 1
 
-	local range = FORMATION_RANGE + self.pet:GetExtentsSize().Magnitude
+	local range = FORMATION_RANGE + (self.pet:GetExtentsSize().Magnitude)/2
 
 	local offset
 	if band == 2 then

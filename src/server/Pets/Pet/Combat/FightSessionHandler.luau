@@ -17,11 +17,18 @@ local CombatTurn = ReplicatedStorage.RemoteEvents.CombatTurn
 -- seconds before the first round, so clients can arm their turn listeners
 local START_GRACE = 1
 
--- A registered pending hit: which fighter it lands on and how much (already
--- mitigated by the target). Health is written when the client confirms.
+-- placeholder gesture (no real attack animation yet) and fallback pacing for an
+-- ability that doesn't specify its own `duration`
+local DEFAULT_ANIMATION = "eat"
+local DEFAULT_DURATION = 3
+
+-- A registered pending hit: which fighter it lands on, how much (already mitigated
+-- by the target), and optional text to float instead of the number. Health is
+-- written when the client confirms.
 type PendingHit = {
 	target: PetBase.PetBase,
 	damage: number,
+	fadeText: string?,
 }
 
 type FightSessionHandler = {
@@ -200,17 +207,16 @@ function FightSessionHandler:_runRound()
 			return
 		end
 		if pet:IsAlive() then
-			pet:TickEffects()
-
-			local isSpecial = index == self._specialIndex
-			local attack = pet:SelectAttack(isSpecial)
-
-			if isSpecial then
-				pet:ApplySpecial(attack)
+			-- the ability callback runs the whole turn (fire + pacing) via the
+			-- session primitives; the round loop only decides basic vs special
+			if index == self._specialIndex then
+				pet:SpecialAttack(self)
+			else
+				pet:BasicAttack(self)
 			end
-
-			self:_castTurn(pet, attack, isSpecial)
-			task.wait(attack.duration)
+			-- age this pet's effects AFTER it acted, so a 2-round debuff modifies
+			-- exactly 2 of its attacks
+			pet:TickEffects()
 		end
 
 		if not self.boss:IsAlive() then
@@ -220,10 +226,9 @@ function FightSessionHandler:_runRound()
 
 	-- Boss turn — only if the boss is alive and the team isn't wiped.
 	if self._running and self.boss:IsAlive() and self:_anyPetAlive() then
-		local bossAttack = self.boss:SelectAttack(false)
 		self.boss:RunTraps()
-		self:_castTurn(self.boss, bossAttack, false)
-		task.wait(bossAttack.duration)
+		self.boss:Attack(self)
+		self.boss:TickEffects()
 	end
 
 	-- advance which pet casts its special next round
@@ -237,39 +242,92 @@ function FightSessionHandler:_runRound()
 	end
 end
 
+-- Options an ability passes to a session primitive. All optional: damage comes
+-- from `multiplier * attacker melee` unless `damage` overrides it.
+export type AttackOptions = {
+	multiplier: number?,
+	damage: number?,
+	animation: string?,
+	text: string?,
+	-- floated on the target instead of the number (for a non-damaging move)
+	fadeText: string?,
+	isSpecial: boolean?,
+	-- how long the round loop pauses on this attack (seconds)
+	duration: number?,
+}
+
 --[=[
-	Asks the attacker for its outgoing damage and targets, has each target
-	mitigate the hit with its own private defense, registers a pending hit, and
-	fires "perform your attack" to the client. Does NOT write health — that
-	happens in `ConfirmHit` once the client reports the animation hit landed.
+	Fires a single "perform your attack" turn: the target mitigates with its own
+	private defense, the hit is registered as pending, and the client is told to
+	animate `attacker`'s gesture and confirm. Does NOT write health — that happens in
+	`ConfirmHit` once the client reports the swing landed. Does not pace; the public
+	primitives below own the `task.wait`.
 ]=]
-function FightSessionHandler:_castTurn(attacker: PetBase.PetBase, attack, isSpecial: boolean)
-	local damage, targets = attacker:CastAttack(attack, isSpecial)
+function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions)
+	local rawDamage = opts.damage or attacker:Outgoing(opts.multiplier or 0)
+	local finalDamage = target:Apply(rawDamage) -- process the damage
+	local token = self:_pend(target, finalDamage, opts.fadeText)
 
+	CombatTurn:FireClient(self.player, {
+		band = attacker.band,
+		attackId = opts.isSpecial and "specialAttack" or "basicAttack",
+		animation = opts.animation or DEFAULT_ANIMATION,
+		isSpecial = opts.isSpecial or false,
+		text = (attacker.petName or attacker.id) .. " " .. (opts.text or ""),
+		damage = finalDamage,
+		token = token,
+	} :: NpcFighterTypes.CombatTurnData)
+end
+
+--[=[
+	Single-target attack used by ability callbacks: fire the hit, then consume the
+	attack's `duration` so the round paces correctly.
+]=]
+function FightSessionHandler:Strike(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions)
+	self:_fire(attacker, target, opts)
+	task.wait(opts.duration or DEFAULT_DURATION)
+end
+
+--[=[
+	AOE attack used by ability callbacks: fire one hit per target (each confirmed
+	independently) then a single `duration` wait for the whole sweep. All turns carry
+	the attacker's band, so the attacker animates once per target on the client.
+]=]
+function FightSessionHandler:StrikeAll(attacker: PetBase.PetBase, targets: { PetBase.PetBase }, opts: AttackOptions)
 	for _, target in ipairs(targets) do
-		local finalDamage = target:Apply(damage)
-		local token = self:_pend(target, finalDamage)
-
-		CombatTurn:FireClient(self.player, {
-			band = attacker.band,
-			attackId = isSpecial and "specialAttack" or "basicAttack",
-			animation = attack.animation,
-			isSpecial = isSpecial or false,
-			text = (attacker.petName or attacker.id) .. " " .. (attack.text or ""),
-			damage = finalDamage,
-			token = token,
-		} :: NpcFighterTypes.CombatTurnData)
+		self:_fire(attacker, target, opts)
 	end
+	task.wait(opts.duration or DEFAULT_DURATION)
+end
+
+--[=[
+	A no-damage gesture used by buff/utility abilities: animate the caster and banner
+	its `text`, with no TextFade (the buff's icon is the `Health` attribute set by
+	`AddEffect`). Token 0 means there is no pending hit, so the client's confirm reply
+	is a harmless no-op.
+]=]
+function FightSessionHandler:Announce(attacker: PetBase.PetBase, opts: AttackOptions)
+	CombatTurn:FireClient(self.player, {
+		band = attacker.band,
+		attackId = "specialAttack",
+		animation = opts.animation or DEFAULT_ANIMATION,
+		isSpecial = true,
+		text = (attacker.petName or attacker.id) .. " " .. (opts.text or ""),
+		damage = 0,
+		token = 0,
+	} :: NpcFighterTypes.CombatTurnData)
+	task.wait(opts.duration or DEFAULT_DURATION)
 end
 
 -- Registers a pending hit and returns its token. The session owns the token
 -- counter (trivially unique) and routes the confirmed hit back to its target.
-function FightSessionHandler:_pend(target: PetBase.PetBase, damage: number): number
+function FightSessionHandler:_pend(target: PetBase.PetBase, damage: number, fadeText: string?): number
 	self._hitSeq += 1
 	local token = self._hitSeq
 	self._pendingHits[token] = {
 		target = target,
 		damage = damage,
+		fadeText = fadeText,
 	}
 	return token
 end
@@ -287,7 +345,7 @@ function FightSessionHandler:ConfirmHit(token: number, position: Vector3?)
 	end
 	self._pendingHits[token] = nil
 
-	pending.target:TakeDamage(pending.damage, position)
+	pending.target:TakeDamage(pending.damage, position, pending.fadeText)
 end
 
 function FightSessionHandler:_anyPetAlive(): boolean
@@ -306,6 +364,32 @@ function FightSessionHandler:_firstAlivePet(): PetBase.PetBase?
 		end
 	end
 	return nil
+end
+
+-- Every living pet, in band order. The boss's AOE abilities (debuff-all /
+-- damage-all) hit this whole set.
+function FightSessionHandler:_allAlivePets(): { PetBase.PetBase }
+	local alive = {}
+	for _, pet in ipairs(self.pets) do
+		if pet:IsAlive() then
+			table.insert(alive, pet)
+		end
+	end
+	return alive
+end
+
+-- The living pet with the least Health — the boss's single-target ability picks
+-- the weakest to finish off. Returns nil if the team is wiped.
+function FightSessionHandler:_lowestHealthPet(): PetBase.PetBase?
+	local weakest: PetBase.PetBase? = nil
+	for _, pet in ipairs(self.pets) do
+		if pet:IsAlive() then
+			if not weakest or pet.health.Value < weakest.health.Value then
+				weakest = pet
+			end
+		end
+	end
+	return weakest
 end
 
 function FightSessionHandler:GetHealth(nameInstance: NpcFighterTypes.healthBarId): IntValue?

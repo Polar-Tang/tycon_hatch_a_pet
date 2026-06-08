@@ -30,11 +30,10 @@ function PetFollower:Init(player, initData: NpcFighterTypes.petStats)
 	self.state = state
 	self._initialized = true
 
-	-- A single life connection
+	-- A single life connection. We don't notify the server here: the round loop
+	-- must start only once the whole team has reached its slots, which the boss
+	-- gates on (BossCombatCon). Here we just send this pet walking to its slot.
 	self.combat_connection = CombatCon.Event:Connect(function(data)
-		-- Notify the server the combat has started
-		ReplicatedStorage.RemoteEvents.NPCFighter:FireServer(player, self.char)
-
 		self:StartCombat(data.enemy, data.enemy_hrp, data.enemy_health)
 		self.combat_connection:Disconnect()
 	end)

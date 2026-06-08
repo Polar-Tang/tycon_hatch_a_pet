@@ -22,7 +22,12 @@ function NPCFighterClient.new(char: Model, serviceBag)
 	return self
 end
 
-function NPCFighterClient.Init(self: NpcFighterTypes.NPCFighterClient, player, initData: NpcFighterTypes.petStats)
+function NPCFighterClient.Init(
+	self: NpcFighterTypes.NPCFighterClient,
+	player,
+	initData: NpcFighterTypes.petStats,
+	expectedPetCount: number
+)
 	-- the state machine is like the npc's brain
 
 	local state = StateMachine.new(
@@ -32,9 +37,26 @@ function NPCFighterClient.Init(self: NpcFighterTypes.NPCFighterClient, player, i
 	)
 	self.state = state
 
+	-- Each pet fires BossCombatCon once it reaches its fight slot. Register the
+	-- arrivals by band (so a pet reporting twice doesn't double-count) and only
+	-- start the fight once the WHOLE team is arranged.
+	local arrivedBands: { [string]: boolean } = {}
+	local arrivedCount = 0
+	local expected = expectedPetCount or 1
+
 	-- A single life connection
 	self.combat_connection = BossCombatCon.Event:Connect(function(data: NpcFighterTypes.bossCombatConData)
-		-- Notify the server the combat has started
+		if data.band and not arrivedBands[data.band] then
+			arrivedBands[data.band] = true
+			arrivedCount += 1
+		end
+
+		-- wait until every pet has reached its slot
+		if arrivedCount < expected then
+			return
+		end
+
+		-- Notify the server the combat has started (kicks off the round loop)
 		ReplicatedStorage.RemoteEvents.NPCFighter:FireServer(player, self.char)
 		self:StartCombat(data.enemy, data.enemy_hrp, data.enemy_health)
 		self.combat_connection:Disconnect()

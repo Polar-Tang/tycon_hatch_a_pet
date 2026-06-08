@@ -71,18 +71,34 @@ local function armTurnListener(data: NpcFighterTypes.petStateCtx)
 	data.maid:GiveTask(data._turnConn)
 end
 
+-- Each pet has a designated combat slot: a part named "fightPos_<bossname>_<band>"
+-- (e.g. "fightPos_rhino_PlayerPet1") placed in the workspace, so the team lines up
+-- by band in front of the boss. If the slot part isn't authored yet, fall back to
+-- standing just in front of the boss so combat still works.
+local function getFightGoal(data: NpcFighterTypes.petStateCtx): Vector3
+	local band = data.band or "PlayerPet1"
+	local partName = "fightPos_" .. string.lower(data.enemy.Name) .. "_" .. band
+	local slot = workspace:FindFirstChild(partName)
+	if slot and slot:IsA("BasePart") then
+		return slot.Position
+	end
+
+	return data.TargetController:GetTo(data.enemy_hrp, (data.pet:GetExtentsSize().X + data.enemy:GetExtentsSize().X) / 2)
+end
+
 function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
-	local new_goal =
-		data.TargetController:GetTo(data.enemy_hrp, (data.pet:GetExtentsSize().X + data.enemy:GetExtentsSize().X) / 2)
+	local new_goal = getFightGoal(data)
 	data.TargetController:CalculatePath(new_goal):Then(function(path): ...any
 		data.MovementController:ForgotPath()
 		data.MovementController:MoveTo(path):Then(function()
-			
+			-- arrived at the slot: turn to face the boss and report this pet (by band)
+			-- so the boss can start the fight once the whole team is arranged
 			data.MovementController:LookTo(data.enemy_hrp.Position)
 			BossCombatCon:Fire({
 				enemy = data.pet,
 				enemy_hrp = data.hrp,
 				enemy_health = CombatControllerClient.getHealth(data.player, data.band),
+				band = data.band,
 			})
 			print("pet reachs position")
 		end)

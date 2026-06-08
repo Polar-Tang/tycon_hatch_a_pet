@@ -72,43 +72,10 @@ You can acquire 6 different egg categories from store, the luck and randomness i
 	},
 
 # Pet Duel
+
+We may need a vfx for 
+
 Combat Pets
-
-Dog
-Passive: Loyalty Boost – Increases all stats slightly for the team
-Active: Rally – At the start of battle, boosts damage and defense for a short time
-
-Lion
-Passive: King’s Strength – Deals consistent high damage
-Active: Alpha Roar – Periodically increases team damage
-
-Tiger
-Passive: Predator Instinct – Increased critical hit chance and damage
-Active: Pounce Strike – Deals high burst damage and applies bleed
-
-Bear
-Passive: Regeneration – Slowly restores health during battle
-Active: Rage Mode – Reduces incoming damage and increases attack
-
-Gorilla
-Passive: Unshaken – Reduces effects of stuns and knockbacks
-Active: Ground Slam – Stuns the boss and interrupts attacks
-
-Bull
-Passive: Armor Break – Attacks reduce enemy defense
-Active: Stampede – Charges forward dealing heavy damage and lowering defense
-
-Wolf
-Passive: Blood Hunt – Damage increases the longer the battle lasts
-Active: Pack Frenzy – Increases attack speed and damage for a short time
-
-Fox
-Passive: Evasion – Chance to dodge incoming attacks
-Active: Clone Trick – Creates a decoy that distracts the boss
-
-Rhino
-Passive: Thick Hide – Reduces incoming damage and increases resistance while attacking
-Active: Rampage Charge – Charges forward, dealing massive damage and breaking enemy defenses
 
 ### New task requirements
 Currently we implement a handler for the duels between pets src/server/Pets/Pet/Combat/CombatController.luau. You can read further and discover the combat sessions are created in client too, besides the pet models + statemachine, everything does exists only in the client `src/myNeverMoreS/PetFollower/src/Client`, meanwhile it reads the NumberValues created in the replicated storage, but only server writes them. Currently all the attacks does come from src/myNeverMoreS/PetFollower/src/Client/Machine/States/Combat.luau but we need to change that. This is the task [Duel pets] and every attack will be turn based and fired by the server. When we create a session we need to register how much pets do the player have, every pet will have an interval to attack, this plus the boss will create a total time per round, for example every pet got an attack with some duration, there are 3 pets (pet1- 3s, pet2 -2s, pet3 - 3s) and a boss (4s) so every round will last 12 seconds, however this will not be a fixed amount of time. There's a pool of attack per pet they got an special attack an a basic one, anyways there should not be any coupling, we decide which attack and we can read the attack duration from it. The server will tell when to attack and Combat only listen to this event and play the vfx + animations, the only inconvinient is we need to change the health listener a little bit because it requires syncronization between the animation event and the Health subtraction.
@@ -174,14 +141,9 @@ end
 
 
 ### Ver como seleccionar varios pet ids (desde la UI) y llevarlos al combate
-Probably will need to separate to split the logic for initiaziation and the one for starting
-Init:
-	Create instance
-	Declare variables and data
-Start
-	Connect heartbeat
-	Run certain functions
-We should fire NPCFighter and call to CombatController.startRounds exaclty when all the pets are arranged to their position at BossCombatCon bindable event, from CombatCon but as this may fire for every pet with should register them keyed through its band and confirm the fight when all the pets are arrange. Another important thing to point out is that :MoveTo(path):Then is not waiting to the pet to reach their final position so we'll ned a way for running this logic probably as a callback that MovementController should know when to call. Also the goal position for each pet should be acordingly to their band, there's a center point in front the boss and first is `centerFront.CFrame.RightVector * range`, `centerFront`, `player_hrp.CFrame.RightVector * -range` 
+We should fire NPCFighter and call to CombatController.startRounds exaclty when all the pets are arranged (currently is fired when the first pet reach the position) to their position at BossCombatCon bindable event, from CombatCon but as this may fire for every pet with should register them keyed through its band and confirm the fight when all the pets are arrange. :MoveTo(path):Then is waiting to the pet to reach their final position. Also the goal position for each pet should be acordingly to their band, and i will add parts like, fightPos_[bossname]_[playerBand] and then rotates the pet to look at the boss like is already doing with `data.MovementController:LookTo(data.enemy_hrp.Position)`
+
+src/client/RoactApp/Context/PromptContext/PromptProvider.luau uses the server to fire back the client with the npc data for creating the proximityPrompt, but sometimes data.npc PromptProvider:78, will be nil if this npc only lives in the client. Create a registry from the client and local npc = data.npc or registry[data.id].npc
 
 ~Currently src/myNeverMoreS/PetFollower/src/Client/Machine/Controllers/TargetController.luau get the goal position of the pet which is sliglty to their right. We need to update TargetController to be aware of their pet ban, 
 if pet band is 1 should be calulated as it is, `player_hrp.CFrame.RightVector * range` right
@@ -192,4 +154,95 @@ I'm not sure if i misstyped the CFrame calculations but it should align with i t
 ~Alright, now i just updated StarterGui.ScreenGui.PetScreen.PetDetails (this is the container)
 It can contains at least 3 StarterGui.ScreenGui.PetScreen.PetDetails.PetDetails which is now the sign that contains all the information about the pet. Please update src/client/facade/petDetails.luau to this structure as well as update their method to be capable of stacking 3 different pet details. also update their client consumer src/client/facade/Index/init.luau:223 and allowing a stacking. You can use the stack and change the petDetails text to something like "goes first", "goes second", and so, If i order them by name they will be order alphabetically so StarterGui.ScreenGui.PetScreen.PetDetails[Name] its important for the stack~
 
--- Ver de crear los efectos de todas las pets
+### Ver de crear los efectos de todas las pets
+
+This is the last feature for Duel Pet and is meant to write the special abilities. Every ability is meant to be merely maths regarding the fight. There are many features we need to add. First let's talk about the boss attack. We probably need a specialized class that inherits from PetBase by polymorphism.
+There are 4 bosses, they a refered by keys
+x-rhino
+goaterberus
+ghidra
+croakan
+all of them will have the same ability but for the moment they can be different tables as it should be easy to create different abilities for each boss in the future. There will be a pool of 3 abilities per boss
+- Debuff to all player pets (damage ruction during 2 rounds)
+- A hit single target, choosing the pet with lower health
+- Damage to all pets
+
+Two attacks are AOE that's why i've told you to CastAttack return targets, but as we need to damage all the player pets i don't know if would be necessary to pass the session data to, also we may need a method to choose the player pet wiht lower health we may need a dedicated method for that. Additionally CastAttack should be able to modify the target class besides dealing damage, how can we do that? That's not all because sometimes we may wanna render a text different from a number at ReplicatedStorage.RemoteEvents.TextFade event
+the last thing i wanna remark is that debug and buffs will also set an attribute to health, as frontend is reading this attribute then would be easy to render some icon or something pointing out this buff
+
+#### Refactorize this shit.
+Before adding new features i prefer refactorizing this in order to make them more readable.
+Looking at the PetAttacks table i do wonder if would be better to have the following structure:
+PetAttacks: {[petNames] : {
+	specialAttack = function(ctx, parentSession) - void,
+	basicAttack = function(ctx, parentSession) - void,
+}}
+ctx will be a type PlayerPet or Boss and parentSession will be the figth session handler
+Also i would add an init method for the PetClass and get their attack of the table once
+```
+for index, petInfo in ipairs(data.player_pets) do
+		local band = "PlayerPet" .. index
+		local healthValue = FightSessionHandler._createFighterFolder(self._folderSession, band, petInfo.petId, petInfo.healthVal)
+		local pet = PlayerPet.new(self, {...})
+		table.insert(self.pets, pet)
+		self._byBand[band] = pet
+
+		-- look this:
+		local petAttacks = table.clone(PetAttacks[petInfo.petName])
+		for attackName, attack in petAttacks do
+			petAttacks[attackName] = attack
+		end
+	end
+```
+Then you do pet:SpecialAttack, otherwise pet:BasicAttack -- more idiomatic + easy to read
+Next, before adding new pet abilities, please let's refactorize the boss attacks, instead of doing complex tables you can do most of the logic inside the ability cb and it only takes to arguments `pet:SpecialAttack(self) -- self (playerPet) and the fightSession handler which is calling it` from those arguments you will have enough context and you can do probably everything you need. Also update types. Boss is still very different but as we are using them in _castTurn we can refactorize them too
+
+Dog
+Passive: Loyalty Boost – Increases all stats slightly for the team
+Active: Rally – At the start of battle, boosts damage and defense for a short time
+
+For this we likelly need a method 
+apply = function(_session, _caster)
+
+Lion
+Passive: King’s Strength – Deals consistent high damage
+Active: Alpha Roar – Periodically increases team damage
+
+Tiger
+Passive: Predator Instinct – Increased critical hit chance and damage
+Active: Pounce Strike – Deals high burst damage and applies bleed
+
+Bear
+Passive: Regeneration – Slowly restores health during battle
+Active: Rage Mode – Reduces incoming damage and increases attack
+
+Gorilla
+Passive: Unshaken – Reduces effects of stuns and knockbacks
+Active: Ground Slam – Stuns the boss and interrupts attacks
+
+Bull
+Passive: Armor Break – Attacks reduce enemy defense
+Active: Stampede – Charges forward dealing heavy damage and lowering defense
+
+Wolf
+Passive: Blood Hunt – Damage increases the longer the battle lasts
+Active: Pack Frenzy – Increases attack speed and damage for a short time
+
+Fox
+Passive: Evasion – Chance to dodge incoming attacks
+Active: Clone Trick – Creates a decoy that distracts the boss
+
+Rhino
+Passive: Thick Hide – Reduces incoming damage and increases resistance while attacking
+Active: Rampage Charge – Charges forward, dealing massive damage and breaking enemy defenses
+
+### Task realease
+For the moment the bosses got all the same pool of attacks, they go like
+1. Reduce damage
+2. Attack a single target
+3. do an aoe
+This got different interactions depending on the strategy you do, for example here's the perfect counter:
+1. Lion, 
+2. Fox (lowest health)
+3. Dog
+This is literally the perfect counter for the boss rotation: First lion increases the team damage, by the end of turn boss attemps to reduce them, then fox creates a decoy, at the end of turn boss attacks it, third turn the dog increase the team defense and damage and later the boss apllies an aoe

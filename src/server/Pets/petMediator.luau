@@ -301,7 +301,7 @@ BossRemoteEvent.OnServerEvent:Connect(
 			end
 
 			local bossInformation = {
-				healthVal = 500,
+				healthVal = 3000,
 				meleeVal = 200,
 				petId = bossName,
 				petName = bossName,

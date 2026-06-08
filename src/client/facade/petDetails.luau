@@ -26,11 +26,11 @@ local stack: { PetTypes.PetData } = {}
 
 -- `PetScreen.PetDetails` is the container; its child `PetDetails` is the hidden
 -- prototype every stacked sign is cloned from.
-local function getContainer(): Instance
+local function getContainer(): Frame
 	return screen.PetScreen.PetDetails
 end
 
-local function getTemplate(): Instance
+local function getTemplate(): Frame
 	return getContainer().PetDetails
 end
 
@@ -89,6 +89,8 @@ end
 
 function PetScreen.open(name: string?)
 	screen.PetScreen.Visible = true
+	getContainer().Visible = true
+
 end
 
 --[[

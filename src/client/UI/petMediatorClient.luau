@@ -31,7 +31,9 @@ combatFighter:GetClassAddedSignal():Connect(function(machine_binder)
 		print("not boss remote recived")
 		return
 	end
-	machine_binder:Init(player, ourFightSession.player_boss)
+	-- pass the team size so the boss waits for every pet to be arranged before
+	-- the fight (and the server round loop) starts
+	machine_binder:Init(player, ourFightSession.player_boss, #ourFightSession.player_pets)
 end)
 
 local PetFollower = BinderProvider:Get(Constants.PetFollower)

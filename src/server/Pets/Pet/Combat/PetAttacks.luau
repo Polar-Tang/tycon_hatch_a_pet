@@ -1,157 +1,195 @@
 --[=[
 	@class PetAttacks
 
-	Decoupled attack pool for the [Duel pets] turn-based combat. Mirrors the
-	`PetBonuses` style: a `module[petName]` table plus a `.get(petName)` accessor
-	that falls back to a safe default so *any* pet can fight even without an entry.
+	Attack pool for the [Duel pets] turn-based combat. Each entry is keyed by pet
+	name and exposes two **callbacks** rather than data tables:
 
-	The round loop in `FightSessionHandler` only ever reads generic fields off an
-	attack table — `duration`, `damageMultiplier`, `kind`, `animation`, `text`,
-	`apply` — so adding a new pet or a new ability never touches the loop.
+	```lua
+	PetAttacks[petName] = {
+		basicAttack   = function(ctx, session) ... end,
+		specialAttack = function(ctx, session) ... end,
+	}
+	```
 
-	Each pet exposes two attacks:
-	- `basicAttack`   — deals `damageMultiplier * Melee` damage.
-	- `specialAttack` — routed by `kind`. Effects are STUBBED for now (text only),
-	  but the plug-in surface is ready:
-	    * "defensive" — register a buff on the caster (e.g. damage reduction); the
-	      boss turn reads the accumulated `session.defense`.
-	    * "instant"   — resolve immediately at cast time (e.g. burst / heal).
-	    * "trap"      — register a pending trap consulted when the boss attacks
-	      (reflect / block). This is what the boss defense check is for.
+	`ctx` is the casting fighter (a `PlayerPet` or `Boss`) and `session` is the
+	`FightSessionHandler` driving the round. An ability is therefore "merely maths
+	regarding the fight": from those two arguments it can read its own stats/effects,
+	pick targets off the session, apply buffs/debuffs, and fire the turn through the
+	session primitives (`Strike` / `StrikeAll` / `Announce`). The round loop no longer
+	inspects attack fields — it just calls `pet:BasicAttack(session)` /
+	`pet:SpecialAttack(session)`, so adding a pet or ability never touches the loop.
 
-	There is no real "attack" animation in `animationsData` yet (only eat/walk/idle),
-	so attacks default to the "eat" gesture as a placeholder until VFX/animations land.
+	The boss is keyed separately (`getBoss`) and draws from an ordered **pool** of
+	callbacks it rotates through, one ability per turn.
+
+	There is no real "attack" animation yet (only eat/walk/idle), so the session
+	primitives default to the "eat" gesture until VFX/animations land.
 ]=]
 
-export type specialKind = "defensive" | "instant" | "trap"
-
-export type Attack = {
-	duration: number,
-	damageMultiplier: number,
-	animation: string,
-	text: string?,
-	-- only meaningful on specials
-	kind: specialKind?,
-	apply: ((session: any, caster: any) -> ())?,
+-- A buff/debuff a fighter carries for a number of its own turns. The id doubles as
+-- the attribute key written on the target's `Health` so the client can render an
+-- icon. A multiplier of `nil` means that side is untouched.
+export type Effect = {
+	id: string,
+	kind: "buff" | "debuff",
+	rounds: number,
+	-- scales the damage the holder DEALS while active (debuff < 1)
+	outgoingMultiplier: number?,
+	-- scales the damage the holder TAKES while active (buff < 1)
+	incomingMultiplier: number?,
+	-- runtime: rounds left, seeded from `rounds` by AddEffect
+	_remaining: number?,
 }
+
+-- An ability. Runs the whole turn (fire + pacing) through `session`. Returns nothing.
+export type AttackFn = (ctx: any, session: any) -> ()
 
 export type PetAttackSet = {
-	basicAttack: Attack,
-	specialAttack: Attack,
+	basicAttack: AttackFn,
+	specialAttack: AttackFn,
 }
 
-local PLACEHOLDER_ANIM = "eat"
+-- The boss rotates through an ordered pool, one ability per turn.
+export type BossAttackSet = {
+	pool: { AttackFn },
+}
 
 local module: { [string]: PetAttackSet } = {}
 
--- Default set used by any pet without a bespoke entry. Keeps the framework total:
--- the loop never has to special-case a missing pet.
+-- Default set used by any pet without a bespoke entry, so the round loop can stay
+-- pet-agnostic.
 local DEFAULT: PetAttackSet = {
-	basicAttack = {
-		duration = 3,
-		damageMultiplier = 1,
-		animation = PLACEHOLDER_ANIM,
-		text = "attacks!",
-	},
-	specialAttack = {
-		duration = 3,
-		damageMultiplier = 0,
-		kind = "instant",
-		animation = PLACEHOLDER_ANIM,
-		text = "uses a special move!",
-		apply = function(_session, _caster)
-			-- stub: no numeric effect yet
-		end,
-	},
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "attacks!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		-- no bespoke special yet: a slightly heavier hit, announced
+		session:Strike(ctx, session.boss, {
+			multiplier = 1.5,
+			text = "uses a special move!",
+			isSpecial = true,
+			duration = 3,
+		})
+	end,
 }
 
--- A defensive example: caster buffs the team's damage reduction. Stubbed — the
--- buff entry is registered by `_applySpecial`; the numeric effect lands later.
+-- A defensive example: the special guards THIS pet instead of dealing damage.
 module["Rhino"] = {
-	basicAttack = {
-		duration = 3,
-		damageMultiplier = 1,
-		animation = PLACEHOLDER_ANIM,
-		text = "rams the boss!",
-	},
-	specialAttack = {
-		duration = 2,
-		damageMultiplier = 0,
-		kind = "defensive",
-		animation = PLACEHOLDER_ANIM,
-		text = "raises a stone guard!",
-		apply = function(_session, _caster)
-			-- stub: real damage-reduction value plugs in here
-		end,
-	},
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "rams the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		-- guard: halve incoming damage on this pet for its next 2 turns. AddEffect
+		-- mirrors the remaining rounds onto the pet's Health attribute (a shield icon).
+		ctx:AddEffect({ id = "Guard", kind = "buff", rounds = 2, incomingMultiplier = 0.5 })
+		session:Announce(ctx, { text = "raises a stone guard!", duration = 2 })
+	end,
 }
 
--- An instant example: resolves at cast time (e.g. a quick burst).
+-- An instant example: the special resolves a heavier hit right now.
 module["Lion"] = {
-	basicAttack = {
-		duration = 2,
-		damageMultiplier = 1,
-		animation = PLACEHOLDER_ANIM,
-		text = "claws the boss!",
-	},
-	specialAttack = {
-		duration = 3,
-		damageMultiplier = 0,
-		kind = "instant",
-		animation = PLACEHOLDER_ANIM,
-		text = "unleashes a roar!",
-		apply = function(_session, _caster)
-			-- stub: instant burst/heal plugs in here
-		end,
-	},
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "claws the boss!", duration = 2 })
+	end,
+	specialAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, {
+			multiplier = 2,
+			text = "unleashes a roar!",
+			isSpecial = true,
+			duration = 3,
+		})
+	end,
 }
 
--- A trap example: registers a pending trap the boss turn checks (reflect / block).
+-- A trap example: the special registers a pending trap the boss consults on its turn.
 module["Fox"] = {
-	basicAttack = {
-		duration = 3,
-		damageMultiplier = 1,
-		animation = PLACEHOLDER_ANIM,
-		text = "bites the boss!",
-	},
-	specialAttack = {
-		duration = 2,
-		damageMultiplier = 0,
-		kind = "trap",
-		animation = PLACEHOLDER_ANIM,
-		text = "lays a snare!",
-		apply = function(_session, _caster)
-			-- stub: trap trigger logic plugs in here
-		end,
-	},
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		-- the boss owns the trap registry it consults on its turn (trigger stubbed)
+		session.boss:AddTrap({ caster = ctx })
+		session:Announce(ctx, { text = "lays a snare!", duration = 2 })
+	end,
 }
 
--- Boss attack pool (single basic for now; respects the team's `defense`).
-local BOSS_ATTACK: PetAttackSet = {
-	basicAttack = {
-		duration = 4,
-		damageMultiplier = 1,
-		animation = PLACEHOLDER_ANIM,
-		text = "strikes!",
-	},
-	specialAttack = DEFAULT.specialAttack,
+-- Builds the standard 3-ability boss pool. Each boss gets its OWN copy (a fresh
+-- call) so the four bosses can diverge later without sharing state. Order of rotation:
+--   1. weaken  — debuff EVERY living pet's outgoing damage for 2 of their turns.
+--   2. execute — a single heavy hit on the WEAKEST (lowest-health) living pet.
+--   3. quake   — lighter damage to EVERY living pet at once.
+local function buildBossPool(): BossAttackSet
+	return {
+		pool = {
+			function(ctx, session)
+				local targets = session:_allAlivePets()
+				for _, target in ipairs(targets) do
+					target:AddEffect({
+						id = "DamageReduction",
+						kind = "debuff",
+						rounds = 2,
+						outgoingMultiplier = 0.5,
+					})
+				end
+				-- no damage: float "Weakened!" instead of a number on each pet
+				session:StrikeAll(ctx, targets, {
+					multiplier = 0,
+					text = "lets out a withering roar!",
+					fadeText = "Weakened!",
+					isSpecial = true,
+					duration = 3,
+				})
+			end,
+			function(ctx, session)
+				local target = session:_lowestHealthPet()
+				if not target then
+					return
+				end
+				session:Strike(ctx, target, {
+					multiplier = 1.5,
+					text = "lunges at the weakest!",
+					isSpecial = true,
+					duration = 4,
+				})
+			end,
+			function(ctx, session)
+				session:StrikeAll(ctx, session:_allAlivePets(), {
+					multiplier = 0.6,
+					text = "slams the ground!",
+					isSpecial = true,
+					duration = 4,
+				})
+			end,
+		},
+	}
+end
+
+-- The four bosses, keyed by id. Same pool today, separate copies so each can be
+-- tuned independently later.
+local bossModule: { [string]: BossAttackSet } = {
+	["x-rhino"] = buildBossPool(),
+	["goaterberus"] = buildBossPool(),
+	["ghidra"] = buildBossPool(),
+	["croakan"] = buildBossPool(),
 }
 
 local PetAttacks = {}
 
 --[=[
-	Returns the attack set for a pet, falling back to a shared default so the
-	round loop can stay pet-agnostic.
+	Returns the attack set for a pet, falling back to a shared default so the round
+	loop can stay pet-agnostic.
 ]=]
 function PetAttacks.get(petName: string?): PetAttackSet
 	return (petName and module[petName]) or DEFAULT
 end
 
 --[=[
-	Boss attack set. Kept separate so bosses can later diverge from the pet pool.
+	Boss attack pool, keyed by boss id (`x-rhino`, `goaterberus`, `ghidra`,
+	`croakan`). Unknown bosses get a fresh standard pool so the round loop never has
+	to special-case a missing entry.
 ]=]
-function PetAttacks.getBoss(_bossName: string?): PetAttackSet
-	return BOSS_ATTACK
+function PetAttacks.getBoss(bossName: string?): BossAttackSet
+	return (bossName and bossModule[bossName]) or buildBossPool()
 end
 
 return PetAttacks

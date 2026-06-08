@@ -51,7 +51,7 @@ export type NPCFighterClient = {
 	combat_connection: RBXScriptConnection,
 
 	new: (char: Model, serviceBag: any) -> NPCFighterClient,
-	Init: (self: NPCFighterClient, player: Player, initData: FightInfo) -> (),
+	Init: (self: NPCFighterClient, player: Player, initData: FightInfo, expectedPetCount: number) -> (),
 	StartCombat: (self: NPCFighterClient) -> (),
 	Destroy: (self: NPCFighterClient) -> (),
 } & NPCBase
@@ -105,6 +105,9 @@ export type bossCombatConData = {
 	enemy: Model,
 	enemy_hrp: BasePart,
 	enemy_health: IntValue,
+	-- which pet reported arrival; the boss keys the team by band so it can wait
+	-- for the whole team to be arranged before starting the fight
+	band: healthBarId,
 }
 
 --|| Controllers
