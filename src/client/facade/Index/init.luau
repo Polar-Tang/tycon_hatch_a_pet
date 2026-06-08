@@ -162,10 +162,8 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 	new_slot.Name = "Slot" .. slotNum
 	new_slot.Txt.Text = data.petName
 
-	local createUIStroke = function(rarity)
-		if currentUiStroke then
-			currentUiStroke:Destroy()
-		end
+	-- Builds the gradient highlight stroke on THIS slot and returns it.
+	local buildStroke = function(rarity)
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.new(255, 255, 255)
 		stroke.Thickness = 4
@@ -176,7 +174,7 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 		local color_seq = ColorSequence.new(clientUtils.getRarityColorSecuence(rarity))
 		--[[
 		 [1] = 0 0.862745 0.862745 0.862745 0 ,
-                    [2] = 1 0.705882 0.705882 0.705882 0 
+                    [2] = 1 0.705882 0.705882 0.705882 0
 		]]
 		gradient.Color = color_seq
 
@@ -187,20 +185,47 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 		gradient.Rotation = 180
 		gradient.Offset = Vector2.new(0, 0)
 		gradient.Parent = stroke
-		currentUiStroke = stroke
+		return stroke
+	end
+
+	-- Pet multi-select highlight: each selected pet keeps its own stroke, toggled
+	-- on/off independently. Idempotent — re-selecting won't stack strokes.
+	local createUIStroke = function(rarity)
+		if new_slot:FindFirstChild("UIStroke") then
+			return
+		end
+		buildStroke(rarity)
+	end
+
+	local removeUIStroke = function()
+		local stroke = new_slot:FindFirstChild("UIStroke")
+		if stroke then
+			stroke:Destroy()
+		end
+	end
+
+	-- Boss is single-select: only one boss slot is highlighted at a time.
+	local createBossUIStroke = function(rarity)
+		if currentUiStroke then
+			currentUiStroke:Destroy()
+		end
+		currentUiStroke = buildStroke(rarity)
 	end
 
 	-- TODO: [Epic Bosses] think if there's a cleanest way for handling this
 	local rarety = utils.getPetRarity(data.petName) or (petBosses[data.petName] and petBosses[data.petName].rarity)
 	local rariry_camelCase = stringUtils.toUpperCamelCase(rarety)
 
-	if not isBoss and data == _G["petToFight"] then
+	-- Re-highlight any pet that is still in the selected team after a slot rebuild
+	-- (switching views keeps the selection alive in _G["petToFight"]).
+	local selectedPets = _G["petToFight"]
+	if not isBoss and type(selectedPets) == "table" and table.find(selectedPets, data.petId) then
 		petDetails.open()
 		petDetails.setPetData(data)
 		createUIStroke(rariry_camelCase)
 	end
 	if data == _G["bossToFight"] then
-		createUIStroke(rariry_camelCase)
+		createBossUIStroke(rariry_camelCase)
 	end
 	if isBoss and data == _G["bossToFight"] then
 		FightButton.open()
@@ -219,7 +244,12 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 
 	Index.createViewport(new_slot, data.petName)
 	local buy = new_slot.Button
-	local con = slotButtonHandler.setupButtonActivated(buy, data, isBoss or false, createUIStroke, rariry_camelCase)
+	local strokes = {
+		create = createUIStroke,
+		remove = removeUIStroke,
+		createBoss = createBossUIStroke,
+	}
+	local con = slotButtonHandler.setupButtonActivated(buy, data, isBoss or false, strokes, rariry_camelCase)
 
 	new_slot.Parent = screen.Index.Slots.Scroller
 	new_slot.Visible = true

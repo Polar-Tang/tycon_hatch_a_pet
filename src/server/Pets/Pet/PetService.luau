@@ -50,7 +50,6 @@ function PetService.fromDataToWorld(Owner: Player, petInfo: PetTypes.PetData, po
 	utils.ScaleToLvl(pet, petInfo.petLvl)
 	pet:SetAttribute("Level", petInfo.petLvl)
 	pet:SetAttribute("AnimatorName", "AnimationController")
-
 end
 
 function PetService.getPlayerPets(player: Player): { Model }

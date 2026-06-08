@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
-local PetTypes = require(ReplicatedStorage.Pets.PetTypes)
 
 local player = Players.LocalPlayer
 
@@ -18,14 +17,15 @@ function FightButton.open()
 	petScreen.PetIndexBottom.Visible = true
 	local fight_button: ImageButton = petScreen.PetIndexBottom.FightButton
 	fight_button.Activated:Connect(function(a0: InputObject, a1: number)
-		local pet_to_fight: PetTypes.PetData = _G["petToFight"]
-
+		-- _G["petToFight"] is the ordered team of selected pet ids (1..3).
+		local petIds = _G["petToFight"]
 		local bossToFight = _G["bossToFight"]
-		--print("bossToFight ", bossToFight)
-		-- Send the team as an ordered array. Only one pet is selectable today, so
-		-- this is an array of one; a future multi-select UI just appends more ids.
+		if type(petIds) ~= "table" or #petIds == 0 or not bossToFight then
+			return
+		end
+
 		local dataFight: NpcFighterTypes.combatInstanceData = {
-			petIds = { pet_to_fight.petId },
+			petIds = petIds,
 			bossName = bossToFight.petName,
 		}
 		game.ReplicatedStorage.RemoteEvents.BossRemoteEvent:FireServer(dataFight)

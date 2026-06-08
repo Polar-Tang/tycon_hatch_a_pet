@@ -171,3 +171,9 @@ for _, petController in ipairs(targets) then
 		token = token,
 	} :: NpcFighterTypes.CombatTurnData)
 end
+
+-- Ver como seleccionar varios pet ids (desde la UI) y llevarlos al combate
+-- Ver de crear los efectos de todas las pets
+
+Probably will need to separate the initiaziation with the start process, they are different. Currently the combat init and starts in the same RemoteEvent 
+Actually the combat starts when the pets are arranged to their position at BossCombatCon bindable event, but as this may fire for every pet with should register them keyed through its band

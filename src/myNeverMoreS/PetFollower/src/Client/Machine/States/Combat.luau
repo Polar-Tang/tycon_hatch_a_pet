@@ -83,6 +83,7 @@ function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
 				enemy_hrp = data.hrp,
 				enemy_health = CombatControllerClient.getHealth(data.player, data.band),
 			})
+			print("pet reachs position")
 		end)
 	end)
 
