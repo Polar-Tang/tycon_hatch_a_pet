@@ -8,24 +8,19 @@ local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.sr
 local Incomes = require(ReplicatedStorage.Nevermore.Custom.values.src.Server.Incomes)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 local utils = require(ReplicatedStorage.utils.utils)
-local PetAttacks = require(script.Parent.PetAttacks)
+local PetBase = require(script.Parent.PetBase)
+local PlayerPet = require(script.Parent.PlayerPet)
+local Boss = require(script.Parent.Boss)
 local combatInstanceRegistryFolder = ReplicatedStorage.Pets.Fights
 local CombatTurn = ReplicatedStorage.RemoteEvents.CombatTurn
 
 -- seconds before the first round, so clients can arm their turn listeners
 local START_GRACE = 1
 
--- One fighter entry tracked by the session (a pet or the boss).
-type Fighter = {
-	id: string,
-	petName: string,
-	meleeVal: number,
-	band: string,
-	health: IntValue,
-}
-
+-- A registered pending hit: which fighter it lands on and how much (already
+-- mitigated by the target). Health is written when the client confirms.
 type PendingHit = {
-	targetHealth: IntValue,
+	target: PetBase.PetBase,
 	damage: number,
 }
 
@@ -33,8 +28,9 @@ type FightSessionHandler = {
 	_folderSession: Folder,
 	_maid: Maid.Maid,
 	player: Player,
-	pets: { Fighter },
-	boss: Fighter,
+	pets: { PlayerPet.PlayerPet },
+	boss: Boss.Boss,
+	_byBand: { [string]: PetBase.PetBase },
 
 	new: (player: Player) -> FightSessionHandler,
 	GetHealth: (self: FightSessionHandler, nameInstance: string) -> IntValue?,
@@ -54,12 +50,11 @@ function FightSessionHandler.new(player: Player): FightSessionHandler?
 	local self = setmetatable({
 		_folderSession = folder,
 		_maid = Maid.new(),
-		-- combat state
+		-- combat state: an ordered team (for the round loop) + a band lookup (for
+		-- routing a confirmed hit back to the fighter it landed on). Each fighter's
+		-- buff/debuff/defense/trap registries now live on the fighter itself.
 		pets = {},
-		-- ability registries (stubbed effects, real structure)
-		buffs = {}, -- [band] = { <buff/debuff> }
-		traps = {}, -- pending traps consulted on the boss turn
-		defense = 0, -- accumulated damage reduction for the boss turn
+		_byBand = {}, -- [band] = PetBase (pet or boss)
 		_specialIndex = 1, -- which pet casts its special this round (rotates)
 		_running = false,
 		_started = false,
@@ -111,27 +106,29 @@ function FightSessionHandler.Init(self: FightSessionHandler, player: Player, dat
 	for index, petInfo in ipairs(data.player_pets) do
 		local band = "PlayerPet" .. index
 		local healthValue = FightSessionHandler._createFighterFolder(self._folderSession, band, petInfo.petId, petInfo.healthVal)
-		table.insert(self.pets, {
+		local pet = PlayerPet.new(self, {
 			id = petInfo.petId,
 			petName = petInfo.petName or petInfo.petId,
 			meleeVal = petInfo.meleeVal,
 			band = band,
 			health = healthValue,
 		})
-		self.buffs[band] = {}
+		table.insert(self.pets, pet)
+		self._byBand[band] = pet
 	end
 
 	-- Boss
 	do
 		local player_boss = data.player_boss
 		local bossHealth = FightSessionHandler._createFighterFolder(self._folderSession, "PlayerBoss", player_boss.petId, player_boss.healthVal)
-		self.boss = {
+		self.boss = Boss.new(self, {
 			id = player_boss.petId,
 			petName = player_boss.petName or player_boss.petId,
 			meleeVal = player_boss.meleeVal,
 			band = "PlayerBoss",
 			health = bossHealth,
-		}
+		})
+		self._byBand["PlayerBoss"] = self.boss
 
 		-- reward the player when the boss falls (unchanged behaviour, generalized name)
 		self._maid:GiveTask(bossHealth.Changed:Connect(function(a0: number)
@@ -198,42 +195,35 @@ function FightSessionHandler:StartRounds()
 end
 
 function FightSessionHandler:_runRound()
-	-- Defensive buffs only protect for the round they are cast in.
-	self.defense = 0
-
 	for index, pet in ipairs(self.pets) do
 		if not self._running then
 			return
 		end
-		if pet.health.Value > 0 then
-			self:_tickEffects(pet)
+		if pet:IsAlive() then
+			pet:TickEffects()
 
 			local isSpecial = index == self._specialIndex
-			local attackSet = PetAttacks.get(pet.petName)
-			local attack = isSpecial and attackSet.specialAttack or attackSet.basicAttack
+			local attack = pet:SelectAttack(isSpecial)
 
 			if isSpecial then
-				self:_applySpecial(attack, pet)
+				pet:ApplySpecial(attack)
 			end
 
-			self:_castAttack(pet, attack, self.boss.health, isSpecial, 0)
+			self:_castTurn(pet, attack, isSpecial)
 			task.wait(attack.duration)
 		end
 
-		if self.boss.health.Value <= 0 then
+		if not self.boss:IsAlive() then
 			break
 		end
 	end
 
 	-- Boss turn — only if the boss is alive and the team isn't wiped.
-	if self._running and self.boss.health.Value > 0 and self:_anyPetAlive() then
-		local bossAttack = PetAttacks.getBoss(self.boss.petName).basicAttack
-		self:_runTraps(bossAttack)
-		local target = self:_firstAlivePet()
-		if target then
-			self:_castAttack(self.boss, bossAttack, target.health, false, self.defense)
-			task.wait(bossAttack.duration)
-		end
+	if self._running and self.boss:IsAlive() and self:_anyPetAlive() then
+		local bossAttack = self.boss:SelectAttack(false)
+		self.boss:RunTraps()
+		self:_castTurn(self.boss, bossAttack, false)
+		task.wait(bossAttack.duration)
 	end
 
 	-- advance which pet casts its special next round
@@ -242,43 +232,53 @@ function FightSessionHandler:_runRound()
 	end
 
 	-- end conditions
-	if self.boss.health.Value <= 0 or not self:_anyPetAlive() then
+	if not self.boss:IsAlive() or not self:_anyPetAlive() then
 		self._running = false
 	end
 end
 
 --[=[
-	Fires the "perform your attack" event to the client and registers a pending
-	hit token. Does NOT write health — that happens in `ConfirmHit` once the
-	client reports the animation hit landed.
+	Asks the attacker for its outgoing damage and targets, has each target
+	mitigate the hit with its own private defense, registers a pending hit, and
+	fires "perform your attack" to the client. Does NOT write health — that
+	happens in `ConfirmHit` once the client reports the animation hit landed.
 ]=]
-function FightSessionHandler:_castAttack(attacker: Fighter, attack, targetHealth: IntValue, isSpecial: boolean, reduction: number)
-	reduction = reduction or 0
-	local base = (attack.damageMultiplier or 0) * (attacker.meleeVal or 0)
-	local damage = math.max(0, math.floor(base - reduction))
+function FightSessionHandler:_castTurn(attacker: PetBase.PetBase, attack, isSpecial: boolean)
+	local damage, targets = attacker:CastAttack(attack, isSpecial)
 
+	for _, target in ipairs(targets) do
+		local finalDamage = target:Apply(damage)
+		local token = self:_pend(target, finalDamage)
+
+		CombatTurn:FireClient(self.player, {
+			band = attacker.band,
+			attackId = isSpecial and "specialAttack" or "basicAttack",
+			animation = attack.animation,
+			isSpecial = isSpecial or false,
+			text = (attacker.petName or attacker.id) .. " " .. (attack.text or ""),
+			damage = finalDamage,
+			token = token,
+		} :: NpcFighterTypes.CombatTurnData)
+	end
+end
+
+-- Registers a pending hit and returns its token. The session owns the token
+-- counter (trivially unique) and routes the confirmed hit back to its target.
+function FightSessionHandler:_pend(target: PetBase.PetBase, damage: number): number
 	self._hitSeq += 1
 	local token = self._hitSeq
 	self._pendingHits[token] = {
-		targetHealth = targetHealth,
+		target = target,
 		damage = damage,
 	}
-
-	CombatTurn:FireClient(self.player, {
-		band = attacker.band,
-		attackId = isSpecial and "specialAttack" or "basicAttack",
-		animation = attack.animation,
-		isSpecial = isSpecial or false,
-		text = (attacker.petName or attacker.id) .. " " .. (attack.text or ""),
-		damage = damage,
-		token = token,
-	} :: NpcFighterTypes.CombatTurnData)
+	return token
 end
 
 --[=[
-	Client confirmed the hit for `token`. Apply the stored damage once. Tokens
-	that are never confirmed (attacker died mid-swing) are simply dropped on
-	teardown, so there is no double counting.
+	Client confirmed the hit for `token`. Hand the stored damage to the target
+	fighter, which writes its own health once. Tokens that are never confirmed
+	(attacker died mid-swing) are simply dropped on teardown, so there is no
+	double counting.
 ]=]
 function FightSessionHandler:ConfirmHit(token: number, position: Vector3?)
 	local pending: PendingHit? = self._pendingHits[token]
@@ -287,77 +287,21 @@ function FightSessionHandler:ConfirmHit(token: number, position: Vector3?)
 	end
 	self._pendingHits[token] = nil
 
-	local health = pending.targetHealth
-	if not health or not health.Parent then
-		return
-	end
-	health.Value = math.max(0, health.Value - pending.damage)
-
-	-- show the damage number at the spot the client reported the hit landed
-	if position then
-		ReplicatedStorage.RemoteEvents.TextFade:FireClient(self.player, {
-			text = tostring(pending.damage),
-			position = position,
-		})
-	end
-end
-
---[=[
-	Routes a special by its `kind`. Effects are stubbed (text only) but the
-	plug-in surface is wired:
-	- defensive → register a buff on the caster + bump the round's `defense`.
-	- instant   → resolve now.
-	- trap      → register a trap the boss turn consults.
-]=]
-function FightSessionHandler:_applySpecial(attack, caster: Fighter)
-	local kind = attack.kind or "instant"
-
-	if kind == "defensive" then
-		self.buffs[caster.band] = self.buffs[caster.band] or {}
-		table.insert(self.buffs[caster.band], { kind = "defensive", attack = attack })
-		-- stub: real reduction value plugs in here
-		self.defense += 0
-	elseif kind == "trap" then
-		table.insert(self.traps, { caster = caster, attack = attack })
-	end
-	-- instant resolves immediately; all numeric effects are stubbed for now
-
-	if attack.apply then
-		attack.apply(self, caster)
-	end
-end
-
--- Plays a pet's registered buffs/debuffs for the round (stub: structure only).
-function FightSessionHandler:_tickEffects(pet: Fighter)
-	local effects = self.buffs[pet.band]
-	if not effects then
-		return
-	end
-	for _, _effect in ipairs(effects) do
-		-- stub: each effect's per-round behaviour plugs in here
-	end
-end
-
--- Consumes pending traps on the boss turn (stub: structure only).
-function FightSessionHandler:_runTraps(_bossAttack)
-	for index = #self.traps, 1, -1 do
-		-- stub: trap trigger (reflect / block) plugs in here
-		table.remove(self.traps, index)
-	end
+	pending.target:TakeDamage(pending.damage, position)
 end
 
 function FightSessionHandler:_anyPetAlive(): boolean
 	for _, pet in ipairs(self.pets) do
-		if pet.health.Value > 0 then
+		if pet:IsAlive() then
 			return true
 		end
 	end
 	return false
 end
 
-function FightSessionHandler:_firstAlivePet(): Fighter?
+function FightSessionHandler:_firstAlivePet(): PetBase.PetBase?
 	for _, pet in ipairs(self.pets) do
-		if pet.health.Value > 0 then
+		if pet:IsAlive() then
 			return pet
 		end
 	end

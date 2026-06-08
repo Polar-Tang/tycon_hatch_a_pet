@@ -18,6 +18,14 @@ function MovementController.new(data: NpcFighterTypes.controllerdataInint, servi
 	self.speed = assert(petData[petName], "invalid petName").walkSpeed
 	self._maid = Maid.new()
 
+	-- IMPORTANT: `data.maid` (inherited onto this table) is the *binder* maid -- it
+	-- owns every controller plus the pet's AncestryChanged teardown. This controller
+	-- treats `self.maid` as its own move-scratch maid and DoCleaning()s it (see
+	-- MoveTo's :Finally and _jumpToWaypoint), which would tear down its sibling
+	-- controllers -> pet:Destroy() -> the pet vanishes mid-move. Own a private maid
+	-- so move cleanup never reaches the binder maid.
+	self.maid = Maid.new()
+
 	-- Assume the pet has a Humanoid
 	local humanoid = self.pet:WaitForChild("Humanoid")
 	if humanoid then
@@ -202,6 +210,7 @@ end
 
 function MovementController.Destroy(self: NpcFighterTypes.MovementController)
 	self._maid:DoCleaning()
+	self.maid:DoCleaning()
 	self.pet:Destroy()
 	self.isMoving = false
 end

@@ -145,3 +145,29 @@ There are three types of special attacks,
 ### Ready for vfrx
 No VFX exist yet, so the player can't visually distinguish a special attack. Instead there will be a displaying text leting you know when this occurs
 **Deadline**: I have everything to start, i will wait for you to cofirm and the task will deliver in 1-2 weeks
+
+
+i've been testing your new combat rounds and its incredibely, it's really impresive. As there are no errors we can jump directly to refactorizations. We can divide the specific logic for each pet to a generalized class, so we split the logic between fightSessions and pet combat handler, but their names will be in CamelCase because they are public methods:
+PetBase
+- TickEffects _tickEffects
+- CastAttack _castAttack
+PlayerPet
+- ApplySpecial _applySpecial
+Boss
+- RunTraps _runTraps
+This is due it's a little more clean in order to managing the internal damage/health/etc for each pet, also because every pet (PetBase) should have their own _buff and _debuff field. Also we should ask to the Pet class what damage would it be acordingly to heir internal state (buff, debuffs, some defense that reduce damage which is private to the pet) so i would cast the attack for the pet, return their value and call to :Apply to target, i imagine something like this:
+local damage, targets = self.petControllers[petName]:CastAttack
+
+for _, petController in ipairs(targets) then
+	petController:Apply(damage)
+
+	CombatTurn:FireClient(self.player, {
+		band = attacker.band,
+		attackId = isSpecial and "specialAttack" or "basicAttack",
+		animation = attack.animation,
+		isSpecial = isSpecial or false,
+		text = (attacker.petName or attacker.id) .. " " .. (attack.text or ""),
+		damage = damage,
+		token = token,
+	} :: NpcFighterTypes.CombatTurnData)
+end

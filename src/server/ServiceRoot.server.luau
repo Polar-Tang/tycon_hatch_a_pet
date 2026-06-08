@@ -75,6 +75,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- set collisions group couse i don't feel like doing this manually from roblox studio
+--[[
 do
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
@@ -187,7 +188,7 @@ local ServerStorage = game:GetService("ServerStorage")
 	petModels.Name = "PetModels"
 	petModels.Parent = ReplicatedFirst
 end
-
+]]
 Players.PlayerAdded:Connect(function(player)
 	local playerData = ds:GetAsync("data_" .. player.UserId)
 	--print("========== LOADING DATA ==========")
@@ -196,6 +197,16 @@ Players.PlayerAdded:Connect(function(player)
 	--print("lastConnection received:", "NIL")
 
 	--print("==================================")
+
+	local character = player.Character or player.CharacterAdded:Wait()
+	local petsClientGhost = character:GetDescendants()
+	for _, descendants in petsClientGhost do
+		
+		if descendants:IsA("BasePart") then 
+			descendants.CollisionGroup = "Players"
+		end
+	end
+
 	Mediator.PlayerAdded(player, playerData)
 end)
 

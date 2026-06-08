@@ -4,6 +4,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
+local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 -- local PathFindCustom = require(ReplicatedStorage.utils.PathFindCustom)
 
 local TargetController = {}
@@ -12,6 +13,10 @@ TargetController.__index = TargetController
 function TargetController.new(data: NpcFighterTypes.controllerdataInint, serviceBag: any, player)
 	local dataShit = table.clone(data)
 	local self = setmetatable(dataShit, TargetController)
+	-- Own a private maid. `data.maid` is the binder maid (owns the controllers +
+	-- the pet's teardown); CalculatePath/Destroy DoCleaning their maid, and cleaning
+	-- the binder maid here would destroy the pet mid-path. Keep them separate.
+	self.maid = Maid.new()
 	local playerChar = self.player_character
 
 	local player_hrp = playerChar and playerChar.PrimaryPart
