@@ -77,6 +77,7 @@ function PromptProvider:didMount()
 	local promptCreator = ProximityPrompt.OnClientEvent:Connect(function(data)
 		local npc: Model = data.npc
 		local id = data.id
+		print("data ", data)
 		local prompty: ProximityPrompt = data.prompt or npc:FindFirstChildOfClass("ProximityPrompt")
 
 		if

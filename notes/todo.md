@@ -172,8 +172,24 @@ for _, petController in ipairs(targets) then
 	} :: NpcFighterTypes.CombatTurnData)
 end
 
--- Ver como seleccionar varios pet ids (desde la UI) y llevarlos al combate
--- Ver de crear los efectos de todas las pets
 
-Probably will need to separate the initiaziation with the start process, they are different. Currently the combat init and starts in the same RemoteEvent 
-Actually the combat starts when the pets are arranged to their position at BossCombatCon bindable event, but as this may fire for every pet with should register them keyed through its band
+### Ver como seleccionar varios pet ids (desde la UI) y llevarlos al combate
+Probably will need to separate to split the logic for initiaziation and the one for starting
+Init:
+	Create instance
+	Declare variables and data
+Start
+	Connect heartbeat
+	Run certain functions
+We should fire NPCFighter and call to CombatController.startRounds exaclty when all the pets are arranged to their position at BossCombatCon bindable event, from CombatCon but as this may fire for every pet with should register them keyed through its band and confirm the fight when all the pets are arrange. Another important thing to point out is that :MoveTo(path):Then is not waiting to the pet to reach their final position so we'll ned a way for running this logic probably as a callback that MovementController should know when to call. Also the goal position for each pet should be acordingly to their band, there's a center point in front the boss and first is `centerFront.CFrame.RightVector * range`, `centerFront`, `player_hrp.CFrame.RightVector * -range` 
+
+~Currently src/myNeverMoreS/PetFollower/src/Client/Machine/Controllers/TargetController.luau get the goal position of the pet which is sliglty to their right. We need to update TargetController to be aware of their pet ban, 
+if pet band is 1 should be calulated as it is, `player_hrp.CFrame.RightVector * range` right
+pet band 2 the pet should go to the left side `player_hrp.CFrame.RightVector * -range` left
+pet band 3 it should be at players back `player_hrp.CFrame.LookVector * range` backwards
+I'm not sure if i misstyped the CFrame calculations but it should align with i told you. Additionally if you can a little extra offset by the pet magnitud it would be great~
+
+~Alright, now i just updated StarterGui.ScreenGui.PetScreen.PetDetails (this is the container)
+It can contains at least 3 StarterGui.ScreenGui.PetScreen.PetDetails.PetDetails which is now the sign that contains all the information about the pet. Please update src/client/facade/petDetails.luau to this structure as well as update their method to be capable of stacking 3 different pet details. also update their client consumer src/client/facade/Index/init.luau:223 and allowing a stacking. You can use the stack and change the petDetails text to something like "goes first", "goes second", and so, If i order them by name they will be order alphabetically so StarterGui.ScreenGui.PetScreen.PetDetails[Name] its important for the stack~
+
+-- Ver de crear los efectos de todas las pets

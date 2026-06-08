@@ -25,6 +25,7 @@ function SlotButtonHandler.setupButtonActivated(button, data, isBoss, strokes, r
 			local existingIndex = table.find(selected, data.petId)
 			if existingIndex then
 				table.remove(selected, existingIndex)
+				petDetails.removePet(data.petId)
 				strokes.remove()
 				return
 			end
@@ -36,7 +37,7 @@ function SlotButtonHandler.setupButtonActivated(button, data, isBoss, strokes, r
 
 			table.insert(selected, data.petId)
 			petDetails.open()
-			petDetails.setPetData(data)
+			petDetails.addPet(data)
 			strokes.create(rarity)
 		else
 			strokes.createBoss(rarity)

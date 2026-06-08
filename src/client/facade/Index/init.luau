@@ -221,7 +221,7 @@ function Index.createSlot(data: PetTypes.PetData, isBoss: boolean?)
 	local selectedPets = _G["petToFight"]
 	if not isBoss and type(selectedPets) == "table" and table.find(selectedPets, data.petId) then
 		petDetails.open()
-		petDetails.setPetData(data)
+		petDetails.addPet(data)
 		createUIStroke(rariry_camelCase)
 	end
 	if data == _G["bossToFight"] then

@@ -77,6 +77,7 @@ function Combat:OnEnter(data: NpcFighterTypes.petStateCtx)
 	data.TargetController:CalculatePath(new_goal):Then(function(path): ...any
 		data.MovementController:ForgotPath()
 		data.MovementController:MoveTo(path):Then(function()
+			
 			data.MovementController:LookTo(data.enemy_hrp.Position)
 			BossCombatCon:Fire({
 				enemy = data.pet,

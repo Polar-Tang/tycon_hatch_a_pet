@@ -1,11 +1,14 @@
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
-local clientUtils = require(StarterPlayer.StarterPlayerScripts.utils.clientUtils)
+
 local NpcFighterTypes = require(ReplicatedStorage.Nevermore.Custom.NPCFighter.src.Shared.utils.NpcFighterTypes)
 local Promise = require(ReplicatedStorage.Nevermore.Quenty.promise.Shared.Promise)
 local Maid = require(ReplicatedStorage.Nevermore.Quenty.maid.Shared.Maid)
 -- local PathFindCustom = require(ReplicatedStorage.utils.PathFindCustom)
+
+-- Base distance from the player each follower stands; the pet's own size is
+-- added on top so larger pets don't clip into the player.
+local FORMATION_RANGE = 3
 
 local TargetController = {}
 TargetController.__index = TargetController
@@ -78,12 +81,32 @@ function TargetController.CalculatePath(self: NpcFighterTypes.TargetController, 
 	end)
 end
 
--- This is producing the goal position used to calculate the path from the movement controller
+-- This is producing the goal position used to calculate the path from the movement controller.
+-- Each follower stands in a band-relative slot around the player:
+--   band 1 -> player's right  ( RightVector * range)
+--   band 2 -> player's left   (-RightVector * range)
+--   band 3 -> player's back   (-LookVector  * range)
+-- A little extra range is added from the pet's own magnitude so bigger pets sit
+-- further out and don't overlap the player.
 function TargetController._getGoalPos(self: NpcFighterTypes.TargetController): Vector3
-	-- get nearby to player position
-	local nearPlayer = clientUtils.petGoal(self.player_character, 3)
+	local player_hrp = self.player_character.PrimaryPart
+	local band = tonumber(string.match(self.band or "", "%d+")) or 1
 
-	return nearPlayer
+	local range = FORMATION_RANGE + self.pet:GetExtentsSize().Magnitude
+
+	local offset
+	if band == 2 then
+		offset = player_hrp.CFrame.RightVector * -range -- left
+	elseif band == 3 then
+		offset = player_hrp.CFrame.LookVector * -range -- back
+	else
+		offset = player_hrp.CFrame.RightVector * range -- right
+	end
+
+	local goal = player_hrp.Position + offset
+
+	-- keep the goal on the player's ground plane (avoid any Y offset)
+	return Vector3.new(goal.X, player_hrp.Position.Y, goal.Z)
 end
 
 function TargetController.Destroy(self: NpcFighterTypes.TargetController)
