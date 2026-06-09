@@ -24,6 +24,8 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PetAttacks = require(script.Parent.PetAttacks)
+local PetPassives = require(script.Parent.PetPassives)
+local FightEffects = require(ReplicatedStorage.Pets.Fights.FightEffects)
 
 -- One fighter the session tracks (built by Init from a pet/boss entry).
 export type FighterInfo = {
@@ -41,14 +43,21 @@ export type PetBase = {
 	meleeVal: number,
 	band: string,
 	health: IntValue,
+	-- fractional damage reduction applied in `_mitigate`: positive softens incoming
+	-- hits, negative (e.g. the boss while "Armor Broken") amplifies them. Default 0.
+	_defense: number,
 	-- active buffs/debuffs this fighter carries; each ages on its own turn and
 	-- mirrors its remaining rounds onto a `Health` attribute for the client icon
 	_effects: { PetAttacks.Effect },
 	-- this fighter's abilities, bound once by Init
 	_attacks: PetAttacks.PetAttackSet,
+	-- this fighter's passive (always-on), bound once by Init
+	_passive: PetPassives.Passive,
 
 	Init: (self: PetBase) -> (),
 	IsAlive: (self: PetBase) -> boolean,
+	GetEffect: (self: PetBase, id: string) -> PetAttacks.Effect?,
+	ApplyPassive: (self: PetBase, session: any) -> (),
 	BasicAttack: (self: PetBase, session: any) -> (),
 	SpecialAttack: (self: PetBase, session: any) -> (),
 	Outgoing: (self: PetBase, multiplier: number) -> number,
@@ -56,6 +65,8 @@ export type PetBase = {
 	Apply: (self: PetBase, damage: number) -> number,
 	TakeDamage: (self: PetBase, damage: number, position: Vector3?, fadeText: string?) -> (),
 	AddEffect: (self: PetBase, effect: PetAttacks.Effect) -> (),
+	HasHealth: (self: PetBase) -> boolean,
+	_tickEffects: (self: PetBase) -> (),
 }
 
 local PetBase = {}
@@ -70,6 +81,7 @@ function PetBase.new(session: any, info: FighterInfo): PetBase
 		band = info.band,
 		health = info.health,
 		-- per-fighter combat state (was session-global before the refactor)
+		_defense = 0,
 		_effects = {},
 	}, PetBase)
 
@@ -82,10 +94,53 @@ end
 ]=]
 function PetBase.Init(self: PetBase)
 	self._attacks = table.clone(PetAttacks.get(self.petName))
+	-- shared (not cloned): a passive is read-only state, the same for every pet of
+	-- a species, and its onTurnEnd/onIncoming closures hold no per-instance data.
+	self._passive = PetPassives.get(self.petName)
 end
 
 function PetBase.IsAlive(self: PetBase): boolean
 	return self.health.Value > 0
+end
+
+-- Returns this fighter's active effect with the given id (or nil). Lets an ability
+-- read/stack an effect it already applied (e.g. Lion's growing Alpha Roar).
+function PetBase.GetEffect(self: PetBase, id: string): PetAttacks.Effect?
+	for _, effect in ipairs(self._effects) do
+		if effect.id == id then
+			return effect
+		end
+	end
+	return nil
+end
+
+function PetBase.HasHealth(self)
+	return self.health and self.health.Parent
+end
+
+--[=[
+	Announces this fighter's passive at the very start of combat: alerts the player
+	with the passive's name, mirrors it onto a `Health` attribute (keyed by name) so
+	the client can render a permanent icon, then runs its one-time `onStart` hook.
+	A fighter without a passive (empty name) does nothing.
+]=]
+function PetBase.ApplyPassive(self: PetBase, session: any)
+	local passive = self._passive
+	if not passive or passive.name == "" then
+		return
+	end
+
+	ReplicatedStorage.RemoteEvents.Notifier:FireClient(session.player, {
+		notification = (self.petName or self.id) .. "'s passive: " .. passive.name,
+	})
+	
+	if self:HasHealth() then
+		self.health:SetAttribute(passive.name, true)
+	end
+
+	if passive.onStart then
+		passive.onStart(self, session)
+	end
 end
 
 -- Run a turn. The bound callback does the maths and drives the session primitives.
@@ -107,6 +162,11 @@ function PetBase.Outgoing(self: PetBase, multiplier: number): number
 		if effect.outgoingMultiplier then
 			base *= effect.outgoingMultiplier
 		end
+		-- a named effect may reshape outgoing damage (scale or flat add)
+		local entry = FightEffects.get(effect.id)
+		if entry.outgoing then
+			base = entry.outgoing(self, effect, base)
+		end
 	end
 	return math.max(0, math.floor(base))
 end
@@ -119,19 +179,34 @@ end
 ]=]
 function PetBase.TickEffects(self: PetBase)
 	self:_tickEffects()
+	-- a passive's per-turn hook (regen, escalating melee) fires on the same beat as
+	-- effect aging — after this fighter has acted
+	if self._passive and self._passive.onTurnEnd then
+		self._passive.onTurnEnd(self, self._session)
+	end
 end
 
 function PetBase._tickEffects(self: PetBase)
 	local health = self.health
 	for index = #self._effects, 1, -1 do
 		local effect = self._effects[index]
+		local entry = FightEffects.get(effect.id)
+		-- per-turn behaviour (e.g. Bleed damage) fires before the effect ages, so a
+		-- 2-round bleed lands exactly 2 ticks
+		if entry.onTick then
+			entry.onTick(self, effect, self._session)
+		end
 		effect._remaining = (effect._remaining or effect.rounds) - 1
 		if effect._remaining <= 0 then
 			table.remove(self._effects, index)
-			if health and health.Parent then
+			-- a teardown hook (e.g. Armor Broken restoring defense) runs once on expiry
+			if entry.onExpire then
+				entry.onExpire(self, effect, self._session)
+			end
+			if self:HasHealth() then
 				health:SetAttribute(effect.id, nil)
 			end
-		elseif health and health.Parent then
+		elseif self:HasHealth() then
 			health:SetAttribute(effect.id, effect._remaining)
 		end
 	end
@@ -149,15 +224,32 @@ end
 
 function PetBase._mitigate(self: PetBase, damage: number): number
 	local result = damage or 0
-	print("damage incomming: ", result)
-	-- mitigation is private to the pet being hit (was a session-global accumulator)
-	print("self._effects: ", self._effects)
-	for _, effect in ipairs(self._effects) do
+	-- a persistent defense factor (private to this pet): positive softens the hit,
+	-- negative (the boss while "Armor Broken") amplifies it.
+	result *= (1 - (self._defense or 0))
+	-- per-effect mitigation: legacy inline multipliers, named-table reshaping, and a
+	-- full block. Iterate in reverse so a spent block can be removed in place.
+	for index = #self._effects, 1, -1 do
+		local effect = self._effects[index]
 		if effect.incomingMultiplier then
 			result *= effect.incomingMultiplier
 		end
+		local entry = FightEffects.get(effect.id)
+		if entry.block and result > 0 then
+			-- a decoy soaks the whole hit, then is spent (removed + icon cleared)
+			result = 0
+			table.remove(self._effects, index)
+			if self:HasHealth() then
+				self.health:SetAttribute(effect.id, nil)
+			end
+		elseif entry.incoming then
+			result = entry.incoming(self, effect, result)
+		end
 	end
-	print("damage processed: ", result)
+	-- a passive may reshape the hit last (Rhino flat reduction, Fox dodge → 0)
+	if self._passive and self._passive.onIncoming then
+		result = self._passive.onIncoming(self, result)
+	end
 
 	return math.max(0, math.floor(result))
 end
@@ -188,11 +280,19 @@ end
 	`Health` attribute (keyed by `id`) so the client can render an icon.
 ]=]
 function PetBase.AddEffect(self: PetBase, effect: PetAttacks.Effect)
-	print("add a buff ", self._effects)
+	print("all the buffs for this guy ", self.petName, self._effects)
 	for _, existing in ipairs(self._effects) do
 		if existing.id == effect.id then
 			existing._remaining = effect.rounds
-			if self.health and self.health.Parent then
+			-- refresh any per-cast params on re-application (e.g. a bumped Alpha Roar
+			-- multiplier, or a fresh bleed amount) — but NOT onApply, which is one-shot
+			if effect.multiplier then
+				existing.multiplier = effect.multiplier
+			end
+			if effect.amount then
+				existing.amount = effect.amount
+			end
+			if self:HasHealth() then
 				self.health:SetAttribute(existing.id, existing._remaining)
 			end
 			return
@@ -201,7 +301,12 @@ function PetBase.AddEffect(self: PetBase, effect: PetAttacks.Effect)
 
 	effect._remaining = effect.rounds
 	table.insert(self._effects, effect)
-	if self.health and self.health.Parent then
+	-- a one-time hook on first application (e.g. Armor Broken lowering the boss's defense)
+	local entry = FightEffects.get(effect.id)
+	if entry.onApply then
+		entry.onApply(self, effect, self._session)
+	end
+	if self:HasHealth() then
 		self.health:SetAttribute(effect.id, effect._remaining)
 	end
 end

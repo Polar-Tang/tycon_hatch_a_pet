@@ -37,6 +37,10 @@ export type Effect = {
 	outgoingMultiplier: number?,
 	-- scales the damage the holder TAKES while active (buff < 1)
 	incomingMultiplier: number?,
+	-- per-cast params the named FightEffects hooks read: a flat magnitude (bleed/turn,
+	-- flat add/cut, defense shred) and/or a scalar (Rally/Roar/Frenzy damage multiplier)
+	amount: number?,
+	multiplier: number?,
 	-- runtime: rounds left, seeded from `rounds` by AddEffect
 	_remaining: number?,
 }
@@ -53,6 +57,29 @@ export type PetAttackSet = {
 export type BossAttackSet = {
 	pool: { AttackFn },
 }
+
+-- Special-attack tuning. Damage bases are a multiple of the caster's melee; bleed
+-- fractions are a slice of that base dealt each of the boss's turns; the rest are
+-- buff/debuff magnitudes. Kept here (not in FightEffects) so the numbers sit with the
+-- ability that casts them — the named effects just apply whatever `amount`/`multiplier`
+-- the special hands them.
+local TIGER_BASE = 200 -- Pounce Strike base = 200 × melee
+local RHINO_BASE = 300 -- Rampage Charge base = 300 × melee
+local BULL_BASE = 300 -- Stampede base = 300 × melee
+local TIGER_BLEED = 0.2 -- bleed/turn = 20% of the Pounce base
+local RHINO_BLEED = 0.05 -- bleed/turn = 5% of the Rampage base
+local DOG_HEALTH = 0.25 -- Rally one-time team health bump
+local DOG_DAMAGE = 1.25 -- Rally team damage ×1.25 next turn
+local LION_ROAR_STEP = 0.15 -- Alpha Roar adds +15% team damage each cast
+local BEAR_DEFENSE = 0.2 -- Rage flat damage cut = 20% of the Bear's health
+local BEAR_ATTACK = 0.2 -- Rage flat damage add = 20% of the Bear's melee
+local WOLF_FRENZY = 1.5 -- Pack Frenzy damage ×1.5 next turn
+local BULL_DEFENSE_BREAK = 0.25 -- Stampede makes the boss take +25% for 2 turns
+
+-- A self/team buff applied during the holder's OWN turn is aged once immediately after
+-- (the post-attack TickEffects), so we pad its rounds by one to still cover the intended
+-- number of *future* turns. Boss debuffs don't need this (the boss acts after the pets).
+local SELF_BUFF_OFFSET = 1
 
 local module: { [string]: PetAttackSet } = {}
 
@@ -73,43 +100,136 @@ local DEFAULT: PetAttackSet = {
 	end,
 }
 
--- A defensive example: the special guards THIS pet instead of dealing damage.
-module["Rhino"] = {
+-- Dog · Rally — boosts the whole team at the start of a fight: a one-time +25% health
+-- and a one-turn +25% damage buff on every player pet.
+module["Dog"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "rams the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 3 })
 	end,
 	specialAttack = function(ctx, session)
-		-- guard: halve incoming damage on this pet for its next 2 turns. AddEffect
-		-- mirrors the remaining rounds onto the pet's Health attribute (a shield icon).
-		ctx:AddEffect({ id = "Guard", kind = "buff", rounds = 2, incomingMultiplier = 0.5 })
-		session:Announce(ctx, { text = "raises a stone guard!", duration = 2 })
+		for _, pet in ipairs(session.pets) do
+			local health = pet.health
+			if health and health.Parent then
+				local maxHealth = health:GetAttribute("MaxHealth") or health.Value
+				health:SetAttribute("MaxHealth", math.floor(maxHealth * (1 + DOG_HEALTH)))
+				health.Value = math.floor(health.Value * (1 + DOG_HEALTH))
+			end
+			pet:AddEffect({ id = "Rally", kind = "buff", rounds = 1 + SELF_BUFF_OFFSET, multiplier = DOG_DAMAGE })
+		end
+		session:Announce(ctx, { text = "rallies the team!", duration = 2 })
 	end,
 }
 
--- An instant example: the special resolves a heavier hit right now.
+-- Lion · Alpha Roar — periodically ratchets the whole team's damage up another 15%,
+-- stacking the buff's multiplier each time the roar fires.
 module["Lion"] = {
 	basicAttack = function(ctx, session)
 		session:Strike(ctx, session.boss, { multiplier = 1, text = "claws the boss!", duration = 2 })
 	end,
 	specialAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, {
-			multiplier = 2,
-			text = "unleashes a roar!",
-			isSpecial = true,
-			duration = 3,
-		})
+		for _, pet in ipairs(session.pets) do
+			local roar = pet:GetEffect("AlphaRoar")
+			if roar then
+				roar.multiplier = (roar.multiplier or 1) + LION_ROAR_STEP
+				pet:AddEffect(roar) -- refresh duration; multiplier already bumped
+			else
+				pet:AddEffect({
+					id = "AlphaRoar",
+					kind = "buff",
+					rounds = 2 + SELF_BUFF_OFFSET,
+					multiplier = 1 + LION_ROAR_STEP,
+				})
+			end
+		end
+		session:Announce(ctx, { text = "lets out an alpha roar!", duration = 2 })
 	end,
 }
 
--- A trap example: the special registers a pending trap the boss consults on its turn.
+-- Tiger · Pounce Strike — a heavy burst (200 × melee) that also leaves a 2-turn bleed
+-- worth 20% of the hit each of the boss's turns.
+module["Tiger"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "swipes the boss!", duration = 2 })
+	end,
+	specialAttack = function(ctx, session)
+		local base = math.floor(TIGER_BASE * ctx.meleeVal)
+		session.boss:AddEffect({ id = "Bleed", kind = "debuff", rounds = 2, amount = math.floor(base * TIGER_BLEED) })
+		session:Strike(ctx, session.boss, { damage = base, text = "pounces with a vicious strike!", isSpecial = true, duration = 3 })
+	end,
+}
+
+-- Bear · Rage Mode — toughens up (flat cut = 20% of its health) and hits harder (flat
+-- add = 20% of its melee) for 2 turns.
+module["Bear"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "mauls the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		local curHealth = (ctx.health and ctx.health.Value) or 0
+		ctx:AddEffect({ id = "RageDefense", kind = "buff", rounds = 2 + SELF_BUFF_OFFSET, amount = math.floor(curHealth * BEAR_DEFENSE) })
+		ctx:AddEffect({ id = "RageAttack", kind = "buff", rounds = 2 + SELF_BUFF_OFFSET, amount = math.floor(ctx.meleeVal * BEAR_ATTACK) })
+		session:Announce(ctx, { text = "enters a rage!", duration = 2 })
+	end,
+}
+
+-- Bull · Stampede — a heavy hit (300 × melee) that cracks the boss's armor, making it
+-- take +25% for 2 turns.
+module["Bull"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "gores the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		local base = math.floor(BULL_BASE * ctx.meleeVal)
+		session.boss:AddEffect({ id = "DefenseBreak", kind = "debuff", rounds = 2, amount = BULL_DEFENSE_BREAK })
+		session:Strike(ctx, session.boss, { damage = base, text = "stampedes through the boss!", isSpecial = true, duration = 3 })
+	end,
+}
+
+-- Wolf · Pack Frenzy — a one-turn +50% damage spike for the Wolf.
+module["Wolf"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "snaps at the boss!", duration = 2 })
+	end,
+	specialAttack = function(ctx, session)
+		ctx:AddEffect({ id = "Frenzy", kind = "buff", rounds = 1 + SELF_BUFF_OFFSET, multiplier = WOLF_FRENZY })
+		session:Announce(ctx, { text = "whips into a frenzy!", duration = 2 })
+	end,
+}
+
+-- Rhino · Rampage Charge — a heavy hit (300 × melee) plus a lighter 2-turn bleed worth
+-- 5% of the hit each of the boss's turns.
+module["Rhino"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "rams the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		local base = math.floor(RHINO_BASE * ctx.meleeVal)
+		session.boss:AddEffect({ id = "Bleed", kind = "debuff", rounds = 2, amount = math.floor(base * RHINO_BLEED) })
+		session:Strike(ctx, session.boss, { damage = base, text = "charges with a rampage!", isSpecial = true, duration = 3 })
+	end,
+}
+
+-- Fox · Clone Trick — a decoy that fully blocks the next hit the Fox would take
+-- (consumed on block, see FightEffects "CloneTrick").
 module["Fox"] = {
 	basicAttack = function(ctx, session)
 		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 3 })
 	end,
 	specialAttack = function(ctx, session)
-		-- the boss owns the trap registry it consults on its turn (trigger stubbed)
-		session.boss:AddTrap({ caster = ctx })
-		session:Announce(ctx, { text = "lays a snare!", duration = 2 })
+		ctx:AddEffect({ id = "CloneTrick", kind = "buff", rounds = 3 + SELF_BUFF_OFFSET })
+		session:Announce(ctx, { text = "splits into a decoy!", duration = 2 })
+	end,
+}
+
+-- Gorilla · Ground Slam — the only trap for now: registers a "skip" the boss consults on
+-- its turn, which makes it forfeit that attack entirely.
+module["Gorilla"] = {
+	basicAttack = function(ctx, session)
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "pummels the boss!", duration = 3 })
+	end,
+	specialAttack = function(ctx, session)
+		session.boss:AddTrap({ kind = "skip", caster = ctx })
+		session:Announce(ctx, { text = "stuns the boss with a ground slam!", duration = 2 })
 	end,
 }
 

@@ -20,7 +20,7 @@ export type Boss = PetBase.PetBase & {
 	_traps: { any },
 	Attack: (self: Boss, session: any) -> (),
 	AddTrap: (self: Boss, trap: any) -> (),
-	RunTraps: (self: Boss) -> (),
+	RunTraps: (self: Boss) -> boolean,
 }
 
 local Boss = setmetatable({}, PetBase)
@@ -52,18 +52,25 @@ function Boss.AddTrap(self: Boss, trap: any)
 end
 
 --[=[
-	Consumes pending traps at the start of the boss turn (stub: the trap trigger —
-	reflect / block — plugs in here).
+	Consumes pending traps at the start of the boss turn and reports whether the boss is
+	stunned this turn. A "skip" trap (Gorilla's Ground Slam) makes the boss forfeit its
+	attack; other trap kinds are still stubbed.
 ]=]
-function Boss.RunTraps(self: Boss)
-	self:_runTraps()
+function Boss.RunTraps(self: Boss): boolean
+	return self:_runTraps()
 end
 
-function Boss._runTraps(self: Boss)
+function Boss._runTraps(self: Boss): boolean
+	local stunned = false
 	for index = #self._traps, 1, -1 do
-		-- stub: trap trigger (reflect / block) plugs in here
+		local trap = self._traps[index]
+		if trap.kind == "skip" then
+			stunned = true
+		end
+		-- other trap triggers (reflect / block) plug in here
 		table.remove(self._traps, index)
 	end
+	return stunned
 end
 
 return Boss

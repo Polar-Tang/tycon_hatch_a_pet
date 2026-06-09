@@ -193,6 +193,14 @@ function FightSessionHandler:StartRounds()
 		-- grace period: the fighters' state machines arm their CombatTurn listeners
 		-- a frame after they enter Combat, so don't fire the first turn instantly.
 		task.wait(START_GRACE)
+
+		-- announce each pet's passive once, now that the client is listening: this
+		-- alerts the player, paints the passive's Health attribute (icon), and runs
+		-- any one-time onStart boost (team health, melee, the boss armor break).
+		for _, pet in ipairs(self.pets) do
+			pet:ApplyPassive(self)
+		end
+
 		while self._running do
 			self:_runRound()
 			-- yield a frame so a fully-resolved round can't spin tight
@@ -226,8 +234,16 @@ function FightSessionHandler:_runRound()
 
 	-- Boss turn — only if the boss is alive and the team isn't wiped.
 	if self._running and self.boss:IsAlive() and self:_anyPetAlive() then
-		self.boss:RunTraps()
-		self.boss:Attack(self)
+		-- a trap (Gorilla's Ground Slam) can stun the boss out of its attack this turn;
+		-- its effects still tick (so a bleed keeps chipping while it's stunned).
+		local stunned = self.boss:RunTraps()
+		if stunned then
+			ReplicatedStorage.RemoteEvents.Notifier:FireClient(self.player, {
+				notification = "The boss is stunned!",
+			})
+		else
+			self.boss:Attack(self)
+		end
 		self.boss:TickEffects()
 	end
 

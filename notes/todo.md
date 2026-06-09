@@ -197,46 +197,105 @@ for index, petInfo in ipairs(data.player_pets) do
 Then you do pet:SpecialAttack, otherwise pet:BasicAttack -- more idiomatic + easy to read
 Next, before adding new pet abilities, please let's refactorize the boss attacks, instead of doing complex tables you can do most of the logic inside the ability cb and it only takes to arguments `pet:SpecialAttack(self) -- self (playerPet) and the fightSession handler which is calling it` from those arguments you will have enough context and you can do probably everything you need. Also update types. Boss is still very different but as we are using them in _castTurn we can refactorize them too
 
+#### Passive effects
+Okay that was an amazing work, we may need to cast a pasive ability which basically will be 
+pet:TickEffects(self) -- called from fight session handler 
+add the following ones, for each prints an alert at the very begging of the combat with their passive effect names but also set an attribute to its health for each pet using effect name as id
+
 Dog
 Passive: Loyalty Boost – Increases all stats slightly for the team
-Active: Rally – At the start of battle, boosts damage and defense for a short time
-
-For this we likelly need a method 
-apply = function(_session, _caster)
-
+-- increase all the playerPets health of the session and increase meelestat by a quarter self.meelestat += self.meelestat/0.25
+-- but only once (not heal) 
 Lion
 Passive: King’s Strength – Deals consistent high damage
-Active: Alpha Roar – Periodically increases team damage
+-- increase melee stat self.meelestat += self.meelestat/0.75
+-- but only once (not heal) 
 
 Tiger
 Passive: Predator Instinct – Increased critical hit chance and damage
-Active: Pounce Strike – Deals high burst damage and applies bleed
+-- do the same, increase melee stat self.meelestat += self.meelestat/0.75
+-- but only once (not heal) 
 
 Bear
 Passive: Regeneration – Slowly restores health during battle
-Active: Rage Mode – Reduces incoming damage and increases attack
+-- When tick effects by the end of turn health its life a 15% of its max value
 
 Gorilla
 Passive: Unshaken – Reduces effects of stuns and knockbacks
-Active: Ground Slam – Stuns the boss and interrupts attacks
-
-Bull
-Passive: Armor Break – Attacks reduce enemy defense
-Active: Stampede – Charges forward dealing heavy damage and lowering defense
+-- Only do the alerts for now
 
 Wolf
 Passive: Blood Hunt – Damage increases the longer the battle lasts
-Active: Pack Frenzy – Increases attack speed and damage for a short time
+-- increase melee stat on turn end self.meelestat += self.meelestat/0.1
+
+Bull
+Passive: Armor Break – Attacks reduce enemy defense
+-- Boss debuff, reduces health
 
 Fox
 Passive: Evasion – Chance to dodge incoming attacks
-Active: Clone Trick – Creates a decoy that distracts the boss
+-- probably will need to add an extra field to Apply that is called if not nil
 
 Rhino
 Passive: Thick Hide – Reduces incoming damage and increases resistance while attacking
-Active: Rampage Charge – Charges forward, dealing massive damage and breaking enemy defenses
+-- probably will need to add an extra field to Apply that is called if not nil
 
-### Task realease
+
+### Special abilities
+Let's add this special attacks, probably need to add new changes, like a defense, a factor that reduce the damge on aplly a little bit, if this value is lower than zero it increases the damage. Also it would be hard to behaviour by data so we can create a table for buffs and debuffs using their names as keys, and call them just like we are already doing with pet abilities. This table will useful for avoiding a complex data-to-behaviour table as well as save a reference to a text and icon given a debuff name. Add all the debuffs/buffs to that table and may use a key to know if its buff or debuf. This table should be in replicated storage, probably at src/shared/Pets/Fights. When i say debuff is to their target (however it will always be the boss) and buff are only to their abilities, inscrease all are buff for all the petPlayers
+Dog
+Active: Rally – At the start of battle, boosts damage and defense for a short time
+-- increase all the playerPets health by a quarter and meelestat by a quarter for the next turn
+
+Lion
+Active: Alpha Roar – Periodically increases team damage
+-- increase all the playerPets health by a quarter a 15% every time it runs, you can use Outgoing
+
+Tiger
+Active: Pounce Strike – Deals high burst damage and applies bleed
+-- Debuf: Deal a damage base like 200 * meleestats, use a debuff that reduce the target life a 20% of that damage , duration : 2 turns
+
+Bear
+Active: Rage Mode – Reduces incoming damage and increases attack
+-- Buff: Reduce damage by a 20% of its own health, duration : 2 turns
+-- Buff: Increase damage by a 20% of their melee stat, duration : 2 turns
+
+Bull
+Active: Stampede – Charges forward dealing heavy damage and lowering defense
+-- Debuf: Deal a damage base like 300 * meleestats, use a debuff that reduce the defense field of boss, duration : 2 turns
+
+Wolf
+Active: Pack Frenzy – Increases attack speed and damage for a short time
+-- there's no stat like attack speed, just buff its damage
+buff: Increase its damage 50% the next turn, duration: 1 turns
+
+Rhino
+Active: Rampage Charge – Charges forward, dealing massive damage and breaking enemy defenses
+-- Debuf: Deal a damage base like 300 * meleestats, use a debuff that reduce the target life a 5% of that damage , duration : 2 turns
+
+Fox
+Active: Clone Trick – Creates a decoy that distracts the boss
+-- When fox is attacked the attack is completly blocked
+
+Gorilla
+Active: Ground Slam – Stuns the boss and interrupts attacks
+-- This is the only trap for now activated by runTraps, it complatly avoids the boss attack
+
+### [Duel Pet] Task realease
+This task brings a new logic for combats, an improved logic that make the combat system way more sophisticated. Every pet now has 
+health (stats of full health, if a pet dies it cannot attack) 
+melee (stats for incresing the damage)
+defense/armor (not a stat, but its used for damage reduction)
+buff/debuff (some effect that runs by the end or start of the turn)
+Currently all the followings abilities were added [Dog, Lion, Tiger, Bear, Gorilla, Wolf, Bull, Fox, Rhino.](https://app.notion.com/p/Attack-abilities-3798ac3aaccd805ebd6bc24352e47da9?source=copy_link)
+------------------------------------------------------------
+### Suggetions: 
+- The pet attacks only do their effects but they don't play any vfx or animation (is not visible)
+- Currently we have a debuf/buff system, we can give an icon for each one and list them avobe the healthBar
+- All the bosses play the same attacks, if you wanna new boss abilities or any pet ability you need to tell me, you are the creative director
+- Besides the vfx for some attacks we also need vfx for buffs, debbufs, healing
+### Mechanics
+All the pets have specific abilities and a team strategy may counter a boss rotation
 For the moment the bosses got all the same pool of attacks, they go like
 1. Reduce damage
 2. Attack a single target
