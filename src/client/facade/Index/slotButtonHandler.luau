@@ -42,12 +42,15 @@ function SlotButtonHandler.setupButtonActivated(button, data, isBoss, strokes, r
 		else
 			strokes.createBoss(rarity)
 			local selected = _G["petToFight"]
-			if type(selected) == "table" and #selected > 0 then
+			print("selected ", selected)
+			local isPetSeletected = type(selected) == "table" and #selected > 0
+			_G["bossToFight"] = data
+			local isBossSeletect = _G["bossToFight"] and next(_G["bossToFight"])
+			if isPetSeletected and isBossSeletect then
 				FightButton.open()
 			else
 				alert.alert("select a pet to fight with")
 			end
-			_G["bossToFight"] = data
 		end
 	end)
 	return con

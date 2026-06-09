@@ -63,9 +63,9 @@ export type BossAttackSet = {
 -- buff/debuff magnitudes. Kept here (not in FightEffects) so the numbers sit with the
 -- ability that casts them — the named effects just apply whatever `amount`/`multiplier`
 -- the special hands them.
-local TIGER_BASE = 200 -- Pounce Strike base = 200 × melee
-local RHINO_BASE = 300 -- Rampage Charge base = 300 × melee
-local BULL_BASE = 300 -- Stampede base = 300 × melee
+local TIGER_BASE = 3 -- Pounce Strike base = 3 × melee
+local RHINO_BASE = 3 -- Rampage Charge base = 3 × melee
+local BULL_BASE = 3 -- Stampede base = 3 × melee
 local TIGER_BLEED = 0.2 -- bleed/turn = 20% of the Pounce base
 local RHINO_BLEED = 0.05 -- bleed/turn = 5% of the Rampage base
 local DOG_HEALTH = 0.25 -- Rally one-time team health bump
@@ -87,7 +87,7 @@ local module: { [string]: PetAttackSet } = {}
 -- pet-agnostic.
 local DEFAULT: PetAttackSet = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "attacks!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "attacks!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		-- no bespoke special yet: a slightly heavier hit, announced
@@ -95,7 +95,7 @@ local DEFAULT: PetAttackSet = {
 			multiplier = 1.5,
 			text = "uses a special move!",
 			isSpecial = true,
-			duration = 3,
+			duration = 4,
 		})
 	end,
 }
@@ -104,7 +104,7 @@ local DEFAULT: PetAttackSet = {
 -- and a one-turn +25% damage buff on every player pet.
 module["Dog"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		for _, pet in ipairs(session.pets) do
@@ -116,7 +116,7 @@ module["Dog"] = {
 			end
 			pet:AddEffect({ id = "Rally", kind = "buff", rounds = 1 + SELF_BUFF_OFFSET, multiplier = DOG_DAMAGE })
 		end
-		session:Announce(ctx, { text = "rallies the team!", duration = 2 })
+		session:Announce(ctx, { text = "rallies the team!", duration = 4 })
 	end,
 }
 
@@ -124,7 +124,8 @@ module["Dog"] = {
 -- stacking the buff's multiplier each time the roar fires.
 module["Lion"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "claws the boss!", duration = 2 })
+		print("")
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "claws the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		for _, pet in ipairs(session.pets) do
@@ -141,7 +142,7 @@ module["Lion"] = {
 				})
 			end
 		end
-		session:Announce(ctx, { text = "lets out an alpha roar!", duration = 2 })
+		session:Announce(ctx, { text = "lets out an alpha roar!", duration = 4 })
 	end,
 }
 
@@ -149,12 +150,12 @@ module["Lion"] = {
 -- worth 20% of the hit each of the boss's turns.
 module["Tiger"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "swipes the boss!", duration = 2 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "swipes the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		local base = math.floor(TIGER_BASE * ctx.meleeVal)
 		session.boss:AddEffect({ id = "Bleed", kind = "debuff", rounds = 2, amount = math.floor(base * TIGER_BLEED) })
-		session:Strike(ctx, session.boss, { damage = base, text = "pounces with a vicious strike!", isSpecial = true, duration = 3 })
+		session:Strike(ctx, session.boss, { damage = base, text = "pounces with a vicious strike!", isSpecial = true, duration = 4 })
 	end,
 }
 
@@ -162,13 +163,13 @@ module["Tiger"] = {
 -- add = 20% of its melee) for 2 turns.
 module["Bear"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "mauls the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "mauls the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		local curHealth = (ctx.health and ctx.health.Value) or 0
 		ctx:AddEffect({ id = "RageDefense", kind = "buff", rounds = 2 + SELF_BUFF_OFFSET, amount = math.floor(curHealth * BEAR_DEFENSE) })
 		ctx:AddEffect({ id = "RageAttack", kind = "buff", rounds = 2 + SELF_BUFF_OFFSET, amount = math.floor(ctx.meleeVal * BEAR_ATTACK) })
-		session:Announce(ctx, { text = "enters a rage!", duration = 2 })
+		session:Announce(ctx, { text = "enters a rage!", duration = 4 })
 	end,
 }
 
@@ -176,23 +177,23 @@ module["Bear"] = {
 -- take +25% for 2 turns.
 module["Bull"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "gores the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "gores the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		local base = math.floor(BULL_BASE * ctx.meleeVal)
 		session.boss:AddEffect({ id = "DefenseBreak", kind = "debuff", rounds = 2, amount = BULL_DEFENSE_BREAK })
-		session:Strike(ctx, session.boss, { damage = base, text = "stampedes through the boss!", isSpecial = true, duration = 3 })
+		session:Strike(ctx, session.boss, { damage = base, text = "stampedes through the boss!", isSpecial = true, duration = 4 })
 	end,
 }
 
 -- Wolf · Pack Frenzy — a one-turn +50% damage spike for the Wolf.
 module["Wolf"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "snaps at the boss!", duration = 2 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "snaps at the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		ctx:AddEffect({ id = "Frenzy", kind = "buff", rounds = 1 + SELF_BUFF_OFFSET, multiplier = WOLF_FRENZY })
-		session:Announce(ctx, { text = "whips into a frenzy!", duration = 2 })
+		session:Announce(ctx, { text = "whips into a frenzy!", duration = 4 })
 	end,
 }
 
@@ -200,12 +201,12 @@ module["Wolf"] = {
 -- 5% of the hit each of the boss's turns.
 module["Rhino"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "rams the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "rams the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		local base = math.floor(RHINO_BASE * ctx.meleeVal)
 		session.boss:AddEffect({ id = "Bleed", kind = "debuff", rounds = 2, amount = math.floor(base * RHINO_BLEED) })
-		session:Strike(ctx, session.boss, { damage = base, text = "charges with a rampage!", isSpecial = true, duration = 3 })
+		session:Strike(ctx, session.boss, { damage = base, text = "charges with a rampage!", isSpecial = true, duration = 4 })
 	end,
 }
 
@@ -213,11 +214,11 @@ module["Rhino"] = {
 -- (consumed on block, see FightEffects "CloneTrick").
 module["Fox"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "bites the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		ctx:AddEffect({ id = "CloneTrick", kind = "buff", rounds = 3 + SELF_BUFF_OFFSET })
-		session:Announce(ctx, { text = "splits into a decoy!", duration = 2 })
+		session:Announce(ctx, { text = "splits into a decoy!", duration = 4 })
 	end,
 }
 
@@ -225,11 +226,11 @@ module["Fox"] = {
 -- its turn, which makes it forfeit that attack entirely.
 module["Gorilla"] = {
 	basicAttack = function(ctx, session)
-		session:Strike(ctx, session.boss, { multiplier = 1, text = "pummels the boss!", duration = 3 })
+		session:Strike(ctx, session.boss, { multiplier = 1, text = "pummels the boss!", duration = 4 })
 	end,
 	specialAttack = function(ctx, session)
 		session.boss:AddTrap({ kind = "skip", caster = ctx })
-		session:Announce(ctx, { text = "stuns the boss with a ground slam!", duration = 2 })
+		session:Announce(ctx, { text = "stuns the boss with a ground slam!", duration = 4 })
 	end,
 }
 
@@ -257,7 +258,7 @@ local function buildBossPool(): BossAttackSet
 					text = "lets out a withering roar!",
 					fadeText = "Weakened!",
 					isSpecial = true,
-					duration = 3,
+					duration = 4,
 				})
 			end,
 			function(ctx, session)

@@ -16,11 +16,11 @@ function Dead:OnEnter(data: NpcFighterTypes.bossStateCtx)
 	data.Humanoid:TakeDamage(100)
 	data.pet:BreakJoints()
 	alert.alert(data.pet.Name .. " have died!")
+	-- A single pet dying just despawns its own rig; it no longer ends the fight. The
+	-- session lives as long as one teammate (or the boss) is alive, and the SERVER
+	-- decides when combat is over (boss dead / team wiped) and teleports the player out.
 	task.delay(5, function()
 		data.DeadController:DestroyNPC()
-	end)
-	task.delay(8, function()
-		ReplicatedSorage.RemoteEvents.BossRemoteEvent:FireServer({ destroy = true })
 	end)
 end
 

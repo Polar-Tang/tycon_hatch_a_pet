@@ -35,7 +35,7 @@ function module.PlayerAdded(player: Player, playerData)
 	------print("playerData ", playerData)
 
 	if not playerData then
-		local petsInitialized = {} --initPets(player)
+		local petsInitialized = initPets(player)
 		playerData = {
 			cash = 0,
 			pets = petsInitialized,

@@ -135,7 +135,7 @@ function PetBase.ApplyPassive(self: PetBase, session: any)
 	})
 	
 	if self:HasHealth() then
-		self.health:SetAttribute(passive.name, true)
+		self.health:SetAttribute(passive.id, true)
 	end
 
 	if passive.onStart then
@@ -158,6 +158,7 @@ end
 ]=]
 function PetBase.Outgoing(self: PetBase, multiplier: number): number
 	local base = (multiplier or 0) * (self.meleeVal or 0)
+	print("base ", base)
 	for _, effect in ipairs(self._effects) do
 		if effect.outgoingMultiplier then
 			base *= effect.outgoingMultiplier

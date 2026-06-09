@@ -225,6 +225,13 @@ local function teleport(player: Player, teleportTo: teleportDestinations)
 	CombatController.destroyFightSession(player)
 end
 
+-- When a fight resolves on its own (boss dead or the whole team wiped), the session
+-- hands the player back to their plot after a short delay. Same path as a manual
+-- leave: pivot to the plot + tear the session down.
+CombatController.setFinishCallback(function(player: Player)
+	teleport(player, "plot")
+end)
+
 game.ReplicatedStorage.RemoteEvents.TeleportRemote.OnServerEvent:Connect(
 	function(player: Player, teleportTo: teleportDestinations)
 		local isValid = checkDestination(teleportTo)

@@ -32,7 +32,10 @@ export type PassiveFn = (ctx: any, session: any) -> ()
 export type IncomingFn = (ctx: any, damage: number) -> number
 
 export type Passive = {
-	-- doubles as the Health attribute key (and the alert label), so "" means "no passive"
+	-- space-free Health attribute key for the client icon (Roblox attribute names
+	-- reject spaces/punctuation, so this is NOT `name`). "" means "no passive".
+	id: string,
+	-- human-readable label shown in the start-of-combat alert
 	name: string,
 	onStart: PassiveFn?,
 	onTurnEnd: PassiveFn?,
@@ -71,6 +74,7 @@ local module: { [string]: Passive } = {}
 
 -- Dog — Loyalty Boost: lifts the whole team's health and its own melee, once.
 module["Dog"] = {
+	id = "LoyaltyBoost",
 	name = "Loyalty Boost",
 	onStart = function(ctx, session)
 		ctx.meleeVal += ctx.meleeVal * DOG_MELEE_BOOST
@@ -80,6 +84,7 @@ module["Dog"] = {
 
 -- Lion — King's Strength: a flat, one-time melee jump for consistent high damage.
 module["Lion"] = {
+	id = "KingsStrength",
 	name = "King's Strength",
 	onStart = function(ctx, session)
 		ctx.meleeVal += ctx.meleeVal * LION_MELEE_BOOST
@@ -88,6 +93,7 @@ module["Lion"] = {
 
 -- Tiger — Predator Instinct: same one-time melee jump (crit stand-in until crits land).
 module["Tiger"] = {
+	id = "PredatorInstinct",
 	name = "Predator Instinct",
 	onStart = function(ctx, session)
 		ctx.meleeVal += ctx.meleeVal * TIGER_MELEE_BOOST
@@ -96,6 +102,7 @@ module["Tiger"] = {
 
 -- Bear — Regeneration: heals a slice of its max health after each of its turns.
 module["Bear"] = {
+	id = "Regeneration",
 	name = "Regeneration",
 	onTurnEnd = function(ctx, session)
 		local health = ctx.health
@@ -111,12 +118,14 @@ module["Bear"] = {
 -- Gorilla — Unshaken: stun/knockback resistance has no mechanic yet, so the passive
 -- is alert-only (name set, no hooks).
 module["Gorilla"] = {
+	id = "Unshaken",
 	name = "Unshaken",
 }
 
 -- Wolf — Blood Hunt: melee compounds a little every turn, so damage climbs the
 -- longer the duel runs.
 module["Wolf"] = {
+	id = "BloodHunt",
 	name = "Blood Hunt",
 	onTurnEnd = function(ctx, session)
 		ctx.meleeVal += ctx.meleeVal * WOLF_MELEE_GROWTH
@@ -126,6 +135,7 @@ module["Wolf"] = {
 -- Bull — Armor Break: cracks the boss's armor at the outset, shaving its health.
 -- (Stub for the future "reduce defense on every attack" version.)
 module["Bull"] = {
+	id = "ArmorBreak",
 	name = "Armor Break",
 	onStart = function(ctx, session)
 		local bossHealth = session.boss.health
@@ -140,6 +150,7 @@ module["Bull"] = {
 
 -- Fox — Evasion: a chance to shrug a hit entirely (the "extra field on Apply").
 module["Fox"] = {
+	id = "Evasion",
 	name = "Evasion",
 	onIncoming = function(ctx, damage)
 		if math.random() < FOX_DODGE_CHANCE then
@@ -152,6 +163,7 @@ module["Fox"] = {
 -- Rhino — Thick Hide: a flat reduction on every incoming hit (stacks with the
 -- Guard special's temporary buff).
 module["Rhino"] = {
+	id = "ThickHide",
 	name = "Thick Hide",
 	onIncoming = function(ctx, damage)
 		return math.floor(damage * (1 - RHINO_DAMAGE_REDUCTION))
@@ -161,6 +173,7 @@ module["Rhino"] = {
 -- Default: no passive (empty name → ApplyPassive announces nothing). Lets a fighter
 -- without a bespoke passive (and the boss) tick harmlessly.
 local DEFAULT: Passive = {
+	id = "",
 	name = "",
 }
 

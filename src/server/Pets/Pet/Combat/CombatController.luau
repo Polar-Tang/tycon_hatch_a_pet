@@ -14,6 +14,14 @@ local CombatController = {}
 
 local _sessions = {}
 
+-- Set by the owner (petMediator) to return a player to their plot when their fight
+-- resolves. Kept here so FightSessionHandler stays decoupled from the teleport code.
+local _finishCallback: ((player: Player) -> ())? = nil
+
+function CombatController.setFinishCallback(callback: (player: Player) -> ())
+	_finishCallback = callback
+end
+
 function CombatController.initFightSession(player: Player, data: NpcFighterTypes.FightInfo)
 	--[[
 	local instanceName = tostring(player.UserId)
@@ -85,6 +93,12 @@ function CombatController.createAFightSession(player: Player, data: NpcFighterTy
 	print("handler ", handler)
 	if handler then
 		_sessions[player.UserId] = handler
+		-- when the fight resolves on its own, hand the player back to their plot
+		handler:SetOnFinish(function()
+			if _finishCallback then
+				_finishCallback(player)
+			end
+		end)
 	end
 	return handler
 	

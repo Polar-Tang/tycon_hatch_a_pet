@@ -22,6 +22,10 @@ local ProximityPrompt = Events.ProximityPrompt
 function PromptProvider:init()
 	self.distanceCheckConnections = {}
 	self.__prompts = {}
+	-- client-side registry keyed by prompt id (prompty.Name). Populated on PromptShown,
+	-- where we always have the local npc/prompt, so the OnClientEvent handler can fall
+	-- back to it when the server fires back without `npc` (client-only NPCs).
+	self._npcRegistry = {}
 	self._maid = Maid.new()
 
 	self:setState({
@@ -63,6 +67,12 @@ function PromptProvider:didMount()
 		:Connect(function(prompty: ProximityPrompt, inputType)
 			local promptParent = prompty.Parent
 			if promptParent then
+				-- remember the local npc/prompt before the server round-trip, so we can
+				-- resolve it even if the server fires back without `npc`.
+				self._npcRegistry[prompty.Name] = {
+					npc = promptParent,
+					prompt = prompty,
+				}
 				ProximityPrompt:FireServer({
 					prompt = prompty,
 					Parent = promptParent,
@@ -75,13 +85,23 @@ function PromptProvider:didMount()
 
 	-- Here we can blindly trust
 	local promptCreator = ProximityPrompt.OnClientEvent:Connect(function(data)
-		local npc: Model = data.npc
 		local id = data.id
-		print("data ", data)
-		local prompty: ProximityPrompt = data.prompt or npc:FindFirstChildOfClass("ProximityPrompt")
+		-- the server may fire back without `npc` for a client-only NPC; fall back to the
+		-- entry we stashed on PromptShown.
+		local registryEntry = self._npcRegistry[id]
+		local npc: Model = data.npc or (registryEntry and registryEntry.npc)
+		if not npc then
+			return
+		end
+		local prompty: ProximityPrompt = data.prompt
+			or (registryEntry and registryEntry.prompt)
+			or npc:FindFirstChildOfClass("ProximityPrompt")
+		if not prompty then
+			return
+		end
 
 		if
-			(Players.LocalPlayer.Character.PrimaryPart.Position - data.npc.PrimaryPart.Position).Magnitude
+			(Players.LocalPlayer.Character.PrimaryPart.Position - npc.PrimaryPart.Position).Magnitude
 			> prompty.MaxActivationDistance
 		then
 			return

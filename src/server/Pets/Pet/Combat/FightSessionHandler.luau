@@ -17,6 +17,10 @@ local CombatTurn = ReplicatedStorage.RemoteEvents.CombatTurn
 -- seconds before the first round, so clients can arm their turn listeners
 local START_GRACE = 1
 
+-- a short beat after combat resolves (boss dead, or the team wiped) before the
+-- player is handed back to their plot, so the killing blow / death lands on screen
+local FINISH_TELEPORT_DELAY = 2
+
 -- placeholder gesture (no real attack animation yet) and fallback pacing for an
 -- ability that doesn't specify its own `duration`
 local DEFAULT_ANIMATION = "eat"
@@ -24,9 +28,10 @@ local DEFAULT_DURATION = 3
 
 -- A registered pending hit: which fighter it lands on, how much (already mitigated
 -- by the target), and optional text to float instead of the number. Health is
--- written when the client confirms.
+-- written when the client confirms. `target` is nil for a no-damage gesture (an
+-- Announce) — the token still exists so the round loop can wait on its confirm.
 type PendingHit = {
-	target: PetBase.PetBase,
+	target: PetBase.PetBase?,
 	damage: number,
 	fadeText: string?,
 }
@@ -39,7 +44,12 @@ type FightSessionHandler = {
 	boss: Boss.Boss,
 	_byBand: { [string]: PetBase.PetBase },
 
+	-- invoked once when combat resolves on its own, after FINISH_TELEPORT_DELAY; the
+	-- owner (CombatController) wires this to return the player to their plot.
+	_onFinish: (() -> ())?,
+
 	new: (player: Player) -> FightSessionHandler,
+	SetOnFinish: (self: FightSessionHandler, callback: () -> ()) -> (),
 	GetHealth: (self: FightSessionHandler, nameInstance: string) -> IntValue?,
 	Destroy: (self: FightSessionHandler) -> (),
 }
@@ -65,12 +75,21 @@ function FightSessionHandler.new(player: Player): FightSessionHandler?
 		_specialIndex = 1, -- which pet casts its special this round (rotates)
 		_running = false,
 		_started = false,
+		-- set true only when the loop ends because combat actually resolved (vs. an
+		-- external teardown, e.g. the player left): gates the auto teleport-out.
+		_concluded = false,
 		-- decoupling of round cadence (server-timed) from damage (client-confirmed)
 		_pendingHits = {}, -- [token] = PendingHit
 		_hitSeq = 0,
 	}, FightSessionHandler)
 
 	return self
+end
+
+-- Registers the end-of-combat hook (return-to-plot teardown). Set by CombatController
+-- at session creation so the handler stays decoupled from the teleport plumbing.
+function FightSessionHandler.SetOnFinish(self: FightSessionHandler, callback: () -> ())
+	self._onFinish = callback
 end
 
 function FightSessionHandler._createFolder(player: Player): Folder?
@@ -206,6 +225,14 @@ function FightSessionHandler:StartRounds()
 			-- yield a frame so a fully-resolved round can't spin tight
 			task.wait()
 		end
+
+		-- Combat resolved on its own (boss fell or the team wiped) — not an external
+		-- teardown. Let the death beat land, then hand the player back to their plot
+		-- (the callback also tears the session down).
+		if self._concluded and self._onFinish then
+			task.wait(FINISH_TELEPORT_DELAY)
+			self._onFinish()
+		end
 	end)
 end
 
@@ -252,9 +279,12 @@ function FightSessionHandler:_runRound()
 		self._specialIndex = (self._specialIndex % #self.pets) + 1
 	end
 
-	-- end conditions
+	-- end conditions: combat is over when the boss falls (win) or the whole team is
+	-- wiped (loss). Flag it concluded so StartRounds teleports the player out, as
+	-- opposed to an external teardown (player left) that only stops the loop.
 	if not self.boss:IsAlive() or not self:_anyPetAlive() then
 		self._running = false
+		self._concluded = true
 	end
 end
 
@@ -279,9 +309,15 @@ export type AttackOptions = {
 	`ConfirmHit` once the client reports the swing landed. Does not pace; the public
 	primitives below own the `task.wait`.
 ]=]
-function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions)
+function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions): number
+	if opts.text then 
+		print(attacker.petName .. opts.text)
+	end
 	local rawDamage = opts.damage or attacker:Outgoing(opts.multiplier or 0)
+	print("attacks " .. attacker.petName .. " damage " .. rawDamage)
 	local finalDamage = target:Apply(rawDamage) -- process the damage
+	print("processed damage " .. attacker.petName .. " by ".. target.petName .. " defense " .. finalDamage)
+
 	local token = self:_pend(target, finalDamage, opts.fadeText)
 
 	CombatTurn:FireClient(self.player, {
@@ -293,36 +329,77 @@ function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.Pe
 		damage = finalDamage,
 		token = token,
 	} :: NpcFighterTypes.CombatTurnData)
+
+	return token
 end
 
 --[=[
-	Single-target attack used by ability callbacks: fire the hit, then consume the
-	attack's `duration` so the round paces correctly.
+	Closed-loop turn pacing: yields until every token of this turn has been confirmed
+	by the client (i.e. cleared from `_pendingHits` by `ConfirmHit`), so the round
+	advances in lockstep with the client actually playing the swing — not a blind
+	server sleep. `timeout` (the attack's `duration`) is a SAFETY cap: if the client
+	never confirms (disconnect, dropped packet, the fighter died mid-swing) the round
+	still moves on instead of hanging the whole fight.
+]=]
+function FightSessionHandler:_awaitConfirm(tokens: { number }, timeout: number)
+	local deadline = os.clock() + timeout
+	while os.clock() < deadline do
+		if not self._running then
+			return
+		end
+		local stillPending = false
+		for _, token in ipairs(tokens) do
+			if self._pendingHits[token] ~= nil then
+				stillPending = true
+				break
+			end
+		end
+		if not stillPending then
+			return
+		end
+		task.wait()
+	end
+end
+
+function FightSessionHandler:_await(tokens, opts)
+	self:_awaitConfirm(tokens, opts.duration or DEFAULT_DURATION)
+	task.wait(opts.duration)
+end
+
+
+--[=[
+	Single-target attack used by ability callbacks: fire the hit, then wait for the
+	client to confirm it (capped at the attack's `duration`) so the round stays in
+	sync with the swing landing on screen.
 ]=]
 function FightSessionHandler:Strike(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions)
-	self:_fire(attacker, target, opts)
-	task.wait(opts.duration or DEFAULT_DURATION)
+	local token = self:_fire(attacker, target, opts)
+	self:_await({token}, opts)
 end
 
 --[=[
 	AOE attack used by ability callbacks: fire one hit per target (each confirmed
-	independently) then a single `duration` wait for the whole sweep. All turns carry
-	the attacker's band, so the attacker animates once per target on the client.
+	independently) then wait for ALL of them to confirm (capped at `duration`). All
+	turns carry the attacker's band, so the attacker animates once per target.
 ]=]
 function FightSessionHandler:StrikeAll(attacker: PetBase.PetBase, targets: { PetBase.PetBase }, opts: AttackOptions)
+	local tokens = {}
 	for _, target in ipairs(targets) do
-		self:_fire(attacker, target, opts)
+		table.insert(tokens, self:_fire(attacker, target, opts))
 	end
-	task.wait(opts.duration or DEFAULT_DURATION)
+	self:_await({tokens}, opts)
 end
 
 --[=[
 	A no-damage gesture used by buff/utility abilities: animate the caster and banner
 	its `text`, with no TextFade (the buff's icon is the `Health` attribute set by
-	`AddEffect`). Token 0 means there is no pending hit, so the client's confirm reply
-	is a harmless no-op.
+	`AddEffect`). It still registers a pending token (with no target) so the round
+	waits on the client's confirm just like a damaging turn; `ConfirmHit` resolves it
+	without writing any health.
 ]=]
 function FightSessionHandler:Announce(attacker: PetBase.PetBase, opts: AttackOptions)
+	local token = self:_pend(nil, 0)
+
 	CombatTurn:FireClient(self.player, {
 		band = attacker.band,
 		attackId = "specialAttack",
@@ -330,14 +407,15 @@ function FightSessionHandler:Announce(attacker: PetBase.PetBase, opts: AttackOpt
 		isSpecial = true,
 		text = (attacker.petName or attacker.id) .. " " .. (opts.text or ""),
 		damage = 0,
-		token = 0,
+		token = token,
 	} :: NpcFighterTypes.CombatTurnData)
-	task.wait(opts.duration or DEFAULT_DURATION)
+
+	self:_await({token}, opts)
 end
 
 -- Registers a pending hit and returns its token. The session owns the token
 -- counter (trivially unique) and routes the confirmed hit back to its target.
-function FightSessionHandler:_pend(target: PetBase.PetBase, damage: number, fadeText: string?): number
+function FightSessionHandler:_pend(target: PetBase.PetBase?, damage: number, fadeText: string?): number
 	self._hitSeq += 1
 	local token = self._hitSeq
 	self._pendingHits[token] = {
@@ -361,7 +439,11 @@ function FightSessionHandler:ConfirmHit(token: number, position: Vector3?)
 	end
 	self._pendingHits[token] = nil
 
-	pending.target:TakeDamage(pending.damage, position, pending.fadeText)
+	-- a no-target token is an Announce (buff/utility gesture): clearing it above is
+	-- all the round loop's `_awaitConfirm` needs; there's no health to write.
+	if pending.target then
+		pending.target:TakeDamage(pending.damage, position, pending.fadeText)
+	end
 end
 
 function FightSessionHandler:_anyPetAlive(): boolean

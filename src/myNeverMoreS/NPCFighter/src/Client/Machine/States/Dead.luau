@@ -17,11 +17,11 @@ function Dead:OnEnter(data: NpcFighterTypes.petStateCtx)
 	data.Humanoid:TakeDamage(100)
 	data.pet:BreakJoints()
 
+	-- The boss only despawns its own rig here; the SERVER detects the boss is dead,
+	-- waits a short beat, then teleports the player back to their plot and tears the
+	-- session down (see FightSessionHandler finish handling).
 	task.delay(5, function()
 		data.DeadController:DestroyNPC()
-	end)
-	task.delay(8, function()
-		ReplicatedSorage.RemoteEvents.BossRemoteEvent:FireServer({ destroy = true })
 	end)
 end
 return Dead

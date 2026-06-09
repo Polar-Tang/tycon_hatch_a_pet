@@ -141,9 +141,9 @@ end
 
 
 ### Ver como seleccionar varios pet ids (desde la UI) y llevarlos al combate
-We should fire NPCFighter and call to CombatController.startRounds exaclty when all the pets are arranged (currently is fired when the first pet reach the position) to their position at BossCombatCon bindable event, from CombatCon but as this may fire for every pet with should register them keyed through its band and confirm the fight when all the pets are arrange. :MoveTo(path):Then is waiting to the pet to reach their final position. Also the goal position for each pet should be acordingly to their band, and i will add parts like, fightPos_[bossname]_[playerBand] and then rotates the pet to look at the boss like is already doing with `data.MovementController:LookTo(data.enemy_hrp.Position)`
+~We should fire NPCFighter and call to CombatController.startRounds exaclty when all the pets are arranged (currently is fired when the first pet reach the position) to their position at BossCombatCon bindable event, from CombatCon but as this may fire for every pet with should register them keyed through its band and confirm the fight when all the pets are arrange. :MoveTo(path):Then is waiting to the pet to reach their final position. Also the goal position for each pet should be acordingly to their band, and i will add parts like, fightPos_[bossname]_[playerBand] and then rotates the pet to look at the boss like is already doing with `data.MovementController:LookTo(data.enemy_hrp.Position)`~
 
-src/client/RoactApp/Context/PromptContext/PromptProvider.luau uses the server to fire back the client with the npc data for creating the proximityPrompt, but sometimes data.npc PromptProvider:78, will be nil if this npc only lives in the client. Create a registry from the client and local npc = data.npc or registry[data.id].npc
+~src/client/RoactApp/Context/PromptContext/PromptProvider.luau uses the server to fire back the client with the npc data for creating the proximityPrompt, but sometimes data.npc PromptProvider:78, will be nil if this npc only lives in the client. Create a registry from the client and local npc = data.npc or registry[data.id].npc~
 
 ~Currently src/myNeverMoreS/PetFollower/src/Client/Machine/Controllers/TargetController.luau get the goal position of the pet which is sliglty to their right. We need to update TargetController to be aware of their pet ban, 
 if pet band is 1 should be calulated as it is, `player_hrp.CFrame.RightVector * range` right
@@ -283,11 +283,15 @@ Active: Ground Slam – Stuns the boss and interrupts attacks
 
 ### [Duel Pet] Task realease
 This task brings a new logic for combats, an improved logic that make the combat system way more sophisticated. Every pet now has 
-health (stats of full health, if a pet dies it cannot attack) 
-melee (stats for incresing the damage)
-defense/armor (not a stat, but its used for damage reduction)
-buff/debuff (some effect that runs by the end or start of the turn)
+- health (stats of full health, if a pet dies it cannot attack) 
+- melee (stats for incresing the damage)
+- defense/armor (not a stat, but its used for damage reduction)
+- buff/debuff (some effect that runs by the end or start of the turn)
+You can test it out with all the pets avaible for combat, they have points avaible so you can check the difference before increasing meleestat or health.
+### Pet Attacks
 Currently all the followings abilities were added [Dog, Lion, Tiger, Bear, Gorilla, Wolf, Bull, Fox, Rhino.](https://app.notion.com/p/Attack-abilities-3798ac3aaccd805ebd6bc24352e47da9?source=copy_link)
+- **Passive Attacks**: Every pet got their own passive effect that runs at the end or begging of turn
+- **Active Attacks**: Every pet got their own passive effect that runs at the end or begging of turn
 ------------------------------------------------------------
 ### Suggetions: 
 - The pet attacks only do their effects but they don't play any vfx or animation (is not visible)
