@@ -99,7 +99,7 @@ function PromptProvider:didMount()
 		if not prompty then
 			return
 		end
-
+		-- local npcHRP = (npc:IsA("BasePart") and npc) or (npc.PrimaryPart or npc:FindFirstChildOfClass("BasePart"))
 		if
 			(Players.LocalPlayer.Character.PrimaryPart.Position - npc.PrimaryPart.Position).Magnitude
 			> prompty.MaxActivationDistance

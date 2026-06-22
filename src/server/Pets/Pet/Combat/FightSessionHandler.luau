@@ -49,7 +49,13 @@ type FightSessionHandler = {
 	_onFinish: (() -> ())?,
 
 	new: (player: Player) -> FightSessionHandler,
+	Init: (self: FightSessionHandler, player: Player, data: NpcFighterTypes.FightInfo) -> (),
 	SetOnFinish: (self: FightSessionHandler, callback: () -> ()) -> (),
+	StartRounds: (self: FightSessionHandler) -> (),
+	Strike: (self: FightSessionHandler, attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions) -> (),
+	StrikeAll: (self: FightSessionHandler, attacker: PetBase.PetBase, targets: { PetBase.PetBase }, opts: AttackOptions) -> (),
+	Announce: (self: FightSessionHandler, attacker: PetBase.PetBase, opts: AttackOptions) -> (),
+	ConfirmHit: (self: FightSessionHandler, token: number, position: Vector3?) -> (),
 	GetHealth: (self: FightSessionHandler, nameInstance: string) -> IntValue?,
 	Destroy: (self: FightSessionHandler) -> (),
 }
@@ -95,7 +101,7 @@ end
 function FightSessionHandler._createFolder(player: Player): Folder?
 	local instanceName = tostring(player.UserId)
 	if combatInstanceRegistryFolder:FindFirstChild(instanceName) then
-		print("player can be in a single instance at a single time")
+		warn("player can be in a single instance at a single time")
 		return nil
 	end
 	local newFolder = Instance.new("Folder", combatInstanceRegistryFolder)
@@ -144,51 +150,55 @@ function FightSessionHandler.Init(self: FightSessionHandler, player: Player, dat
 	end
 
 	-- Boss
-	do
-		local player_boss = data.player_boss
-		local bossHealth = FightSessionHandler._createFighterFolder(self._folderSession, "PlayerBoss", player_boss.petId, player_boss.healthVal)
-		self.boss = Boss.new(self, {
-			id = player_boss.petId,
-			petName = player_boss.petName or player_boss.petId,
-			meleeVal = player_boss.meleeVal,
-			band = "PlayerBoss",
-			health = bossHealth,
+	local player_boss = data.player_boss
+	local bossHealth = FightSessionHandler._createFighterFolder(self._folderSession, "PlayerBoss", player_boss.petId, player_boss.healthVal)
+	self.boss = Boss.new(self, {
+		id = player_boss.petId,
+		petName = player_boss.petName or player_boss.petId,
+		meleeVal = player_boss.meleeVal,
+		band = "PlayerBoss",
+		health = bossHealth,
+	})
+	self._byBand["PlayerBoss"] = self.boss
+	self:_wireBossReward(bossHealth, player_boss.petId)
+end
+
+-- Pays the player out when the boss falls: base coins (optionally doubled by the
+-- Elephant bonus) plus the Pig extra-coins bonus, each with its own notification.
+function FightSessionHandler:_wireBossReward(bossHealth: IntValue, bossId: string)
+	local player = self.player
+	self._maid:GiveTask(bossHealth.Changed:Connect(function(newHealth: number)
+		if newHealth > 0 then
+			return
+		end
+		local incomes = Incomes:GetHandler(player)
+		local extraReward = incomes:GetExtraCoins()
+		local inventory = PlayerInventory:GetHandler(player)
+		ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+			notification = bossId .. " has fallen.",
 		})
-		self._byBand["PlayerBoss"] = self.boss
 
-		-- reward the player when the boss falls (unchanged behaviour, generalized name)
-		self._maid:GiveTask(bossHealth.Changed:Connect(function(a0: number)
-			if a0 <= 0 then
-				local incomes = Incomes:GetHandler(player)
-				local extraReward = incomes:GetExtraCoins()
-				local inventory = PlayerInventory:GetHandler(player)
-				ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
-					notification = player_boss.petId .. " has fallen.",
-				})
+		local moneyEarned = utils.bossCoins(inventory.cash)
+		local maybeDoubled = incomes:GetDoubleCoins()
+		if maybeDoubled then
+			moneyEarned = maybeDoubled
+			ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+				notification = "[Elephant Bonus]: coins doubled " .. MoneyLib.HandleMoney(moneyEarned) .. "!",
+			})
+		else
+			ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+				notification = "You earn " .. MoneyLib.HandleMoney(moneyEarned) .. " coins!",
+			})
+		end
 
-				local moneyEarned = utils.bossCoins(inventory.cash)
-				local maybeDoubled = incomes:GetDoubleCoins()
-				if maybeDoubled then
-					moneyEarned = maybeDoubled
-					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
-						notification = "[Elephant Bonus]: coins doubled " .. MoneyLib.HandleMoney(moneyEarned) .. "!",
-					})
-				else
-					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
-						notification = "You earn " .. MoneyLib.HandleMoney(moneyEarned) .. " coins!",
-					})
-				end
-
-				if extraReward > 0 then
-					inventory:IncreaseMoney(extraReward)
-					extraReward = math.round(extraReward)
-					ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
-						notification = "[Pig Bonus]: You gained " .. MoneyLib.HandleMoney(extraReward),
-					})
-				end
-			end
-		end))
-	end
+		if extraReward > 0 then
+			inventory:IncreaseMoney(extraReward)
+			extraReward = math.round(extraReward)
+			ReplicatedStorage.RemoteEvents.Notifier:FireClient(player, {
+				notification = "[Pig Bonus]: You gained " .. MoneyLib.HandleMoney(extraReward),
+			})
+		end
+	end))
 end
 
 --[=[
@@ -243,8 +253,10 @@ function FightSessionHandler:_runRound()
 		end
 		if pet:IsAlive() then
 			-- the ability callback runs the whole turn (fire + pacing) via the
-			-- session primitives; the round loop only decides basic vs special
-			if index == self._specialIndex then
+			-- session primitives; the round loop only decides basic vs special.
+			-- The special also honours its per-turn cooldown — while it is still
+			-- cooling down the pet falls back to its basic attack.
+			if index == self._specialIndex and pet:CanCastSpecial() then
 				pet:SpecialAttack(self)
 			else
 				pet:BasicAttack(self)
@@ -303,22 +315,27 @@ export type AttackOptions = {
 }
 
 --[=[
-	Fires a single "perform your attack" turn: the target mitigates with its own
-	private defense, the hit is registered as pending, and the client is told to
-	animate `attacker`'s gesture and confirm. Does NOT write health — that happens in
-	`ConfirmHit` once the client reports the swing landed. Does not pace; the public
-	primitives below own the `task.wait`.
+	Fires a single "perform your attack" turn: the target (if any) mitigates with its
+	own private defense, the hit is registered as pending, and the client is told to
+	animate `attacker`'s gesture and confirm. A nil `target` is a no-damage gesture
+	(see `Announce`). When the target's mitigation fully blocked the hit (the Fox's
+	decoy), the float text becomes "Blocked!" so the block reads on screen. Does NOT
+	write health — that happens in `ConfirmHit` once the client reports the swing
+	landed. Does not pace; the public primitives below own the waiting.
 ]=]
-function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions): number
-	if opts.text then 
-		print(attacker.petName .. opts.text)
+function FightSessionHandler:_fire(attacker: PetBase.PetBase, target: PetBase.PetBase?, opts: AttackOptions): number
+	local finalDamage = 0
+	local fadeText = opts.fadeText
+	if target then
+		local rawDamage = opts.damage or attacker:Outgoing(opts.multiplier or 0)
+		local blocked
+		finalDamage, blocked = target:Apply(rawDamage)
+		if blocked then
+			fadeText = "Blocked!"
+		end
 	end
-	local rawDamage = opts.damage or attacker:Outgoing(opts.multiplier or 0)
-	print("attacks " .. attacker.petName .. " damage " .. rawDamage)
-	local finalDamage = target:Apply(rawDamage) -- process the damage
-	print("processed damage " .. attacker.petName .. " by ".. target.petName .. " defense " .. finalDamage)
 
-	local token = self:_pend(target, finalDamage, opts.fadeText)
+	local token = self:_pend(target, finalDamage, fadeText)
 
 	CombatTurn:FireClient(self.player, {
 		band = attacker.band,
@@ -361,11 +378,20 @@ function FightSessionHandler:_awaitConfirm(tokens: { number }, timeout: number)
 	end
 end
 
-function FightSessionHandler:_await(tokens, opts)
-	self:_awaitConfirm(tokens, opts.duration or DEFAULT_DURATION)
-	task.wait(opts.duration)
+--[=[
+	One full turn's pacing: wait for the client confirm (capped at `duration`), then
+	pad out the remainder so every attack occupies exactly its authored `duration` —
+	the cadence stays server-timed whether the confirm arrives early or never.
+]=]
+function FightSessionHandler:_await(tokens: { number }, opts: AttackOptions)
+	local duration = opts.duration or DEFAULT_DURATION
+	local startedAt = os.clock()
+	self:_awaitConfirm(tokens, duration)
+	local remaining = duration - (os.clock() - startedAt)
+	if remaining > 0 then
+		task.wait(remaining)
+	end
 end
-
 
 --[=[
 	Single-target attack used by ability callbacks: fire the hit, then wait for the
@@ -374,7 +400,7 @@ end
 ]=]
 function FightSessionHandler:Strike(attacker: PetBase.PetBase, target: PetBase.PetBase, opts: AttackOptions)
 	local token = self:_fire(attacker, target, opts)
-	self:_await({token}, opts)
+	self:_await({ token }, opts)
 end
 
 --[=[
@@ -387,7 +413,7 @@ function FightSessionHandler:StrikeAll(attacker: PetBase.PetBase, targets: { Pet
 	for _, target in ipairs(targets) do
 		table.insert(tokens, self:_fire(attacker, target, opts))
 	end
-	self:_await({tokens}, opts)
+	self:_await(tokens, opts)
 end
 
 --[=[
@@ -398,19 +424,10 @@ end
 	without writing any health.
 ]=]
 function FightSessionHandler:Announce(attacker: PetBase.PetBase, opts: AttackOptions)
-	local token = self:_pend(nil, 0)
-
-	CombatTurn:FireClient(self.player, {
-		band = attacker.band,
-		attackId = "specialAttack",
-		animation = opts.animation or DEFAULT_ANIMATION,
-		isSpecial = true,
-		text = (attacker.petName or attacker.id) .. " " .. (opts.text or ""),
-		damage = 0,
-		token = token,
-	} :: NpcFighterTypes.CombatTurnData)
-
-	self:_await({token}, opts)
+	local announceOpts = table.clone(opts)
+	announceOpts.isSpecial = true
+	local token = self:_fire(attacker, nil, announceOpts)
+	self:_await({ token }, announceOpts)
 end
 
 -- Registers a pending hit and returns its token. The session owns the token

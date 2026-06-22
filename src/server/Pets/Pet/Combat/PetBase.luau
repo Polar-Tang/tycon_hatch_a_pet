@@ -27,6 +27,11 @@ local PetAttacks = require(script.Parent.PetAttacks)
 local PetPassives = require(script.Parent.PetPassives)
 local FightEffects = require(ReplicatedStorage.Pets.Fights.FightEffects)
 
+-- turns a fighter must spend on its basic attack after casting its special: the
+-- counter is set on cast and ages once per turn (TickEffects, same beat as effects),
+-- and the round loop falls back to the basic attack while it is above zero
+local SPECIAL_COOLDOWN_TURNS = 3
+
 -- One fighter the session tracks (built by Init from a pet/boss entry).
 export type FighterInfo = {
 	id: string,
@@ -53,6 +58,8 @@ export type PetBase = {
 	_attacks: PetAttacks.PetAttackSet,
 	-- this fighter's passive (always-on), bound once by Init
 	_passive: PetPassives.Passive,
+	-- turns left before the special may be cast again (0 = ready)
+	_specialCooldown: number,
 
 	Init: (self: PetBase) -> (),
 	IsAlive: (self: PetBase) -> boolean,
@@ -60,9 +67,10 @@ export type PetBase = {
 	ApplyPassive: (self: PetBase, session: any) -> (),
 	BasicAttack: (self: PetBase, session: any) -> (),
 	SpecialAttack: (self: PetBase, session: any) -> (),
+	CanCastSpecial: (self: PetBase) -> boolean,
 	Outgoing: (self: PetBase, multiplier: number) -> number,
 	TickEffects: (self: PetBase) -> (),
-	Apply: (self: PetBase, damage: number) -> number,
+	Apply: (self: PetBase, damage: number) -> (number, boolean),
 	TakeDamage: (self: PetBase, damage: number, position: Vector3?, fadeText: string?) -> (),
 	AddEffect: (self: PetBase, effect: PetAttacks.Effect) -> (),
 	HasHealth: (self: PetBase) -> boolean,
@@ -83,6 +91,7 @@ function PetBase.new(session: any, info: FighterInfo): PetBase
 		-- per-fighter combat state (was session-global before the refactor)
 		_defense = 0,
 		_effects = {},
+		_specialCooldown = 0,
 	}, PetBase)
 
 	return self :: any
@@ -148,8 +157,17 @@ function PetBase.BasicAttack(self: PetBase, session: any)
 	self._attacks.basicAttack(self, session)
 end
 
+-- Casting puts the special on cooldown; the counter ages once per turn in
+-- TickEffects, so the next SPECIAL_COOLDOWN_TURNS turns fall back to the basic.
+-- Padded by one because the counter also ages on this very cast turn's tick
+-- (same idea as SELF_BUFF_OFFSET in PetAttacks).
 function PetBase.SpecialAttack(self: PetBase, session: any)
+	self._specialCooldown = SPECIAL_COOLDOWN_TURNS + 1
 	self._attacks.specialAttack(self, session)
+end
+
+function PetBase.CanCastSpecial(self: PetBase): boolean
+	return self._specialCooldown <= 0
 end
 
 --[=[
@@ -158,7 +176,6 @@ end
 ]=]
 function PetBase.Outgoing(self: PetBase, multiplier: number): number
 	local base = (multiplier or 0) * (self.meleeVal or 0)
-	print("base ", base)
 	for _, effect in ipairs(self._effects) do
 		if effect.outgoingMultiplier then
 			base *= effect.outgoingMultiplier
@@ -180,6 +197,10 @@ end
 ]=]
 function PetBase.TickEffects(self: PetBase)
 	self:_tickEffects()
+	-- the special cooldown ages on the same per-turn beat as the effects
+	if self._specialCooldown > 0 then
+		self._specialCooldown -= 1
+	end
 	-- a passive's per-turn hook (regen, escalating melee) fires on the same beat as
 	-- effect aging — after this fighter has acted
 	if self._passive and self._passive.onTurnEnd then
@@ -215,16 +236,17 @@ end
 
 --[=[
 	Incoming side. Reduces `damage` by this fighter's own active buffs (each a private
-	`incomingMultiplier`) and returns the final number. Does NOT write health — the
-	session registers the pending hit and the write happens in `TakeDamage` once the
-	client confirms.
+	`incomingMultiplier`) and returns the final number plus whether a block (the Fox's
+	decoy) soaked the hit entirely. Does NOT write health — the session registers the
+	pending hit and the write happens in `TakeDamage` once the client confirms.
 ]=]
-function PetBase.Apply(self: PetBase, damage: number): number
+function PetBase.Apply(self: PetBase, damage: number): (number, boolean)
 	return self:_mitigate(damage)
 end
 
-function PetBase._mitigate(self: PetBase, damage: number): number
+function PetBase._mitigate(self: PetBase, damage: number): (number, boolean)
 	local result = damage or 0
+	local blocked = false
 	-- a persistent defense factor (private to this pet): positive softens the hit,
 	-- negative (the boss while "Armor Broken") amplifies it.
 	result *= (1 - (self._defense or 0))
@@ -239,6 +261,7 @@ function PetBase._mitigate(self: PetBase, damage: number): number
 		if entry.block and result > 0 then
 			-- a decoy soaks the whole hit, then is spent (removed + icon cleared)
 			result = 0
+			blocked = true
 			table.remove(self._effects, index)
 			if self:HasHealth() then
 				self.health:SetAttribute(effect.id, nil)
@@ -252,7 +275,7 @@ function PetBase._mitigate(self: PetBase, damage: number): number
 		result = self._passive.onIncoming(self, result)
 	end
 
-	return math.max(0, math.floor(result))
+	return math.max(0, math.floor(result)), blocked
 end
 
 --[=[
@@ -281,7 +304,6 @@ end
 	`Health` attribute (keyed by `id`) so the client can render an icon.
 ]=]
 function PetBase.AddEffect(self: PetBase, effect: PetAttacks.Effect)
-	print("all the buffs for this guy ", self.petName, self._effects)
 	for _, existing in ipairs(self._effects) do
 		if existing.id == effect.id then
 			existing._remaining = effect.rounds

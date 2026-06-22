@@ -291,11 +291,13 @@ You can test it out with all the pets avaible for combat, they have points avaib
 ### Pet Attacks
 Currently all the followings abilities were added [Dog, Lion, Tiger, Bear, Gorilla, Wolf, Bull, Fox, Rhino.](https://app.notion.com/p/Attack-abilities-3798ac3aaccd805ebd6bc24352e47da9?source=copy_link)
 - **Passive Attacks**: Every pet got their own passive effect that runs at the end or begging of turn
-- **Active Attacks**: Every pet got their own passive effect that runs at the end or begging of turn
+- **Normal Attack**: A regular attack that dealt damage based in the pet stats
+- **Special attack**: Some special ability specific to the pet
 ------------------------------------------------------------
-### Suggetions: 
+### Suggetions:
+This feature is incomplete but closer to its final phase, we still need more attack mechanics, vfx, animations and some images would be cool too.
 - The pet attacks only do their effects but they don't play any vfx or animation (is not visible)
-- Currently we have a debuf/buff system, we can give an icon for each one and list them avobe the healthBar
+- Currently we have a debuf/buff system, we can give an icon for each one and list them avobe the healthBar [ALL PETS BUFF/DEBUFFS](https://app.notion.com/p/Buffs-Debuffs-37d8ac3aaccd8062a677c4c39569ae12?source=copy_link)
 - All the bosses play the same attacks, if you wanna new boss abilities or any pet ability you need to tell me, you are the creative director
 - Besides the vfx for some attacks we also need vfx for buffs, debbufs, healing
 ### Mechanics
@@ -309,3 +311,10 @@ This got different interactions depending on the strategy you do, for example he
 2. Fox (lowest health)
 3. Dog
 This is literally the perfect counter for the boss rotation: First lion increases the team damage, by the end of turn boss attemps to reduce them, then fox creates a decoy, at the end of turn boss attacks it, third turn the dog increase the team defense and damage and later the boss apllies an aoe
+
+
+I recived the new rigs. I wanna talk about the Parrot, let me do a not tecnichal explanation: every pet have the same behaviour, different behaviour like the parrot requires changing the code infrastructure and do additional work. I can do that work but you need to know that i cannot plug the parrot into the game like the other pets for 10$ because this requires me to take extra time so i will treat that as a different task. Also i need you to answer me a few questions.
+1. Pets level by eating the grass, if the parrot does not eat grass, how does it level up?
+2. Pets have proximity prompt to see stats (the press e sign), should we avoid this proximity prompt to parrot?
+3. Also we use a billboard for each pet, what you have in mind for parrot?
+4. Parrot can fight bosses?
