@@ -19,7 +19,7 @@ type SeedSpec = {
 -- Dog, Lion, Tiger, Bear, Gorilla, Wolf, Bull, Fox, Rhino
 
 local specs: { [PetData.petNames]: SeedSpec } = {
-	Fox = { petLvl = 80, petProg = 10, avaiblePoints = 60, petStats = { Health = 2, Melee = 3, Stamina = 1 } },
+	Panda = { petLvl = 80, petProg = 10, avaiblePoints = 60, petStats = { Health = 2, Melee = 3, Stamina = 1 } },
 	Rhino = { petLvl = 80, petProg = 40, avaiblePoints = 60, petStats = { Health = 5, Melee = 7, Stamina = 4 } },
 	Lion = { petLvl = 80, petProg = 80, avaiblePoints = 60, petStats = { Health = 6, Melee = 9, Stamina = 5 } },
 	Dog = { petLvl = 80, petProg = 15, avaiblePoints = 60, petStats = { Health = 3, Melee = 3, Stamina = 2 } },

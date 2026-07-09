@@ -1,6 +1,6 @@
 local module = {}
 
-export type petNames = "Fox" | "Hippo" | "Rhino" | "Elephant" | "Panda" | "Lion" | "Cat" | "Dog" | "Pig" | "Giraffe" | "Wolf" | "Bear" | "Turtle" | "Alpaca" | "Bull" | "Gorilla" | "Bunny" | "Elk" | "Parrot" | "Tiger"
+export type petNames = "Fox" | "Hippo" | "Rhino" | "Elephant" | "Panda" | "Lion" | "Cat" | "Dog" | "Pig" | "Giraffe" | "Wolf" | "Bear" | "Turtle" | "Alpaca" | "Bull" | "Gorilla" | "Bunny" | "Elk" | "Parrot" | "Tiger" | "Deer"
 
 module.allPetNames = { "Fox", "Hippo", "Rhino", "Elephant", "Panda", "Lion", "Cat", "Dog", "Pig", "Giraffe", "Wolf",
 "Bear",
@@ -11,7 +11,8 @@ module.allPetNames = { "Fox", "Hippo", "Rhino", "Elephant", "Panda", "Lion", "Ca
 "Bunny",
 "Elk",
 "Parrot",
-"Tiger" }
+"Tiger",
+"Deer" }
 
 export type petStats = {
 	Health: number,

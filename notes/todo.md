@@ -318,3 +318,6 @@ I recived the new rigs. I wanna talk about the Parrot, let me do a not tecnichal
 2. Pets have proximity prompt to see stats (the press e sign), should we avoid this proximity prompt to parrot?
 3. Also we use a billboard for each pet, what you have in mind for parrot?
 4. Parrot can fight bosses?
+
+
+When this game runs there's a huge delay and an Script timer out error, why may be causing this? there were a folder:GetDescendants for creating another folder with pets and they were used alongside with setCollider src/server/ServiceRoot.server.luau:77 for a moment this seem to eliminates the issue but the issue persist

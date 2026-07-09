@@ -1,9 +1,9 @@
 local module = {}
 
 module["Panda"] = {
-	["eat"] = "rbxassetid://80946202686101",
-	["walk"] = "rbxassetid://131602430583471",
-	["idle"] = "rbxassetid://99212102782041",
+	["eat"] = "rbxassetid://121782651140931",
+	["walk"] = "rbxassetid://139534713731067",
+	["idle"] = "rbxassetid://97585869361521",
 }
 
 module["Elephant"] = {
@@ -100,6 +100,28 @@ module["Giraffe"] = {
 	["eat"] = "rbxassetid://133181977803394",
 	["walk"] = "rbxassetid://102435050981033",
 	["idle"] = "rbxassetid://77647037845686",
+}
+
+module["Tiger"] = {
+	["eat"] = "rbxassetid://86814667727640",
+	["walk"] = "rbxassetid://95572228718942",
+	["idle"] = "rbxassetid://90273858006347",
+}
+
+module["Deer"] = {
+	["eat"] = "rbxassetid://97768646299765",
+	["walk"] = "rbxassetid://113070829318919",
+	["idle"] = "rbxassetid://93681702410735",
+}
+
+module["Bunny"] = {
+	["eat"] = "rbxassetid://92409183170787",
+	["walk"] = "rbxassetid://113070829318919",
+	["idle"] = "rbxassetid://97815104416946",
+}
+
+module["Parrot"] = {
+	["idle"] = ""
 }
 
 --[[
