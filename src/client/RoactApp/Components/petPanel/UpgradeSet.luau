@@ -165,7 +165,7 @@ function UpgradeSet:render()
 
 				Shadow = Roact.createElement("UIShadow", {
 					BlurRadius = UDim.new(0, 0),
-					Transparency = 0.5,
+					Transparency = 1,
 					Offset = UDim2.new(0, 2, 0, 2),
 				}),
 			}),

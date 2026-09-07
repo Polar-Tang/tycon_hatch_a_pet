@@ -87,6 +87,33 @@ function InventoryUI:render()
 				Image = images.Header,
 			}, {
 
+				Title = Roact.createElement("TextLabel", {
+					Size = UDim2.fromScale(1, 1),
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.fromScale(0.5, 0.5),
+					BackgroundTransparency = 1,
+					Font = Enum.Font.FredokaOne,
+					TextScaled = true,
+					Text = "Player Inventory",
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+				}, {
+					Padding = Roact.createElement("UIPadding", {
+						PaddingTop = UDim.new(yPadding / 2, 0),
+						PaddingBottom = UDim.new(yPadding / 2, 0),
+					}),
+
+					Outline = Roact.createElement("UIStroke", {
+						Thickness = 2,
+						Color = Color3.fromRGB(0, 0, 0),
+					}),
+
+					Shadow = Roact.createElement("UIShadow", {
+						BlurRadius = UDim.new(0, 0),
+						Transparency = 1,
+						Offset = UDim2.new(0, 2, 0, 2),
+					}),
+				}),
+
 				Close = Roact.createElement("ImageButton", {
 					Size = UDim2.fromScale(10 / 300, 0.65),
 					Position = UDim2.fromScale(1 - sidesPadding / 2, 0.175),

@@ -60,7 +60,7 @@ function LeftColumn:_renderItemList(layoutOrder: number, petId: string, petInfor
 
 			Shadow = Roact.createElement("UIShadow", {
 				BlurRadius = UDim.new(0, 0),
-				Transparency = 0.5,
+				Transparency = 1,
 				Offset = UDim2.new(0, 2, 0, 2),
 			}),
 		}),
@@ -129,7 +129,7 @@ function LeftColumn:render()
 
 				Shadow = Roact.createElement("UIShadow", {
 					BlurRadius = UDim.new(0, 0),
-					Transparency = 0.5,
+					Transparency = 1,
 					Offset = UDim2.new(0, 2, 0, 2),
 				}),
 			}),

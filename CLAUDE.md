@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 "Raise and Hatch" — a Roblox pet-tycoon game written in **Luau**, built with **Rojo** (7.5.1). Live: https://www.roblox.com/games/80420751886453/Raise-and-hatch
+Use git to keep the project updated
 
 ## Conventions
 - **Modules**: Require via `local module = require(path)`; use `export type` for Luau types and create a different file for types often called as `serviceTypes`
@@ -35,8 +36,7 @@ Used only for:
 - Keep arguments small (1–2)
 
 ## Comments
-- Block comments for file/function documentation
-- Moonwave docstrings: --[=[ @class ClassName ]=] at the top of the method/file.
+- Don't do comments
 
 ## Naming
 - Spell out words fully
@@ -44,9 +44,6 @@ Used only for:
 - `camelCase` for locals, members, functions
 - `LOUD_SNAKE_CASE` for local constants
 - File name matches the object it exports
-
-## Yielding
-- Do not call yielding functions on the main task – use `coroutine.wrap`/`delay` or Promises
 
 ## Error Handling
 - Throw only to validate correct usage, with `assert` when it MUST and close guard early return when it should
